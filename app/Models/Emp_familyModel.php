@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Emp_familyModel extends Model
+{
+    use HasFactory;
+    protected $table='EMP_FAMILY';
+    public $timestamps = false;
+    public $incrementing = false;
+
+    protected $fileable=[
+        'empno',
+        'depd_no',
+        'depd_name',
+        'relationship',
+        'd_dob',
+        'd_age',
+        'd_sex',
+        'd_as_on',
+        'percentage',
+        'address',
+        'depent_name_bangla',
+        'relation_bn',
+        'address_bn'
+    ];
+}
