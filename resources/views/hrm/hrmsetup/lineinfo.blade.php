@@ -41,14 +41,14 @@
 </head>
 
 <body>
-@section('title', 'Page Title')
+    @section('title', 'Page Title')
     @include('topbar.sidebar')
 
     <div class="container-fluid">
         <div class="content-wrapper">
             <div class="d-grid gap-2 col-4 mx-auto" role="group" aria-label="Basic example">
                 <button type="button" class="btn btn-secondary float-left" data-toggle="modal"
-                        data-target="#lineinsertModal">Add New Line</button>
+                    data-target="#lineinsertModal">Add New Line</button>
             </div>
             <span>
                 <hr>
@@ -60,32 +60,34 @@
 
                     <thead class="bg-dark text-light ">
                         <tr>
-                        <th>LINE_NO</th>
-                    <th>LINE_NAME</th>
-                    <th>LINE_NAME_IN_BANGLA</th>
-                    <th>LINE_GROUP</th>
-                    <th>Action</th>
+                            <th>LINE_NO</th>
+                            <th>LINE_NAME</th>
+                            <th>LINE_NAME_IN_BANGLA</th>
+                            <th>LINE_GROUP</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
-            <tbody>
-            @foreach($line as $lns)
+                    <tbody>
+                        @foreach($line as $lns)
 
-                <tr>
-                    <td scope="row" id="line_no">{{$lns->line_no}}</td>
-                    <td scope="row" id="line">{{$lns->line}}</td>
-                    <td scope="row" id="line_in_bangla" style="font-family: 'SutonnyMJ' !important;">
-                        {{$lns->line_in_bangla}}</td>
-                    <td scope="row" id="l_group">{{$lns->l_group}}</td>
-                    <td scope="row"><a href="{{route('destroydata',$lns->line_no)}}"
-                            class="btn btn-danger btn-info pull-right">DELETE</a>
-                        <button type="button" class="btn btn-info" id="edit_line" data-toggle="modal"
-                            data-id='{{$lns->line_no}}' data-first='{{$lns->line}}' data-target="#exampleModalLong">
-                            Edit
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
+                        <tr>
+                            <td scope="row" id="line_no">{{$lns->line_no}}</td>
+                            <td scope="row" id="line">{{$lns->line}}</td>
+                            <td scope="row" id="line_in_bangla" style="font-family: 'SutonnyMJ' !important;">
+                                {{$lns->line_in_bangla}}</td>
+                            <td scope="row" id="l_group">{{$lns->l_group}}</td>
+                            <td scope="row">
+                                <a href="{{route('destroydata',$lns->line_no)}}"
+                                    class="btn btn-danger btn-info pull-right">DELETE</a>
+                                <button type="button" class="btn btn-info" id="edit_line" data-toggle="modal"
+                                    data-id='{{$lns->line_no}}' data-first='{{$lns->line}}'
+                                    data-target="#exampleModalLong">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -162,7 +164,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form  class="form-group" method="" id="lineeditForm">
+                    <form class="form-group" method="" id="lineeditForm">
                         @csrf
                         <div class="mb-3 row">
                             <label for="line_no" class="col-sm-3 col-form-label">Line No :</label>
@@ -222,9 +224,6 @@
 
 <!-- insert line  -->
 <script>
-
-
-
 $('#insertline').on('click', function(e) {
 
     e.preventDefault();
@@ -234,9 +233,9 @@ $('#insertline').on('click', function(e) {
 
 // insert line
 
-$('#lineinsertForm').on('submit',  function(e) {
+$('#lineinsertForm').on('submit', function(e) {
     e.preventDefault();
-   //alert('dd');
+    //alert('dd');
     $.ajaxSetup({
 
         headers: {
@@ -252,12 +251,19 @@ $('#lineinsertForm').on('submit',  function(e) {
         url: 'lineinsert',
         data: form,
         cache: false,
-                contentType: false,
-                processData: false,
-                dataType: 'json',
+        contentType: false,
+        processData: false,
+        dataType: 'json',
         success: function(response) {
-           
-            console.log(response);
+
+            if (response.status2 == 200) {
+
+                Swal.fire(
+                    'Added!',
+                    'Employee Added Successfully!',
+                    'success'
+                )
+            }
 
         },
         error: function(response) {
@@ -265,19 +271,19 @@ $('#lineinsertForm').on('submit',  function(e) {
         }
     })
 
-}); 
+});
 // update line
 $(document).on('click', '#edit_line', function(e) {
     e.preventDefault();
 
-    console.log( $(this).data('first'));
+    console.log($(this).data('first'));
 
     var id = $(this).data('id');
     var first = $(this).data('first');
     $('#line_no_up').val(id);
-   $('#line_up').val(first);
-  var lneup = $('#line_in_bangla_up').val(lneup);
-  var lnupdate= $('#l_group_up').val(lnupdate);
+    $('#line_up').val(first);
+    var lneup = $('#line_in_bangla_up').val(lneup);
+    var lnupdate = $('#l_group_up').val(lnupdate);
 
     console.log(id);
 
@@ -302,10 +308,19 @@ $('#lineeditForm').on('submit', function(e) {
         type: 'POST',
         url: 'lineUpdate',
         data: form,
-                
+
         success: function(response) {
-            alert('Success');
+
             $('#lineEditModal').modal('hide');
+
+            if (response.status2 == 200) {
+
+                Swal.fire(
+                    'Added!',
+                    'Employee Added Successfully!',
+                    'success'
+                )
+            }
             console.log(response)
         },
         error: function(response) {

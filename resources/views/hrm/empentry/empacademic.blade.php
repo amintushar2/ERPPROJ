@@ -31,7 +31,7 @@
                     <div class="row p-1">
                         <label for="passed_exam" class="col-sm-3 col-form-label">Passed Examination : </label>
                         <div class="col-sm-8">
-                            <select class="form-select" id="year" name="year"aria-label="Default select example">
+                            <select class="form-select" id="passed_exam" name="passed_exam"aria-label="Default select example">
                                 <option selected placeholder="Select pass_xm">Select One</option>
                                 <option selected placeholder="2002">2002</option>
                            
@@ -58,7 +58,7 @@
                     <div class="row p-1">
                     <label for="year" class="col-sm-3 col-form-label">Year : </label>
                         <div class="col-sm-7">
-                            <input type="text" class="form-control" name="name_of_ins" id="name_of_ins"
+                            <input type="text" class="form-control" name="year" id="year"
                                 value="{{ old('name_of_ins') }}" placeholder="Name of Institute" />
 
                         </div>
@@ -114,7 +114,7 @@
             {{-- Action buttons --}}
             <div class="row-md-6 m-3 text-center p-3">
                 <button class="btn btn-white border-black" type="submit">Add</button>
-                <button class="btn btn-danger" type="button">Clear</button>
+                <button class="btn btn-danger" type="button" id="clearacedamy">Clear</button>
             </div>
 
         </div>
@@ -140,4 +140,4 @@
         </table>
     </div>
 </div>
-{{-- academic info section ends --}}
+

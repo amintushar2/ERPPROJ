@@ -90,14 +90,18 @@ public function getAttendenceData(Request $request){
 
 public function atdFullProcess(Request $request){
     $data = $request->input();
-    $company_id=$data['company_id'];
+    // $company_id=$data['company_id'];
 
     //tat_attendance_process
    // dd( $data );
 
     try{
 
+        $batPath = 'cmd\105.bat';
+        $result = exec("cmd /c $batPath");
 
+        // Process $result or return a response
+        return response()->json(['result' => $result]);
         // $procedureName = 'HRM.TAT_ATTENDANCE_PROCESSFINAL';
  
         // $bindings = [
@@ -107,23 +111,16 @@ public function atdFullProcess(Request $request){
         // $result = DB::executeProcedure($procedureName, $bindings);
          
         // dd($result);
-
-
-
-
-
-
-
         // $dd=DB::statement('begin HRM.TAT_ATTENDANCE_PROCESSFINAL(:param1); END;', [
         //     'param1' => $company_id,
     
         // ]);
 
-        $pdo = DB::connection()->getPdo();
+        // $pdo = DB::connection()->getPdo();
 
-        $stmt = $pdo->prepare("begin HRM.TAT_ATTENDANCE_PROCESSFINAL('".$company_id."');end;");
-        // //  $stmt->bindParam(':p_company',$company_id, PDO::PARAM_STR);
-         $stmt->execute();
+        // $stmt = $pdo->prepare("begin HRM.TAT_ATTENDANCE_PROCESSFINAL('".$company_id."');end;");
+        // // //  $stmt->bindParam(':p_company',$company_id, PDO::PARAM_STR);
+        //  $stmt->execute();
 
 return response()->json([
     'status' => 200                            
@@ -309,6 +306,9 @@ return response()->json([
             }
                 
             }
+            return response()->json([
+                          'status'=> 200 ,
+                        ]);
         
         }
     }

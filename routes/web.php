@@ -13,6 +13,8 @@ use App\Http\controllers\HrmSetupController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SalProcessController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\InventoryController;
 
 
 
@@ -42,14 +44,29 @@ Route::get('/login',[LoginController::class,'login'])->name('login');
 Route::post('auth/check',[LoginController::class,'check'])->name('auth.check');
 Route::get('dashboard',[LoginController::class, 'dashboard'])->name('dashboard');
 Route::get('/auth/logout',[LoginController::class, 'logout'])->name('auth.logout');
+
+
+//report
+Route::get('/hrm/report',[ReportController::class, 'hrmreport'])->name('report.hrm');
+Route::get('getReportPera/{id}',[ReportController::class, 'getReportId'])->name('report.hrm');
+Route::get('getReportFile/{id}',[ReportController::class, 'getReportFile'])->name('report.hrm');
+Route::get('getReportName/{id}',[ReportController::class, 'getReportName'])->name('report.hrm');
+Route::get('hrm/pdfReport',[ReportController::class, 'pdfview']);
+
+
+
+
 Route::get('/common/gatepass',[GpController::class, 'gatepass'])->name('common.gatepass');
 //Route::get('/file',[GpController::class, 'getFile'])->name('getFile');
 
+
+
 //emp_controller 
 Route::get('/empnewentry',[EmpControllers::class,'empentry'])->name('empnewentry');
-Route::get('/empnewentryfind',[EmpControllers::class,'empnewentryfind']);
+// Route::get('/empnewentryfind',[EmpControllers::class,'empnewentryfind']);
 Route::get('/empsearch',[EmpControllers::class,'empsearch']);
 Route::get('/empList',[EmpControllers::class,'getAllEmpList']);
+Route::get('/empDetailsSearch',[EmpControllers::class,'getEmpDetSearch']);
 
 Route::get('/index',[EmpControllers::class,'index']);
 Route::post('/emppersonalsave',[EmpControllers::class,'employeePersonalInsert'])->name('employeePersonalInsert');
@@ -59,8 +76,17 @@ Route::post('/empEducsave',[EmpControllers::class,'empeduSave'])->name('empEducs
 Route::post('/empShortSave',[EmpControllers::class,'empShortSave'])->name('empEducsave');
 Route::post('/empNomineeSave',[EmpControllers::class,'empNomineeSave'])->name('empEducsave');
 Route::post('/empHistory',[EmpControllers::class,'empHistory'])->name('empHistory');
-Route::post('/empTraining',[EmpControllers::class,'empTraining'])->name('empHistory');
-Route::post('/empExp',[EmpControllers::class,'empExp'])->name('empHistory');
+Route::post('/empTraining',[EmpControllers::class,'empTraining']);
+Route::post('/empExp',[EmpControllers::class,'empExp']);
+Route::get('/empPerUpdate',[EmpControllers::class,'employeePersonalUpdate']);
+Route::get('/leave',[EmpControllers::class,'leaveentry']);
+Route::get('/getLeaveDetails/{empno}/{year}',[EmpControllers::class,'getLeaveDetails']);
+Route::get('/getPrebal/{empno}/{year}/{lv}',[EmpControllers::class,'getLeavePrebal']);
+Route::get('/getLeavBal/{lv}',[EmpControllers::class,'getLeavBal']);
+Route::get('/LeaveEntry',[EmpControllers::class,'leaveEntryIns']);
+Route::get('/LeaveEntryDet',[EmpControllers::class,'leaveEntryDet']);
+Route::get('/deleteLeave/{empno}/{year}/{lvsl}',[EmpControllers::class,'deleteLeave']);
+Route::get('/empSearchExist',[EmpControllers::class,'empSearchExist']);
 
 
 
@@ -113,21 +139,24 @@ Route::get('/tableData/{empId}', [EmpControllers::class,'tableData'])->name('t.d
 
 //hrm setup
 
-
+//Designation
 Route::get('/des',[HrmSetupController::class,'designation'])->name('des');
 Route::post('/desiinsert',[HrmSetupController::class,'insertDesignation'])->name('insertdata4');
 Route::post('/desUpdate', [HrmSetupController::class, 'editdes'])->name('editdes');
 Route::get('/destroydes/{des_id}',[HrmSetupController::class,'destroydesig'])->name('deletedesig');
+
 // Department 
 Route::get('/dept',[HrmSetupController::class,'department'])->name('dept');
 Route::post('/deptUpdate', [HrmSetupController::class, 'editdept'])->name('editdept');
 Route::post('/deptentry',[HrmSetupController::class,'savedata'])->name('save');
-Route::get('/destroy/{grade_id}',[HrmSetupController::class,'destroy'])->name('destroy');
+Route::get('/destroyDept/{grade_id}',[HrmSetupController::class,'destroyDept'])->name('destroy');
+
 //Company Profile
 Route::get('/companypf',[HrmSetupController::class,'companypf']);
 Route::get('/comapnydt',[HrmSetupController::class,'companyDetails']);
 Route::post('/cominsert',[HrmSetupController::class,'companyInsert']);
 Route::post('/comUpdate',[HrmSetupController::class,'companyUpdate']);
+Route::get('/destroyCom/{company_id}',[HrmSetupController::class,'destroyprof'])->name('destroyprofile');
 
 
 // Address 
@@ -167,3 +196,22 @@ Route::get('/savedata', [SalaryController::class,'storeData']);
 // Route::get('/savedata', [SalaryController::class,'storeData']);
 Route::get('/salProcess', [SalProcessController::class,'salProcess']);
 Route::get('/salFullProcess', [SalProcessController::class,'salFullProcess']);
+Route::get('/salProcessDell', [SalProcessController::class,'salProcessDell']);
+
+
+
+
+//inventory
+Route::get('/buyAccList', [InventoryController::class,'buyAccList']);
+Route::post('/storeget', [InventoryController::class,'storeget']);
+Route::post('/storeitmdt', [InventoryController::class,'storeitemdetails']);
+Route::get('/item_gat/{item_id}', [InventoryController::class,'getItemdetails']);
+Route::get('/item_list/{id_pk}', [InventoryController::class,'getItemlist']);
+Route::get('/item_list', [InventoryController::class,'getItemfind']);
+Route::get('/getDetails/{id_pk}', [InventoryController::class,'getItemFull']);
+Route::get('/pdfview/{id_pk}', [InventoryController::class,'pdfview']);
+
+
+
+
+Route::get('/delete', [InventoryController::class,'getImageName']);

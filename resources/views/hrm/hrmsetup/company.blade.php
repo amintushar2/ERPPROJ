@@ -2,37 +2,26 @@
 <html lang="en">
 
 <head>
+<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department</title>
+    {{-- font awesome cdn --}}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- {{-- font awesome cdn --}} -->
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="{{ URL::asset('plugins/fontawesome-free/css/all.min.css') }}">
-
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- {{-- font awesome cdn --}} -->
+    <link rel="stylesheet" href="{{URL::asset('plugins/fontawesome-free/css/all.min.css')}}">
+    <link rel="stylesheet" href="erpcss/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous">
-    </script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"
-        integrity="sha512-KBeR1NhClUySj9xBB0+KRqYLPkM6VvXiiWaSz/8LCQNdRpUm38SWUrj0ccNDNSkwCD9qPA4KobLliG26yPppJA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="erpcss/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="mainjs/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="erpcss/bootstrap.min.css">
+    <link rel="stylesheet" href="erpcss/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="erpcss/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="bootstrap_icon/bootstrap-icons.min.css">
+    <script src="mainjs/adminlte.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -113,10 +102,8 @@
                                     data-toggle="modal" data-id="{{ $getCompanyDetails->company_id }}"
                                     data-target="#comEditModal"><i class="bi bi-pencil-square"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger edit_des" data-toggle="modal"
-                                    data-id="{{ $getCompanyDetails->company_id }}" data-target="#desEditModal"><i
-                                        class="bi bi-trash3-fill"></i>
-                                </button>
+                                <a id="del_com" data-id="{{ $getCompanyDetails->company_id }}"
+                                    class="btn btn-danger btn-info pull-right"><i class="bi bi-trash3-fill"></i></a>
                             </td>
                         </tr>
                         @endforeach
@@ -314,9 +301,39 @@
 
 
 
+<script src="mainjs/jquery.min.js"></script>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
+<script type="text/javascript" src="{{ URL::asset('dist/js/adminlte.min.js') }} "></script>
+<script src="mainjs/sweetalert2.all.min.js"></script>
+<link href="erpcss/sweetalert2.min.css" rel="stylesheet">
+<script src="mainjs/moment.min.js" crossorigin="anonymous">
+</script>
+
+
+
+
+<script src="mainjs/moment-duration-format.js"></script>
+<script src="mainjs/jquery.dataTables.min.js"></script>
+
+<script src="mainjs/dataTables.bootstrap5.min.js"></script>
+<script src="mainjs/dataTables.buttons.min.js"></script>
+<script src="mainjs/buttons.bootstrap5.min.js"></script>
+<script src="mainjs/jszip.min.js"></script>
+<script src="mainjs/pdfmake.min.js"></script>
+<script src="mainjs/vfs_fonts.js"></script>
+<script src="mainjs/buttons.html5.min.js"></script>
+<script src="mainjs/buttons.print.min.js"></script>
+<script src="mainjs/buttons.colVis.min.js"></script>
+
+<script src="mainjs/popper.min.js"
+    integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
+</script>
+<script src="mainjs/bootstrap.min.js"
+    integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
+</script>
+
+
 
 <!-- insert line  -->
 <script>
@@ -353,8 +370,11 @@ $("#cominsertForm").submit(function(e) {
         processData: false,
         dataType: 'json',
         success: function(response) {
+            $('#lineinsertModal').modal('hide');
 
-            if (response.status == 200) {
+            $('.modal-backdrop').remove();
+
+            if (response.status2 == 200) {
 
                 Swal.fire(
                     'Added!',
@@ -382,10 +402,7 @@ $(document).on('click', '#edit_com', function(e) {
     e.preventDefault();
 
     console.log($(this).data('id'));
-
     var id = $(this).data('id');
-
-
     $.ajax({
         method: 'get',
         url: 'comapnydt',
@@ -420,7 +437,51 @@ $(document).on('click', '#edit_com', function(e) {
     $('#comEditModal').modal('show');
 
 })
-$('#comeditForm').on('submit', function(e) {
+
+
+$(document).on('click', '#del_com', function(e) {
+    e.preventDefault();
+    var id = $(this).data('id');
+
+    $.ajax({
+
+        url: 'destroydes/' + id,
+        method: 'GET',
+
+        success: function(response) {
+            console.log('ss' + response);
+
+
+            if (response.status2 == 200) {
+
+                Swal.fire(
+                    'Added!',
+                    'Company Profile Delete Successfully!',
+                    'success'
+                )
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Errorr',
+                    html: 'Error Code:' + response +
+                        '<br> Company Profile Delete Unsuccessfull',
+                })
+
+            }
+        },
+        error: function(response) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Errorr',
+                text: response + '/n Company Profile Delete Unsuccessfull',
+            })
+
+        }
+    });
+
+})
+$(document).on('submit', '#comeditForm', function(e) {
     e.preventDefault();
 
     $.ajaxSetup({
@@ -436,15 +497,16 @@ $('#comeditForm').on('submit', function(e) {
     $.ajax({
 
         url: 'comUpdate',
-        method: 'post',
+        method: 'POST',
         data: fd,
-        cache: false,
         contentType: false,
         processData: false,
         dataType: 'json',
         success: function(response) {
+            console.log(response);
             $('#comEditModal').modal('hide');
             $('.modal-backdrop').remove();
+
             if (response.status2 == 200) {
 
                 Swal.fire(
@@ -470,33 +532,6 @@ $('#comeditForm').on('submit', function(e) {
 
 
 
-
-
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<script type="text/javascript" src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
-<script type="text/javascript" src="{{ URL::asset('dist/js/adminlte.min.js') }} "></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Data Table Script -->
-
-
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.colVis.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
-    integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-    integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
-</script>
 
 
 <script>

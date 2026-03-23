@@ -195,7 +195,7 @@
                                     </div>
                                     <div class="col-sm-5">
 
-                                        <input type="text" class="form-control" name="section_name" id="section_name"
+                                        <input type="text" class="form-control w-50" name="section_name" id="section_name"
                                             value="{{ old('section_name') }}" readonly>
                                     </div>
                                 </div>
@@ -608,6 +608,14 @@ $(function() {
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 
 <script>
+
+$('input, select').on('keydown', function(e){
+    if(e.keyCode == 13) { // Check if the pressed key is Enter (keyCode 13)
+      e.preventDefault(); // Prevent the default Enter key action
+    }
+  });
+
+
 $('#company_no').on('change', function(e) {
 
     e.preventDefault();

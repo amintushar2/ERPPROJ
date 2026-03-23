@@ -192,7 +192,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" id="line_update">Seve changes</button>
+                            <button type="submit" class="btn btn-primary" id="line_update">Save changes</button>
                         </div>
 
                     </form>
@@ -228,7 +228,7 @@
                     <td scope="row">
                   
                         <button type="button" class="btn btn-primary edit_lineDate"
-                                    data-toggle="modal"    data-id='{{$lns->line_no}}'data-first='{{$lns->line}}' data-target="#exampleModalLong">EDIT</button>
+                                    data-toggle="modal"    data-id='{{$lns->line_no}}' data-first='{{$lns->line}}' data-target="#exampleModalLong">EDIT</button>
                     </td>
                 </tr>
                 @endforeach

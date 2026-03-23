@@ -2,6 +2,10 @@
 
 <div class="tab-pane fade show active" id="per" role="tabpanel" aria-labelledby="per-tab" tabindex="1">
 
+
+<input type="text" name="updateorsave" id="updateorsave"
+                                value="{{old('updateorsave')}}"
+                                tabindex="1" aria-describedby="basic-addon2" hidden>
     <form id="emppersonalSave2">
         @csrf
 
@@ -11,7 +15,6 @@
             <div id="error-list">
                 <ul></ul>
             </div>
-            
             <div class="row">
                 <div class="col-md">
                     <div class="row p-1">
@@ -22,8 +25,8 @@
                                 value="{{old('empno')}}" placeholder="employee id" value="{{old('emp_no')}}"
                                 tabindex="1" aria-describedby="basic-addon2">
                             <div class="input-group-append">
-                                <button class="btn btn-secondary" type="button"><i class="bi bi-search"></i>
-                                </button>
+                                <button class="btn btn-secondary" id="findemp" type="button"><i
+                                        class="bi bi-search"></i></button>
                             </div>
                             <span class="text-danger" id="massege"></span>
 
@@ -52,14 +55,14 @@
             </div>
 
             <div class="row">
-                {{-- Department name input --}}
+                <!-- {{-- Department name input --}} -->
                 <div class="col-md-6">
                     <div class="row p-1">
                         <label for="company_name" class="col-sm-3 col-form-label">Company Name :</label>
-                        <div class="col-sm-7">
+                        <div class="col-sm">
                             <select class="form-select" id="comapnylist" name="company_id"
                                 aria-label="Default select example">
-                                <option selected value="">Select Company</option>
+                                <option selected value="" >Select Company</option>
 
                                 @foreach($companyList as $comapnyLists)
 
@@ -174,7 +177,7 @@
                     <div class="row p-1">
                         <label for="age" class="col-sm col-form-label">Age :</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" name="age" id="age" value="{{old('age')}}"
+                            <input type="text" class="form-control" name="ageDet" id="ageDet" value="{{old('age')}}"
                                 placeholder="age">
                         </div>
                     </div>
@@ -184,35 +187,56 @@
 
             <div class="row">
                 <div class="col-md">
-                    <div class="row p-1">
+                    <div class="row">
                         <label for="bangla_name" class="col-sm col-form-label">Name in Bangla :</label>
-                        <div class="col-sm-7">
+                        <div class="col-sm">
                             <input type="text" class="form-control" name="b_name" id="b_name" value="{{old('b_name')}}"
                                 placeholder="name in bangla">
                         </div>
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="row p-1">
+                    <div class="row">
                         <label for="sex" class="col-sm col-form-label">Gender :</label>
-                        <div class="col-sm-7">
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" id="male" name="sex"
-                                    value="{{old('sex')=='Male'}}">
-                                Male
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" id="female" name="sex"
-                                    value="{{old('sex')=='Female'}}">
-                                Female
-                            </div>
+                        <div class="col-sm">
+
+
+                        <select class="form-select" id="sex" name="sex"
+                                aria-label="Default select example">
+                                <option selected value="0" >Select Gender</option>
+                                <option  value="Female" >Female</option>
+                                <option  value="Male" >Male</option>
+
+                            
+
+                            </select>
+                           
                         </div>
                     </div>
                 </div>
                 <div class="col-md">
-                    <div class="row p-1">
+                    <div class="row">
+                        <label for="sex" class="col-sm col-form-label">Merital Status :</label>
+                        <div class="col-sm">
+
+
+                        <select class="form-select" id="marial_status" name="marial_status"
+                                aria-label="Default select example">
+                                <option selected value="0" >Select </option>
+                                <option  value="Single" >Single</option>
+                                <option  value="Married" >Married</option>
+
+                            
+
+                            </select>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="row">
                         <label for="religion_name" class="col-sm col-form-label">Religion : </label>
-                        <div class="col-sm-8">
+                        <div class="col-sm">
                             <select class="form-select" name="religion_id" id="religion_id"
                                 aria-label="Default select example">
                                 @foreach($religion as $religion)
@@ -264,7 +288,7 @@
                     <div class="row p-1">
                         <label for="id_card_issue" class="col-sm col-form-label">Id Card Issue :</label>
                         <div class="col-sm-7">
-                            <input type="date" class="form-control" name="id_card_issue" id="id_card_issue"
+                            <input type="text" class="form-control" name="id_card_issue" id="id_card_issue"
                                 value="{{ old('id_card_issue') }}" placeholder="National Id issue" />
                         </div>
                     </div>
@@ -297,7 +321,7 @@
                     <div class="row p-1">
                         <label for="valid_till" class="col-sm col-form-label">Id Card Valid Till :</label>
                         <div class="col-sm-7">
-                            <input type="date" class="form-control" name="valid_till" id="valid_till"
+                            <input type="text" class="form-control" name="valid_till" id="valid_till"
                                 value="{{ old('valid_till') }}" placeholder="id card valid till" />
                         </div>
                     </div>
@@ -340,15 +364,15 @@
                         <div class="col-sm-7">
                             <select class="form-select" name="blood_group" id="blood_group"
                                 aria-label="Default select example">
-                                <option selected>Select Blood Group</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
+                                <option selected value="">Select Blood Group</option>
+                                <option value="A (+) ve">A (+) ve</option>
+                                <option value="A (-) ve">A (-) ve</option>
+                                <option value="B (+) ve">B (+) ve</option>
+                                <option value="B (-) ve">B (-) ve</option>
+                                <option value="AB (+) ve">AB (+) ve</option>
+                                <option value="AB (-) ve">AB (-) ve</option>
+                                <option value="O (+) ve">O (+) ve</option>
+                                <option value="O (-) ve">O (-) ve</option>
                             </select>
                         </div>
                     </div>
@@ -357,9 +381,11 @@
                     <div class="row p-1">
                         <label for="hbs_test" class="col-sm col-form-label">HBS Ag: </label>
                         <div class="col-sm-8">
-                            <select class="form-select" name="hbs_test" aria-label="Default select example">
-                                <option selected value="">1</option>
-                                <option value="">2</option>
+                            <select class="form-select" name="hbs_test" id="hbs_test"
+                                aria-label="Default select example">
+                                <option selected value="">Choose</option>
+                                <option value="(+) ve">(+) ve</option>
+                                <option value="(-) ve">(-) ve</option>
 
                             </select>
                         </div>
@@ -375,7 +401,7 @@
             <div class="row">
                 <div class="col-md">
                     <div class="row p-1">
-                        <label for="emp_mobile_no" class="col-sm col-form-label">SMS Mobile No:</label>
+                        <label for="emp_mobile_no" class="col-sm col-form-label">Emp Mobile No:</label>
                         <div class="col-sm-7">
                             <input type="tel" class="form-control" name="emp_mobile_no" id="emp_mobile_no"
                                 value="{{ old('emp_mobile_no') }}" placeholder="Emp mobile No" />
@@ -395,8 +421,14 @@
                     <div class="row p-1">
                         <label for="office_food" class="col-sm col-form-label">Office Food : </label>
                         <div class="form-check col-sm-8">
-                            <input class="form-check-input" type="checkbox" id="office_food" name="office_food"
-                                value="{{ old('office_food') }}">
+                          
+
+                                <select class="form-select" name="office_food" id="office_food"
+                                aria-label="Default select example">
+                                <option selected value="">Choose One</option>
+                                <option     value="N">No</option>
+                                <option  value="Y">Yes</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -453,6 +485,8 @@
             {{-- Action buttons --}}
             <div class="row-md-6 m-3 text-center p-3">
                 <button class="btn btn-success" type="submit" id="emppersonalSave">Save</button>
+                <button class="btn btn-success" type="submit" id="emppersonalUpdate">Update</button>
+
                 <!-- <button class="btn btn-warning" type="button">Edit</button> -->
                 <button class="btn btn-primary" type="button" id="clearFieldsBtn">Clear</button>
             </div>
@@ -460,4 +494,5 @@
     </form>
 
 </div>
-{{-- personal info section ends --}}
+
+</script>

@@ -7,27 +7,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Department</title>
     {{-- font awesome cdn --}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- {{-- font awesome cdn --}} -->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- {{-- font awesome cdn --}} -->
     <link rel="stylesheet" href="{{URL::asset('plugins/fontawesome-free/css/all.min.css')}}">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="erpcss/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous">
-    </script>
+    <link href="erpcss/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="mainjs/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="erpcss/bootstrap.min.css">
+    <link rel="stylesheet" href="erpcss/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="erpcss/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="bootstrap_icon/bootstrap-icons.min.css">
+    <script src="mainjs/adminlte.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"
-        integrity="sha512-KBeR1NhClUySj9xBB0+KRqYLPkM6VvXiiWaSz/8LCQNdRpUm38SWUrj0ccNDNSkwCD9qPA4KobLliG26yPppJA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
     .text-style:hover {
         text-decoration: underline;
@@ -102,10 +98,14 @@
                             <td scope="row" id="in_short">{{$dp->in_short}}</td>
                             <td scope="row" id="c_name">{{$dp->c_name}}</td>
                             <td scope="row" id="company_id">{{$dp->company_id}}</td>
-                            <td scope="row" id="editd"><button type="edit" class="btn btn-primary editDept"
-                                    data-toggle="modal" data-id="{{$dp->dept_no}}" data-first="{{$dp->dept_name}}"
-                                    data-target="#editmodal">EDIT</button></td>
 
+                            <td scope="row">
+                                <button type="edit" id="editd" class="btn btn-primary editDept"
+                                data-toggle="modal" data-id="{{$dp->dept_no}}" data-first="{{$dp->dept_name}}"
+                                data-target="#editmodal"><i class="bi bi-pencil-square"></i></button>
+                                <a id="dept_setroy"data-id="{{$dp->dept_no}}"
+                                class="btn btn-danger btn-info pull-right"><i class="bi bi-trash3-fill"></i></a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -252,18 +252,26 @@
     </div>
 </body>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="mainjs/jquery.min.js"></script>
+
+<script src="mainjs/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
 <script type="text/javascript" src="{{ URL::asset('dist/js/adminlte.min.js') }} "></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="mainjs/sweetalert2.all.min.js"></script>
+<link href="erpcss/sweetalert2.min.css" rel="stylesheet">
+<script src="mainjs/moment.min.js" crossorigin="anonymous">
+</script>
+
+<script src="mainjs/moment-duration-format.js"></script>
+<link rel="stylesheet" type="text/css" href="mainjs\DataTables-1.13.6\css/jquery.dataTables.min.css">
+
 
 
 <script>
 // data table
 
 $(document).ready(function() {
-    $('#dept').DataTable();
+    $('#datatab').DataTable();
 });
 
 
@@ -360,6 +368,51 @@ $(document).ready(function() {
 
     });
 });
+
+
+
+$(document).on('click', '#dept_setroy', function(e) {
+    e.preventDefault();
+    var id = $(this).data('id');
+    console.log(id);
+    $.ajax({
+
+        url: 'destroyDept/' + id,
+        method: 'GET',
+
+        success: function(response) {
+            console.log('ss ' + response);
+
+
+            if (response.status2 == 200) {
+
+                Swal.fire(
+                    'Delete!',
+                    'Depertment Profile Delete Successfully!',
+                    'success'
+                )
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Errorr',
+                    html: 'Error Code:' + response +
+                        '<br> Depertment Profile Delete Unsuccessfull',
+                })
+
+            }
+        },
+        error: function(response) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Errorr',
+                text: response + '/n Depertment Profile Delete Unsuccessfull',
+            })
+
+        }
+    });
+
+})
 </script>
 
 </html>

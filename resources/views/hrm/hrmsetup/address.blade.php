@@ -2,29 +2,26 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"
-        integrity="sha384-zYPOMqeu1DAVkHiLqWBUTcbYfZ8osu1Nd6Z89ify25QV9guujx43ITvfi12/QExE" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
-        integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ" crossorigin="anonymous">
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"
-        integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"
-        integrity="sha512-YUkaLm+KJ5lQXDBdqBqk7EVhJAdxRnVdT2vtCzwPHSweCzyMgYV/tgGF4/dCyqtCC2eCphz0lRQgatGVdfR0ww=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>Department</title>
+    {{-- font awesome cdn --}}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- {{-- font awesome cdn --}} -->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- {{-- font awesome cdn --}} -->
+    <link rel="stylesheet" href="{{URL::asset('plugins/fontawesome-free/css/all.min.css')}}">
+    <link rel="stylesheet" href="erpcss/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Bootstrap CSS -->
+    <link href="erpcss/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="mainjs/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="erpcss/bootstrap.min.css">
+    <link rel="stylesheet" href="erpcss/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="erpcss/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="bootstrap_icon/bootstrap-icons.min.css">
+    <script src="mainjs/adminlte.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
@@ -55,6 +52,17 @@
 
         </div>
     </div>
+    <div class="row justify-content-center">
+        <div class="col-5 d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#cityModal"
+                id="insertcity">Add New City</button>
+        </div>
+        <div class="col-5 d-flex  justify-content-center">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#districtleModal"
+                id="insertdistrict">Add New District</button>
+        </div>
+
+    </div>
     <!-- edit&delete table  -->
     <div class="row justify-content-center">
         <div class="col-5">
@@ -77,8 +85,9 @@
                                 data-target="#editmodal">
                                 EDIT
                             </button>
-                        
-                        <button class="btn btn-danger delete-data" data-id="{{$ct->city}}">Delete</button></td>
+
+                            <button class="btn btn-danger delete-data" data-id="{{$ct->city}}">Delete</button>
+                        </td>
 
                     </tr>
                     @endforeach
@@ -101,8 +110,8 @@
                         <td scope="row" id="editdistrict"><button type="submit" class="btn btn-primary edit-district"
                                 data-toggle="modal" data-id="{{$dis->district_id}}" data-first="{{$dis->district}}"
                                 data-target="#district-Modal" id="edit-District">EDIT</button>
-                        <button class="btn btn-danger delete-district"
-                                data-id="{{$dis->district}}">Delete</button></td>
+                            <button class="btn btn-danger delete-district" data-id="{{$dis->district}}">Delete</button>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -143,7 +152,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" id="close"
+                            <button type="button" class="btn btn-secondary" id="close_edit"
                                 data-dismiss="modal">Close</button>
                             <button type="submit" id="city_change" class="btn btn-primary">Save changes</button>
                         </div>
@@ -155,16 +164,7 @@
     </div>
 
     <!-- insert city  -->
-    <div class="row justify-content-center">
-        <div class="col-5">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#cityModal"
-                id="insertcity">City</button>
-        </div>
-        <div class="col-5">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#districtleModal"
-                id="insertdistrict">District</button>
-        </div>
-    </div>
+
 
     <div class="modal fade" id="cityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -189,14 +189,14 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="citysave">Send message</button>
+                    <button type="button" class="btn btn-secondary" id="cityClose" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="citysave">Save</button>
                 </div>
             </div>
         </div>
     </div>
     <!-- update district  -->
-   
+
     <div class="modal fade" id="district-Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -214,8 +214,8 @@
                         <div class="mb-3 row">
                             <label for="district_id" class="col-sm-3 col-form-label"> District ID: </label>
                             <div class="col-sm-8">
-                                <input type="text" class="form-control" name="district_update_id" id="district_update_id"
-                                    placeholder="District ID" hidden />
+                                <input type="text" class="form-control" name="district_update_id"
+                                    id="district_update_id" placeholder="District ID" hidden />
                             </div>
                         </div>
                         <div class="mb-3 row">
@@ -261,7 +261,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" id="districtClose"  data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="districtsave">Send message</button>
                 </div>
             </div>
@@ -269,11 +269,19 @@
     </div>
 </body>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="mainjs/jquery.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="mainjs/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
+<script type="text/javascript" src="{{ URL::asset('dist/js/adminlte.min.js') }} "></script>
+<script src="mainjs/sweetalert2.all.min.js"></script>
+<link href="erpcss/sweetalert2.min.css" rel="stylesheet">
+<script src="mainjs/moment.min.js" crossorigin="anonymous">
+</script>
+
+<script src="mainjs/moment-duration-format.js"></script>
+<link rel="stylesheet" type="text/css" href="mainjs\DataTables-1.13.6\css/jquery.dataTables.min.css">
 
 
 
@@ -282,13 +290,40 @@
 $(document).ready(function() {
     $('#districtTab').DataTable({});
 });
-$(document).ready(function () {
+$(document).ready(function() {
     $('#city').DataTable();
-});
+    $('#close_edit').on('click', function(e) {
 
+        e.preventDefault();
+
+        $('#editmodal').hide();
+        $('.modal-backdrop').remove();
+
+    })
+
+    $('#cityClose').on('click', function(e) {
+
+        e.preventDefault();
+
+        $('#cityModal').hide();
+        $('.modal-backdrop').remove();
+
+    })
+     $('#districtClose').on('click', function(e) {
+
+        e.preventDefault();
+
+        $('#districtModal').hide();
+        $('.modal-backdrop').remove();
+
+    })
+    
+
+});
 </script>
 <script>
-    // update city 
+// update city 
+
 $('#cityUpdateFrom').on('submit', function(e) {
     e.preventDefault();
 
@@ -324,6 +359,7 @@ $('#cityUpdateFrom').on('submit', function(e) {
 $(document).ready(function() {
     $('#insertcity').on('click', function(e) {
         e.preventDefault();
+        alert('aa');
         $('#cityModal').modal('show');
     });
     $('#citysave').on('click', function(e) {

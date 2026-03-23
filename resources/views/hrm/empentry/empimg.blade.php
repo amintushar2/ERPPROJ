@@ -41,10 +41,11 @@
         </div>
         <div class="row-md-6 m-3 text-center p-3">
                 <button class="btn btn-white border-black" type="submit">Add</button>
-                <button class="btn btn-danger" type="button">Delete</button>
+                <button class="btn btn-danger" type="button" id="clearimg">Clear</button>
             </div>
 
     </form>
 
 
 </div>
+

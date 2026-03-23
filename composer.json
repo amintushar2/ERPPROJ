@@ -11,6 +11,7 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
+        "league/flysystem-ftp": "^3.15",
         "livewire/livewire": "^2.10",
         "rats/zkteco": "^002.0",
         "yajra/laravel-oci8": "^9.5"

@@ -61,7 +61,9 @@ class EmpOfficial extends Model
        'service_book_number',
        'other_allowance',
        'insert_by',
-       'update_by'
+       'update_by',
+       'update_user',
+       'is_lefty'
 
     ];
 }

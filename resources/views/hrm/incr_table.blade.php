@@ -18,6 +18,6 @@
     <td>{{ $list->cur_basic }}</td>
     <td>{{ $list->cur_house_rent }}</td>
     <td>{{ $list->cur_medical }}</td>
-    <td><button type="button" id="newemplist" class="btn btn-primary" onclick="windowOpen()">EDIT</button></td>
+    <!-- <td><button type="button" id="newemplist" class="btn btn-primary" onclick="windowOpen()">EDIT</button></td> -->
 </tr>
 @endforeach

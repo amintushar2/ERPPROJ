@@ -9,7 +9,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route ;
 
 
-
 class LoginController extends Controller
 {
     function login(){
@@ -54,6 +53,7 @@ class LoginController extends Controller
 
             }else{
                 $request->session()->put('LoggedUser', $userInfo->employee_id);
+                $request->session()->put('LoggedId', $request->user_id);
                 return redirect('dashboard');
             }
         }
@@ -90,21 +90,61 @@ class LoginController extends Controller
             ->where ('ROUTE','=',$uri)
             ->get();
 
- $exportData="";
- $exportUSD="";
+ $wmpCountData=DB::table(DB::raw('HRM.EMP_PERSONAL Ep'))
+ ->select(DB::raw('COUNT(EO.EMPNO) EMPNO'),'EO.DEPT_NAME')
+ ->crossJoin(DB::raw('HRM.EMP_OFFICIAL EO'))
+ ->whereRaw('EO.EMPNO = Ep.EMPNO')
+ ->where('Ep.STATUS','=','Active')
+ ->where('EO.COMPANY_ID','=','100')
+ ->groupBy('EO.DEPT_NAME')
+ ->get();
 
+
+ $dailyOT=DB::table('ATTD_OT_GROUP_VW')
+ ->get();
+
+$dailyAttdSum=DB::table(DB::raw('attendance_details ad'))
+->select('EP.SEX',DB::raw('COUNT(eo.empno) total_emp'),DB::raw('(SELECT   
+                    COUNT (eo.empno)
+               FROM attendance_details ad, emp_official eo, emp_personal ep
+              WHERE eo.empno = ad.empno AND ep.empno = eo.empno
+             AND AD.ATT_DATE='.'\'08-APR-2023\''.'
+              AND eo.company_id='.'\'100\''.'
+                         GROUP BY 
+      eo.company_id  )T_EMP'))
+->crossJoin(DB::raw('emp_official eo'))
+->crossJoin(DB::raw('emp_personal ep'))
+->whereRaw('eo.empno = ad.empno')
+->whereRaw('ep.empno = eo.empno')
+->where('AD.ATT_DATE','=','2023-04-08')
+->where('eo.company_id','=','100')
+->groupBy(['eo.company_id','EP.SEX'])
+->get();
+
+
+ $expusdt="";
  $exportDataarrat=['Month','Quantity'];
 
- $expdta="";
-//  foreach($exportData as $expdt){
-//     $expdta .="['".$expdt->month."',".$expdt->qtuanty."],";
-//  }
+ $empCountData="";
+ foreach($wmpCountData as $wmpCountData){
+    $empCountData .="['".$wmpCountData->dept_name."',".$wmpCountData->empno."],";
+ }
  $expusd="";
 //  foreach($exportUSD as $expusdt){
 //     $expusd .="['".$expusdt->month."',".$expusdt->total_price."],";
 //  }
+$empOTData="";
+foreach($dailyOT as $dailyOT){
+    $empOTData .="['".$dailyOT->a_date."',".$dailyOT->c_hour."],";
+ }
+ $empATTDData="";
+ foreach($dailyAttdSum as $dailyAttdSum){
+     $empATTDData .="['".$dailyAttdSum->sex."',".$dailyAttdSum->total_emp."],";
+  }
+ 
+//dd($empATTDData);
 
-        return view('dashboard',['headeer'=>$header,'data'=>$data,'menu'=>$leftmenu,'expdta'=>$expdta,'expusd'=>$expusd,'submenu'=>$submenu,'submenu2'=>$submenu2]);
+        return view('dashboard',['empATTDData'=>$empATTDData,'empOTData'=>$empOTData,'headeer'=>$header,'data'=>$data,'menu'=>$leftmenu,'empCountData'=>$empCountData,'expusd'=>$expusd,'submenu'=>$submenu,'submenu2'=>$submenu2]);
         }
         catch(Exception $e)
         {
@@ -122,14 +162,10 @@ class LoginController extends Controller
 
 
 
-
-
-
-
-
     function logout(){
         if(session()->has('LoggedUser')){
             session()->pull('LoggedUser');
+            session()->pull('LoggedId');
             return redirect('login');
         }
     }

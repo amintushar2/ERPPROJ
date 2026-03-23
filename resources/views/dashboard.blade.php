@@ -1,127 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+    <!-- {{-- font awesome cdn --}} -->
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dashboard</title>
-    <link href="https://fonts.bunny.net/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="erpcss/nunitoFont.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" integrity="sha512-ZnR2wlLbSbr8/c9AgLg3jQPAattCUImNsae6NHYnS9KrIwRdcY9DxFotXhNAKIKbAXlRnujIqUWoXXwqyFOeIQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="erpcss/all.min.css" />
+    <link rel="stylesheet" href="erpcss/bootstrap-icons.min.css" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <link href="erpcss/bootstrap.min.css" rel="stylesheet">
+    <script src="mainjs/bootstrap.bundle.min.js"></script>
+    <script src="mainjs/demo.js"></script>
+    <style>
+    .aside {
+        overflow: scroll;
+    }
 
-<style>
-
-    aside  {
-  width: 100px;
-  overflow:scroll;
-}
+    @media only screen and (max-width: 400px) {
+        body {
+            font-size: 50px;
+        }
+    }
     </style>
 </head>
+
 <body>
+    @include('topbar.sidebar')
+    <div class="content-wrapper">
 
-
-@include('topbar.sidebar')
-
-
-
-<div class="content-wrapper">
-
-
-<h1 class="justyfy-centre">DASHBOARD</h1>
-            <!-- Content Header (Page header) -->
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="col-sm-15" id='graph' style="display: flex; justify-content: space-around">
-
-                        <div id="monthly_exp" style="width: 550px; height: 400px;"></div>
-                        <div id="monthly_exp1" style="width: 550px; height: 400px;"></div>
-
-
-                    </div><!-- /.col -->
-                </div><!-- /.container-fluid -->
-            </div>
-
+        <div class="d-flex justify-content-center">
+            <h1 class="justyfy-centre">DASHBOARD</h1>
 
         </div>
-        <!-- /.content-wrapper -->
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
 
-        <!-- Control Sidebar -->
-        <aside class="control-sidebar control-sidebar-dark  ">
-            <!-- Control sidebar content goes here -->
-            <div class="p-3">
-                <h5>Title</h5>
-                <p>Sidebar content</p>
+            <div class="row d-flex justify-content-center">
+                <div class="col-md">
+                    <div class="row p-1">
+                    <div id="monthly_exp2" style="width: 300px; height: 200px;"></div>
+
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="row p-1">
+                    <div id="monthly_exp" style="width: 300px; height: 200px;"></div>
+
+
+                    </div>
+                </div>
+                <div class="col-md ">
+                    <div class="row p-1">
+                    <div id="monthly_exp3" style="width: 300px; height: 200px;"></div>
+
+                    </div>
+                </div>
+
             </div>
-        </aside>
-        <!-- /.control-sidebar -->
+            <div class="row d-flex justify-content-center">
+                <div class="col-md ">
+                    <div class="row">
+                    <div id="monthly_exp1" style="width: 100%; height: 400px;"></div>
 
-        <!-- Main Footer -->
-        <footer class="main-footer">
-            <!-- To the right -->
-            <div class="float-right d-none d-sm-inline">
+                    </div>
+                </div>
+              
+               
 
             </div>
-            <!-- Default to the left -->
-            <strong>Copyright &copy; 2014-2023 <a href="#">FDL ERP</a>.</strong> All rights reserved.
-        </footer>
+
+            </div>
+        </div>
+
+
     </div>
-    <!-- ./wrapper -->
+    <!-- /.content-wrapper -->
 
-    <!-- REQUIRED SCRIPTS -->
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark  ">
+        <!-- Control sidebar content goes here -->
+        <div class="p-3">
+            <h5>Title</h5>
+            <p>Sidebar content</p>
+        </div>
+    </aside>
+    <!-- /.control-sidebar -->
 
+    <!-- Main Footer -->
+    <footer class="main-footer">
+        <!-- To the right -->
+        <div class="float-right d-none d-sm-inline">
 
-    <!-- <script type="text/javascript" src="{{ URL::asset('plugins/jquery/jquery.min.js') }} "></script> -->
-  
+        </div>
+        <!-- Default to the left -->
+        <strong>Copyright &copy; 2014-2023 <a href="#">FDL ERP</a>.</strong> All rights reserved.
+    </footer>
+
     {{-- font awesome cdn --}}
 
     <script type="text/javascript" src="{{ URL::asset('plugins/jquery/jquery.min.js') }} "></script>
     <script type="text/javascript" src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }} "></script>
-    <script type="text/javascript" src="{{ URL::asset('dist/js/adminlte.min.js') }} "></script>
+    <script type="text/javascript" src="{{ URL::asset('mainjs/adminlte.min.js') }} "></script>
+    <script type="text/javascript" src="{{ URL::asset('mainjs/jquery.slimscroll.min.js') }} "></script>
 
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="googleChart/loader.js"></script>
     <script type="text/javascript">
+    // Load the Visualization API and the corechart package.
     google.charts.load('current', {
         'packages': ['corechart']
     });
-    google.charts.setOnLoadCallback(drawVisualization);
 
-    function drawVisualization() {
-        // Some raw data (not necessarily accurate)
-        var data = google.visualization.arrayToDataTable([
-            ['Month', 'Quantity'],
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawChart);
 
-            <?php  if ($expdta==NULL){
+    // Callback that creates and populates a data table,
+    // instantiates the pie chart, passes in the data and
+    // draws it.
+    function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Slices');
+        data.addRows([
+            <?php  if ($empCountData==NULL){
                 print_r("No Data") ;
-            }else{echo $expdta;} ?>
-    
+            }else{echo $empCountData;} ?>
         ]);
 
+        // Set chart options
         var options = {
-            title: 'Monthly Export Graph By Yearly',
-            vAxis: {
-                title: 'Quantity'
-            },
-            hAxis: {
-                title: 'Month'
-            },
-            seriesType: 'bars',
-            series: {
-                1: {
-                    type: 'line'
-                }
-            }
-
-
+            'title': 'Total Employee',
+            'width': 300,
+            'height': 200
         };
-        var chart = new google.visualization.ComboChart(document.getElementById('monthly_exp'));
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('monthly_exp'));
         chart.draw(data, options);
     }
     </script>
     <script type="text/javascript">
+    // Load the Visualization API and the corechart package.
+    google.charts.load('current', {
+        'packages': ['corechart']
+    });
+
+    // Set a callback to run when the Google Visualization API is loaded.
+    google.charts.setOnLoadCallback(drawChart);
+
+    // Callback that creates and populates a data table,
+    // instantiates the pie chart, passes in the data and
+    // draws it.
+    function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Topping');
+        data.addColumn('number', 'Slices');
+        data.addRows([
+            <?php  if ($empATTDData==NULL){
+                print_r("No Data") ;
+            }else{echo $empATTDData;} ?>
+        ]);
+
+        // Set chart options
+        var options = {
+            'title': 'Total Employee',
+            'width': 300,
+            'height': 200
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('monthly_exp2'));
+        chart.draw(data, options);
+    }
+    </script>
+
+    <script type="text/javascript">
     google.charts.load('current', {
         'packages': ['corechart']
     });
@@ -130,16 +191,18 @@
     function drawVisualization() {
         // Some raw data (not necessarily accurate)
         var data = google.visualization.arrayToDataTable([
-            ['Month', 'USD'],
-            <?php  if ($expusd==NULL){
+            ['Month', 'Total OverTime'],
+
+            <?php  if ($empOTData==NULL){
                 print_r("No Data") ;
-            }else{echo $expusd;} ?>
+            }else{echo $empOTData;} ?>
+
         ]);
 
         var options = {
-            title: 'Monthly Export Graph By Yearly',
+            title: 'Monthly Total OverTime Graph By Yearly',
             vAxis: {
-                title: 'USD'
+                title: 'Total OverTime'
             },
             hAxis: {
                 title: 'Month'
@@ -156,12 +219,9 @@
         var chart = new google.visualization.ComboChart(document.getElementById('monthly_exp1'));
         chart.draw(data, options);
     }
-
-
     </script>
- 
-</body>
 
+</body>
 
 
 

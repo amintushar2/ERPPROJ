@@ -82,7 +82,7 @@
                 {{-- Action buttons --}}
                 <div class="row-md-6 m-3 text-center p-3">
                     <button class="btn btn-white border-black" type="submit">Add</button>
-                    <button class="btn btn-danger" type="button">Clear</button>
+                    <button class="btn btn-danger" id="clearshortc" type="button">Clear</button>
                 </div>
 
         </div>
@@ -109,3 +109,4 @@
     </div>
 </div>
 {{-- Short course info section starts --}}
+

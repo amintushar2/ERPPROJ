@@ -50,7 +50,7 @@
                       <div class="row-md-6 m-3 text-center p-3">
                         <button class="btn btn-success" type="submit">Save</button>
                         <!-- <button class="btn btn-warning" type="button">Edit</button> -->
-                        <button class="btn btn-primary" type="button">Clear</button>
+                        <button class="btn btn-primary" type="button" id="clearjob">Clear</button>
                       </div>
 
                  </div>
@@ -75,6 +75,7 @@
             </tbody>
         </table>
     </div>
-            </div>
+  </div>
             {{-- Job History section ends --}}
-        
+
+      

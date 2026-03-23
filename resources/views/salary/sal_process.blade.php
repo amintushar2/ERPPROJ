@@ -34,15 +34,19 @@
     }
 
     .select2-selection__rendered {
-        line-height: 31px !important;
+        line-height: 28px !important;
     }
 
     .select2-container .select2-selection--single {
-        height: 35px !important;
+        height: 38px !important;
     }
 
     .select2-selection__arrow {
-        height: 34px !important;
+        height: 35px !important;
+    }
+
+    .select2.select2-container {
+        width: 100% !important;
     }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -51,142 +55,167 @@
 
 <body>
 
+    @section('title', 'Page Title')
+    @include('topbar.sidebar')
+
+
     <div class="container-fluid">
         <div class="content-wrapper">
+            <div class="justify-content-center">
 
 
-            <h3 class="text-center">Salary Process</h3>
-            <hr />
-            <form action="" method="" id="salfrom">
-                @csrf
 
-                <div class="row">
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card">
-                            <div class="card-body text-left">
-                                <h5 class="card-title">Delete Option</h5>
+                <br>
+                <br>
+                <hr />
+                <form action="" method="" id="salfrom">
+                    @csrf
 
-                                <div class="row p-1">
-
-                                    <div class="col-sm-10">
-                                        <select class="js-example-responsive form-control" id="salDate" name="salDate">
-                                            @foreach($paymentDateList as $paymentDateList)
-                                            <option
-                                                value="{{Illuminate\Support\Carbon::parse($paymentDateList->payment_date)->format('Y-m-d')}}">
-                                                {{Illuminate\Support\Carbon::parse($paymentDateList->payment_date)->format('Y-m-d')}}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                    <div class="row d-flex justify-content-center">
+                        <div class="col-sm-4 mb-4 mb-sm-0">
+                            <div class="card">
+                                <div class="card-body d-flex justify-content-center">
+                                    <h3 class="">Delete Option</h3>
                                 </div>
 
 
 
-                                <div class="text left p-2">
-                                    <button type="button" class="btn btn-danger" id="delDateBtn">Delete Selected
-                                        Date</button>
+                                <div class="card-body">
+
+                                    <div class="col-md-12">
+                                        <div class="mb-3 row">
+                                            <label for="payment_date" class="col-sm-5 col-form-label ">Payment Date:
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <select class="js-example-responsive form-select" id="payment_date"
+                                                    name="payment_date" required>
+                                                    @foreach($paymentDateList as $paymentDateList)
+                                                    <option
+                                                        value="{{Illuminate\Support\Carbon::parse($paymentDateList->payment_date)->format('Y-m-d')}}">
+                                                        {{Illuminate\Support\Carbon::parse($paymentDateList->payment_date)->format('Y-m-d')}}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-danger" id="delDateBtn">Delete Selected
+                                            Date</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-sm-5">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="container col-sm-12 p-3">
+                        <div class="col-sm-5">
+                            <div class="card">
+                                <div class="card-body d-flex justify-content-center">
+                                    <h3 class="">Sallery Process Option</h3>
+                                </div>
+                                <div class="">
 
-                                    <div class="row">
-                                        {{-- To input --}}
-                                        <div class="col-md-12">
-                                            <div class="mb-3 row">
-                                                <label for="company_name" class="col-sm-3 col-form-label ">Company Name
-                                                    : </label>
-                                                <div class="col-sm-8">
-                                                    <select class="js-example-responsive form-select" id="company_id"
-                                                        name="company_name" required>
-                                                        @foreach($compList as $company)
-                                                        <option value="{{ $company->company_id }}">
-                                                            ({{ $company->company_id }}) {{ $company->company_name }}
-                                                        </option>
-                                                        @endforeach
-                                                    </select>
+                                    <div class="container col-sm-12 p-3">
+
+                                        <div class="row">
+                                            {{-- To input --}}
+                                            <div class="col-md-12">
+                                                <div class="mb-3 row">
+                                                    <label for="company_name" class="col-sm-3 col-form-label ">Company
+                                                        Name
+                                                        : </label>
+                                                    <div class="col-sm-8">
+                                                        <select class="js-example-responsive form-select"
+                                                            id="company_id" name="company_name" required>
+                                                            @foreach($compList as $company)
+                                                            <option value="{{ $company->company_id }}">
+                                                                ({{ $company->company_id }})
+                                                                {{ $company->company_name }}
+                                                            </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                    </div>
-
-                                    <div class="row">
-                                        {{-- To input --}}
-                                        <div class="col-md-12">
-                                            <div class="mb-3 row">
-                                                <label for="month" class="col-sm-3 col-form-label ">Month : </label>
-                                                <div class="col-sm-4">
-                                                    <select class="js-example-responsive form-select" id="month"
-                                                        name="month" required>
-                                                        <option value="01">January</option>
-                                                        <option value="02">February</option>
-                                                        <option value="03">March</option>
-                                                        <option value="04">April</option>
-                                                        <option value="05">May</option>
-                                                        <option value="06">June</option>
-                                                        <option value="07">July</option>
-                                                        <option value="08">August</option>
-                                                        <option value="09">September</option>
-                                                        <option value="10">October</option>
-                                                        <option value="11">November</option>
-                                                        <option value="12">December</option>
-                                                    </select>
-                                                </div>
-
-                                            </div>
-                                            <div class="mb-3 row">
-                                                <label for="yearList" class="col-sm-3 col-form-label ">Year : </label>
-                                                <div class="col-sm-4">
-                                                    <select class="form-select" id="yearList" name="year">
-
-                                                        @foreach($listYear as $listYear)
-                                                        <option value="{{ $listYear->yearlist }}">
-                                                            {{ $listYear->yearlist }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-
-                                            </div>
                                         </div>
 
                                         <div class="row">
-                                            {{-- From input --}}
-                                            <div class="col-md-6">
-                                                <div class="row p-1">
-                                                    <label for="from" class="col-sm-6 col-form-label">From :</label>
-                                                    <div class="col-sm-6">
-                                                        <input type="text" class="form-control" name="fromDate"
-                                                            id="fromDate" value="{{ old('fromDate') }}" hint="01"
-                                                            required>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
                                             {{-- To input --}}
-                                            <div class="col-md-6">
-                                                <div class="row p-1">
-                                                    <label for="to" class="col-sm-4 col-form-label">To :</label>
-                                                    <div class="col-sm-6">
-                                                        <input type="text" class="form-control" name="todate"
-                                                            id="todate" value="{{ old('todate') }}" hint="31" required>
+                                            <div class="col-md-12">
+                                                <div class="mb-3 row">
+                                                    <label for="month" class="col-sm-3 col-form-label ">Month : </label>
+                                                    <div class="col-sm-4">
+                                                        <select class="js-example-responsive form-select" id="month"
+                                                            name="month" required>
+                                                            <option value="01">January</option>
+                                                            <option value="02">February</option>
+                                                            <option value="03">March</option>
+                                                            <option value="04">April</option>
+                                                            <option value="05">May</option>
+                                                            <option value="06">June</option>
+                                                            <option value="07">July</option>
+                                                            <option value="08">August</option>
+                                                            <option value="09">September</option>
+                                                            <option value="10">October</option>
+                                                            <option value="11">November</option>
+                                                            <option value="12">December</option>
+                                                        </select>
                                                     </div>
+
+                                                </div>
+                                                <div class="mb-3 row">
+                                                    <label for="yearList" class="col-sm-3 col-form-label ">Year :
+                                                    </label>
+                                                    <div class="col-sm-4">
+                                                        <select class="form-select" id="yearList" name="year">
+
+                                                            @foreach($listYear as $listYear)
+                                                            <option value="{{ $listYear->yearlist }}">
+                                                                {{ $listYear->yearlist }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
                                                 </div>
                                             </div>
+
+                                            <div class="row">
+                                                {{-- From input --}}
+                                                <div class="col-md-6">
+                                                    <div class="row p-1">
+                                                        <label for="from" class="col-sm-6 col-form-label">From :</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control" name="fromDate"
+                                                                id="fromDate" value="{{ old('fromDate') }}" hint="01"
+                                                                required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                {{-- To input --}}
+                                                <div class="col-md-6">
+                                                    <div class="row p-1">
+                                                        <label for="to" class="col-sm-4 col-form-label">To :</label>
+                                                        <div class="col-sm-6">
+                                                            <input type="text" class="form-control" name="todate"
+                                                                id="todate" value="{{ old('todate') }}" hint="31"
+                                                                required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+
+
 
                                         </div>
-
-
-                                        <div class="col-sm-6">
+                                        <span> <br></span>
+                                        <div class="d-grid gap-2">
                                             <button type="button" class="btn btn-success" id="calculateSal">Calculate
                                                 Salary</button>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
@@ -196,10 +225,11 @@
 
 
 
-            </form>
+                </form>
+
+            </div>
 
         </div>
-
 
     </div>
 
@@ -236,7 +266,7 @@ https://cdn.jsdelivr.net/npm/sweetalert2@11.7.12/dist/sweetalert2.min.css
 <script>
 $(document).ready(function() {
     $('#company_id').select2({});
-    $('#salDate').select2();
+    $('#payment_date').select2();
     $('#month').select2();
 });
 </script>
@@ -369,6 +399,93 @@ $("#fromsaveData").submit(function(e) {
         }
     });
 });
+
+
+
+
+
+
+
+
+
+$('#delDateBtn').on('click', function(e) {
+        e.preventDefault();
+
+
+
+        var company_name = $('#company_id').val();
+  
+        var payment_date = $('#payment_date').val();
+        var yearList = $('#yearList').val();
+
+
+        var date1 = moment(payment_date).format('DD-MMM-YYYY');
+
+        //var dd = date.getMonth(f);
+
+        const date = new Date(payment_date); // 2009-11-10
+        const month11 = date.toLocaleString('default', {
+            month: 'long'
+        });
+        console.log(date1);
+
+
+
+        Swal.fire({
+            title: 'Delete salary of month',
+            text: month11 + '-' + yearList,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#DD6B55',
+            confirmButtonText: 'Yes, I am sure!',
+            cancelButtonText: "No, cancel it!",
+
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'GET',
+                    url: 'salProcessDell',
+                    data: {
+                        'company_name': company_name,
+                        'date1': date1,
+
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        if (response.status2 == 200) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Sallary Process Complete!',
+                            })
+                        }
+
+
+                    },
+                    error: function(response) {
+                        //  alert('error');
+                        console.log(response.responseJSON.message);
+                        Swal.fire({
+                            icon: 'errorr',
+                            title: 'Errorr',
+                            text: response.responseJSON.message,
+                        })
+
+                    }
+                });
+            }
+        })
+
+
+
+
+    })
+
+
+
+
+
+
 </script>
 
 </html>

@@ -80,9 +80,9 @@ class HrmSetupController extends Controller
             return response()->json([
                 'status2' => 200,
                 $request->all()]);
-        } catch (Exception $e) {
+        }  catch (\Illuminate\Database\QueryException $e) {
+            dd($e->getCode());
 
-            return redirect('/des')->with('failed', "operation failed");
         }
 
     }
@@ -93,15 +93,18 @@ class HrmSetupController extends Controller
             ->select('DES_ID', 'DESIGNATION_NAME', 'IN_SHORT', 'IN_BENGALI')
             ->where('DES_ID', '=', $des_id)
             ->first();
+           // dd($destryfind);
+
         if (!optional($destryfind)->des_id == null) {
+           // dd($destryfind->des_id );
             try {
                 $destroy = DB::table('DESIGNATION_DETAILS')
                     ->where('des_id', '=', $des_id)
                     ->delete();
-                return redirect('/des')->with('deletef', "Deleted Successfully");
-
+                    return response()->json([
+                        'status2' => 200]);
             } catch (\Illuminate\Database\QueryException $e) {
-                dd($e->getCode());
+                return response()->json($e->getCode());
 
             }
         }
@@ -205,21 +208,29 @@ class HrmSetupController extends Controller
         }
     }
 
-    public function destroy($department)
+    public function destroyDept($department)
     {
         $destryfind = DB::table('DEPT')
             ->select('DEPT_NO', 'DEPT_NAME', 'IN_BENGALI', 'IN_SHORT', 'C_NAME', 'COMPANY_ID')
             ->where('DEPT_NO', '=', $department)
             ->first();
         if (!optional($destryfind)->dept_no == null) {
+            try{
             $destroy = DB::table('DEPT')
                 ->where('dept_no', '=', $department)
                 ->delete();
-            return redirect('/dept')->with('deletef', "Inserted Successfully");
+                return response()->json([
+                    'status2' => 200,
+                    ]);
 
+                } catch (\Illuminate\Database\QueryException $e) {
+                    return response()->json($e->getCode());
+    
+                }
         }
 
     }
+
     public function editdept(Request $request)
     {$data = $request->input();
 
@@ -473,7 +484,8 @@ class HrmSetupController extends Controller
     }
 
     public function editline(Request $request)
-    {$data = $request->input();
+    {
+        $data = $request->input();
 
         try {
             $lns = LineModel::where('line_no', '=', $data['line_no_up']);
@@ -560,10 +572,12 @@ class HrmSetupController extends Controller
         // dd($data);
 
         if (!session('LoggedUser') == null) {
-
-            $imagename = $data['company_id'] . '.' . $request->file('logo')->getClientOriginalExtension();
-            $request->file('logo')->storeAs('com_logo', $imagename);
-
+            if($request->file('logo')==null){
+                $imagename="";   
+            }else{
+                $imagename ='com_logo/'. $data['company_id'] . '.' . $request->file('logo')->getClientOriginalExtension();
+                $request->file('logo')->storeAs('com_logo', $imagename);
+            }
             try {
                 $companyInsert = new CompanyProfile;
                 $companyInsert->company_id = $data['company_id'];
@@ -574,7 +588,7 @@ class HrmSetupController extends Controller
                 $companyInsert->tel = $data['tel'];
                 $companyInsert->fax = $data['fax'];
                 $companyInsert->email = $data['email'];
-                $companyInsert->logo_location = 'com_logo/'.$imagename;
+                $companyInsert->logo_location = $imagename;
                 $companyInsert->save();
 
             } catch (\Illuminate\Database\QueryException $e) {
@@ -607,15 +621,18 @@ class HrmSetupController extends Controller
     //return response()->json($getCompanyDetails->logo_location);
 
         if(!optional($getCompanyDetails)->company_id==null){
-        if(\Storage::exists("{$getCompanyDetails->logo_location}")){
-            \Storage::delete("{$getCompanyDetails->logo_location}");
+      
     
 
 
             try {
-                
-            $imagename = $data['company_id'] . '.' . $request->file('logo')->getClientOriginalExtension();
-            $request->file('logo')->storeAs('com_logo', $imagename);
+                if($request->file('logo')==null){
+                    $imagename="";   
+                }else{
+                    $imagename ='com_logo/'. $data['company_id'] . '.' . $request->file('logo')->getClientOriginalExtension();
+                    $request->file('logo')->storeAs('com_logo', $imagename);
+                }
+             
 
                
                     $dist = CompanyProfile::where('company_id', '=', $data['company_id']);
@@ -633,14 +650,44 @@ class HrmSetupController extends Controller
     
             }
             return response()->json('ss');
-        }else{
-            return response()->json('e1');
     
-        }
     
        }else{
         // return redirect('upload')->with('deletef',"operation failed");
         return response()->json('e2');
 
        }}
+
+     //company profile delete
+    public function destroyprof($comp_id)
+    {
+
+        $destryfind = DB::table('COMPANY')
+            ->select('COMPANY_ID', 'COMPANY_NAME', 'IN_BENGALI', 'ADDRESS','ADDRESS_BANGLA')
+            ->where('COMPANY_ID', '=', $comp_id)
+            ->first();
+            // dd($destryfind);
+            //$countCom=count($destryfind);
+           // dd($countCom);
+        if (!optional($destryfind)->company_id == null) {
+         //   dd($destryfind->company_id);
+            try {
+                $destroy = DB::table('COMPANY')
+                    ->where('company_id', '=', $comp_id)
+                    ->delete();
+
+                    return response()->json([
+                        'status2' => 200,
+                    ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+              //  dd($e);
+                return response()->json([
+                    $e->getCode(),
+                ]);
+
+            }
+        }
+    }
+   
+
     }

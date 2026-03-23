@@ -32,7 +32,7 @@ class Emp_locationModel extends Model
         'r_cperson',
         'p_village',
         'p_post_off',
-        'p_police_station'
+        'p_police_station',
 
     ];
 }

@@ -92,8 +92,8 @@
 
             {{-- Action Buttons --}}
             <div class="row-md-6 m-3 text-center p-3">
-                <button class="btn btn-white border-black" type="submit">Add</button>
-                <button class="btn btn-danger" type="button">Clear</button>
+                <button class="btn btn-primary border-black" type="submit">Add</button>
+                <button class="btn btn-danger" type="button" id="clearnominee">Clear</button>
             </div>
         </div>
 
@@ -101,19 +101,22 @@
 
 
 
-
-    <div class="overflow-auto" style="max-width: 100%; max-height: 2200px;">
-        <table id="sal_table" class="table table-bordered table-striped" style="width:100%">
-            <thead class="bg-dark text-light" style="background-color:rgb(94, 21, 94)">
+    <div class="overflow-auto" style="max-width: 3000px; max-height: 2000px;">
+            <hr />
+            <table id="sal_table" class="table table-bordered p-3" style="width:100%">
+            <thead class="bg-dark text-light" width="200%" style="background-color:rgb(94, 21, 94)">
                 <tr>
                     <th style="width:10px; text-align:left">Empno</th>
                     <th style="width:10px; text-align:center">DEPENDED NAME</th>
+                    <th style="width:10px; text-align:center">DEPENDED NAME BN</th>
                     <th style="width:10px; text-align:center">Relationship</th>
+                    <th style="width:10px; text-align:center">Relationship BN</th>
                     <th style="width:10px; text-align:center">Date Of Birth</th>
                     <th style="width:20px; text-align:center">Age</th>
                     <th style="width:10px; text-align:left">Gender</th>
                     <th style="width:10px; text-align:center">Percentage</th>
-                    <th style="width:10px; text-align:center">Adress</th>
+                    <th style="width:10px; text-align:center">Address</th>
+                    <th style="width:10px; text-align:center">Address BN</th>
                 </tr>
             </thead>
             <tbody id="emp_nom_data">
@@ -123,5 +126,3 @@
     </div>
 </div>
 {{-- Nominee section ends --}}
-
-

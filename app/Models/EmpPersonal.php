@@ -63,13 +63,41 @@ class EmpPersonal extends Model
         'permanent_empno',
         'emp_img',
         'emp_sign',
+        'update_user',
     ];
-    public function getemp(){
+
+    
+    public function getempofficial(){
 
         return $this->hasMany('App\Models\EmpOfficial','empno','empno');
     }
     public function getemploc(){
 
-        return $this->hasMany('App\Models\EmpLocation','empno','empno');
+        return $this->hasMany('App\Models\Emp_locationModel','empno','empno');
+    }
+    public function empQualification(){
+
+        return $this->hasMany('App\Models\Emp_qualificationModel','empno','empno');
+    }
+    public function getEmpShortModel(){
+
+        return $this->hasMany('App\Models\Emp_ShortModel','empno','empno');
+    }
+    public function getEmpFamily(){
+
+        return $this->hasMany('App\Models\Emp_familyModel','empno','empno');
+    }
+    public function getEmpHistory(){
+
+        return $this->hasMany('App\Models\Emp_historyModel','empno','empno');
+    }
+    public function getEmpTraining(){
+
+        return $this->hasMany('App\Models\Emp_trainingModel','empno','empno');
+    }
+    public function getEmpWorkExp(){
+
+        return $this->hasMany('App\Models\Emp_work_expModel','empno','empno');
     }
 }
+
