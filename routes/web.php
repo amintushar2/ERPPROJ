@@ -15,8 +15,9 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SalProcessController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryController;
-
-
+use App\Http\Controllers\Inventory\CategoryController;
+use App\Http\Controllers\Inventory\ItemController;
+use App\Http\Controllers\Inventory\PurchaseOrderController;
 
 
 /*
@@ -215,3 +216,78 @@ Route::get('/pdfview/{id_pk}', [InventoryController::class,'pdfview']);
 
 
 Route::get('/delete', [InventoryController::class,'getImageName']);
+
+
+
+
+
+Route::prefix('inventory')->group(function () {
+
+    Route::get('/categories', [CategoryController::class,'index']);
+    Route::get('/categories/data', [CategoryController::class,'list']);
+
+    Route::get('/groups/list', [CategoryController::class,'groups']); // 🔥
+
+    Route::post('/categories/store', [CategoryController::class,'store']);
+    Route::post('/categories/update/{id}', [CategoryController::class,'update']);
+    Route::get('/categories/delete/{id}', [CategoryController::class,'destroy']);
+
+});
+
+
+
+
+Route::prefix('inventory/items')->group(function () {
+
+    Route::get('/', [ItemController::class,'index']);
+    Route::get('/data', [ItemController::class,'list']);
+
+    Route::get('/categories', [ItemController::class,'categories']);
+    Route::get('/units', [ItemController::class,'units']);
+
+    Route::post('/store', [ItemController::class,'store']);
+    Route::post('/update/{id}', [ItemController::class,'update']);
+    Route::get('/delete/{id}', [ItemController::class,'destroy']);
+});
+
+
+
+
+Route::prefix('purchase-orders')->name('purchase-orders.')->group(function () {
+ 
+    // Main CRUD — maps to Forms query/insert/update modes
+    Route::get('/',           [PurchaseOrderController::class, 'index'])   ->name('index');
+    Route::get('/create',     [PurchaseOrderController::class, 'create'])  ->name('create');
+    Route::post('/',          [PurchaseOrderController::class, 'store'])   ->name('store');
+    Route::get('/generate-pk', [PurchaseOrderController::class, 'generatePk']);
+    Route::get('/generate-po-no', [PurchaseOrderController::class, 'generatePoNo']);
+    
+    Route::get('/{id}',       [PurchaseOrderController::class, 'show'])    ->name('show');
+    Route::put('/{id}',       [PurchaseOrderController::class, 'update'])  ->name('update');
+    Route::delete('/{id}',    [PurchaseOrderController::class, 'destroy']) ->name('destroy');
+ 
+    // LOV endpoints — replace Oracle Forms LOV popups
+    // WHEN-BUTTON-PRESSED on PO_NUMBER field → PO_LV LOV
+    Route::get('/lov/po-numbers',  [PurchaseOrderController::class, 'lovPoNumbers']) ->name('lov.po-numbers');
+    // WHEN-BUTTON-PRESSED on ITEM_BTN → ITEMDT LOV
+    Route::get('/lov/items',       [PurchaseOrderController::class, 'lovItems'])     ->name('lov.items');
+    // Supplier search LOV
+    Route::get('/lov/suppliers',   [PurchaseOrderController::class, 'lovSuppliers']) ->name('lov.suppliers');
+ 
+    // Ajax helpers — replace Forms trigger computations
+    // WHEN-VALIDATE-ITEM (ITEM_ID) — duplicate check + price lookup
+    Route::post('/{id}/validate-item', [PurchaseOrderController::class, 'validateItem']) ->name('validate-item');
+    // POST-CHANGE (QUANTITY / ITEM_RATE / PERCENTAGE) — recalculate line totals
+    Route::post('/{id}/recalc-line',   [PurchaseOrderController::class, 'recalcLine'])   ->name('recalc-line');
+    // WHEN-BUTTON-PRESSED (ITEM_BTN) — bulk import from XL_BIND_UP
+    Route::post('/{id}/import-xl',     [PurchaseOrderController::class, 'importXl'])     ->name('import-xl');
+ 
+    // PO Check canvas — WHEN-BUTTON-PRESSED (PUR_ORDER_MASTER.PO_CHECK)
+    Route::get('/po-check',    [PurchaseOrderController::class, 'poCheck'])  ->name('po-check');
+
+
+    Route::get('/{poId}/items', [PurchaseOrderController::class, 'getItemsByPo']);
+
+    Route::get('/generate-pk', [PurchaseOrderController::class, 'generatePk']);
+});
+ 

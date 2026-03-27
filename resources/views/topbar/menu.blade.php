@@ -1,8 +1,7 @@
-@foreach ($menu as $value)
+@foreach ($menu  as $value)
 
-    @foreach($data as $ddata)
 
-        @if($value->user_group_id == $ddata->user_group_id)
+        @if($value->user_group_id == $data->user_group_id)
 
         <li class="nav-item has-treeview">
 
@@ -25,7 +24,7 @@
                             $child2 = collect($submenu2)->where('sub_menu_2', $submenus->sub_menu_id);
                         @endphp
 
-                        {{-- ✅ IF submenu2 EXISTS --}}
+                        {{--  IF submenu2 EXISTS --}}
                         @if($child2->count() > 0)
 
                             <li class="nav-item has-treeview">
@@ -53,7 +52,7 @@
 
                             </li>
 
-                        {{-- ✅ IF submenu2 NOT EXISTS --}}
+                        {{-- IF submenu2 NOT EXISTS --}}
                         @else
 
                             <li class="nav-item">
@@ -75,6 +74,5 @@
 
         @endif
 
-    @endforeach
 
 @endforeach

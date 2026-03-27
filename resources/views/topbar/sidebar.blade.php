@@ -27,7 +27,7 @@
     <div class="container-fluid justify-content-center">
         @if (!empty($headeer))
             @foreach($headeer as $h)
-                <h4>{{ $h->sub_menu_name }}</h4>
+                <h4>{{ $h->sub_menu_name ?? "l"}}</h4>
             @endforeach
         @else
             <h4>Dashboard</h4>
@@ -36,10 +36,9 @@
 
     <!-- Right -->
     <ul class="navbar-nav ml-auto">
-        @foreach($data as $d)
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown">
-                    {{ $d->employee_name }}
+                    {{ $data->employee_name ?? 'User' }}
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-right">
@@ -48,7 +47,6 @@
                     </a>
                 </div>
             </li>
-        @endforeach
     </ul>
 
 </nav>
@@ -84,3 +82,4 @@
 
     </div>
 </aside>
+
