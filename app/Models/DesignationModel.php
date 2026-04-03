@@ -12,7 +12,7 @@ class DesignationModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fillable=[
+    protected $fillable =[
      'des_id',
      'designation_name',
      'in_short',

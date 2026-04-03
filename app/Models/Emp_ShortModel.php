@@ -12,7 +12,7 @@ class Emp_ShortModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'course_name',
         'conducted_by',

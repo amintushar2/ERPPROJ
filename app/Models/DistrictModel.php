@@ -12,7 +12,7 @@ class DistrictModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fillable=[
+    protected $fillable =[
         'district','district_id'
     ];
 }

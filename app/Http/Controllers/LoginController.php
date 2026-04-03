@@ -7,6 +7,8 @@ use Session;
 use DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route ;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 
 class LoginController extends Controller
@@ -22,42 +24,38 @@ class LoginController extends Controller
     }
     }
 
-    function check(Request $request ){
+   public function check(Request $request)
+{
+    $request->validate([
+        'user_id' => 'required',
+        'initial_password' => 'required',
+    ]);
 
-        $request->validate([
-            'user_id'=>'required',
-            'initial_password'=>'required',
-        ]);
+    $user = User::where('user_id', Str::upper($request->user_id))->first();
 
-  
-        $userInfo = User::where('user_id','=', Str::upper($request->user_id))->first();
-        if(!$userInfo){
-            return back()->with('fail','We do not recognize your UserName');
-        }else{
-            $userP = User::where([
-                'user_id' => Str::upper($request->user_id), 
-                'initial_password' => $request->initial_password
-            ])->first();
-
-            if(!$userP){
-                return back()->with('fail','We do not recognize your UserName or Password');
-            
-            // if(HASH::check($request->initial_password, $userInfo->initial_password)){
-            // //     $request->session()->put('LoggedUser', $userInfo->user_id);
-        //     'user_id' , 
-        // 'initial_password',
-        // 'employee_id',
-        // 'user_group_id',
-        // 'company_id',
-        // 'user_mobile',
-
-            }else{
-                $request->session()->put('LoggedUser', $userInfo->employee_id);
-                $request->session()->put('LoggedId', $request->user_id);
-                return redirect('dashboard');
-            }
-        }
+    if (!$user) {
+        return back()->with('fail', 'We do not recognize your UserName');
     }
+
+    // plain password check (since not hashed)
+    if ($request->initial_password !== $user->initial_password) {
+        return back()->with('fail', 'Invalid password');
+    }
+
+    // ✅ ONLY ONE LOGIN (IMPORTANT)
+    Auth::guard('web')->login($user);
+
+    // ✅ regenerate session AFTER login
+    $request->session()->regenerate();
+
+    // optional custom session
+    session([
+        'LoggedUser' => $user->employee_id,
+        'LoggedId'   => $user->user_id
+    ]);
+
+    return redirect('/dashboard');
+}
 //start dashboard
     function dashboard(){
         $uri = Route::getFacadeRoot()->current()->uri();
@@ -70,6 +68,7 @@ class LoginController extends Controller
              DB::raw('"GET_EMP_NAME"(EMPLOYEE_ID) as EMPLOYEE_NAME'))
             ->where('EMPLOYEE_ID','=',session('LoggedUser'))
             ->get();
+          //  dd($data);
             $leftmenu =DB::table('ALL_USER_GROUP_DETAILS')
             ->crossJoin('ALL_MENU_HIERARCHY')
             ->select('MENU_ITEM_ID', 'USER_GROUP_ID', 'TITLE', 'DESCRIPTION')

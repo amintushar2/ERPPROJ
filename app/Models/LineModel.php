@@ -12,7 +12,7 @@ class LineModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fillable=[
+    protected $fillable =[
         'line_no',
         'line',
         'line_in_bangla',

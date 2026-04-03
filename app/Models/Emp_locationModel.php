@@ -12,7 +12,7 @@ class Emp_locationModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'p_address',
         'p_city',

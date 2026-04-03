@@ -12,7 +12,7 @@ class Emp_trainingModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         't_title',
         't_conducted_by',

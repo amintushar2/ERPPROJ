@@ -12,7 +12,7 @@ class DepartmentModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fillable=[
+    protected $fillable =[
         'dept_no',
         'dept_name',
         'in_bengali',

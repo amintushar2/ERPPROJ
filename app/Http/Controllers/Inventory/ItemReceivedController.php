@@ -45,7 +45,9 @@ class ItemReceivedController extends Controller
      */
    public function create()
     {
+         $mode = 'create';
         return view('item-received.form', [
+              'mode'    => $mode,  
             'master'  => null,
             'styles'  => collect(),
             'details' => collect(),

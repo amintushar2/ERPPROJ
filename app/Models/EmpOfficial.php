@@ -13,7 +13,7 @@ class EmpOfficial extends Model
     public $incrementing = false;
 
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'company_id',
         'company_name',

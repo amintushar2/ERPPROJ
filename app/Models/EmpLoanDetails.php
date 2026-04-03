@@ -14,7 +14,7 @@ class EmpLoanDetails extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'loan_app_no',
         'install_no',
  'install_amount',

@@ -14,7 +14,7 @@ class EmpLocation extends Model
     public $incrementing = false;
 
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'p_address',
         'p_city',

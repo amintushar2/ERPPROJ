@@ -12,7 +12,7 @@ class IncrementDetailsModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'emp_name',
         'section',

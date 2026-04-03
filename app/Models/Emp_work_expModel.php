@@ -12,7 +12,7 @@ class Emp_work_expModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'organization',
         'd_from',

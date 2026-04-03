@@ -12,7 +12,7 @@ class Emp_familyModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'depd_no',
         'depd_name',

@@ -12,7 +12,7 @@ class Emp_historyModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'join_as',
         'work_location',

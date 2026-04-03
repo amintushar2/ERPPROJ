@@ -12,7 +12,7 @@ class Emp_leaveModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'earn_leave_balance',
         'earn_leave_balance_date',

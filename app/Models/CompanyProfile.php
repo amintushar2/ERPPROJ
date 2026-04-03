@@ -13,7 +13,7 @@ class CompanyProfile extends Model
     public $incrementing = false;
     use HasFactory;
 
-    protected $fillable=[
+    protected $fillable =[
       
         'company_id',
         'company_name',

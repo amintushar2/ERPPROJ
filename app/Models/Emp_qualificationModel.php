@@ -12,7 +12,7 @@ class Emp_qualificationModel extends Model
     public $timestamps = false;
     public $incrementing = false;
 
-    protected $fileable=[
+    protected $fillable =[
         'empno',
         'name_of_ins',
         'passed_exam',

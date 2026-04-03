@@ -48,17 +48,14 @@
 @endsection
 
 @section('content')
+    {{-- FIX 1: Removed duplicate @method('PUT') — it was already inside the @if ($master) block below --}}
     @if ($master)
         <form id="mainForm" action="{{ route('item-received.update', $master->received_no_id) }}" method="POST">
             @method('PUT')
+            @csrf
         @else
             <form id="mainForm" action="{{ route('item-received.store') }}" method="POST">
-    @endif
-
-    @csrf
-
-    @if ($isEdit)
-        @method('PUT')
+                @csrf
     @endif
 
     {{-- ═══ MASTER ═══ --}}
@@ -478,9 +475,6 @@
         let lovModalInstance = null;
 
 
-
-
-
         function updateTotal() {
 
             let totalQty = 0;
@@ -597,8 +591,6 @@
 
                                 const supplierId = row.party_id;
 
-                                console.log('Supplier selected:', supplierId); // 🔍 debug
-
                                 document.getElementById('SUPPLIER_NO').value = supplierId;
                                 document.getElementById('supplier_name').value = row.party_name;
 
@@ -607,9 +599,10 @@
 
                                 // ✅ GUARANTEED CALL
                                 setTimeout(() => {
-                                    console.log('Calling loadPoList...'); // 🔍 debug
+
+                                    //alert('Loading PO list for selected supplier...' + supplierId);
                                     loadPoList(supplierId);
-                                }, 300); // ⬅️ IMPORTANT: 300ms (not 150)
+                                }, 3000);
                             };
                         }
 
@@ -639,7 +632,7 @@
         }
 
         // =========================
-        // SEARCH (DB BASED)
+        // FIX 2: Added supplierId guard in lovSearch listener
         // =========================
         document.getElementById('lovSearch').addEventListener('input', function() {
 
@@ -649,6 +642,7 @@
 
             if (lovType === 'po') {
                 const supplierId = document.getElementById('SUPPLIER_NO').value;
+                if (!supplierId) return; // ✅ guard: don't call if no supplier selected
                 loadPoLov(supplierId, this.value);
             }
         });
@@ -758,14 +752,16 @@
 
                 const tr = document.createElement('tr');
 
+                // FIX 3: All style row inputs now have correct name attributes and matching CSS classes
                 tr.innerHTML = `
-      <td>${++si}</td>
-      <td><input name="styles[${si}][PUR_ORDER_PK]" value="${s.pur_order_pk || ''}"></td>
-      <td><input name="styles[${si}][PO_NUMBER]" value="${s.po_number || ''}"></td>
-      <td><input name="styles[${si}][PO_NUMBER_ID]" value="${s.po_number_id || ''}"></td>
-      <td><input name="styles[${si}][STYLE_NO]" value="${s.order_no || ''}"></td>
-      <td><input value="${s.buyer_name || '-'}" readonly></td>
-      <td><input value="${s.po_qty || ''}"></td>
+      <td class="row-no">${++si}</td>
+      <td><input type="text" name="styles[${si}][PUR_ORDER_PK]" class="td-input mono" value="${s.pur_order_pk || ''}"></td>
+      <td><input type="text" name="styles[${si}][PO_NUMBER]" class="td-input mono" value="${s.po_number || ''}" placeholder="PO Number"></td>
+      <td><input type="text" name="styles[${si}][PO_NUMBER_ID]" class="td-input mono" value="${s.po_number_id || ''}"></td>
+      <td><input type="text" name="styles[${si}][STYLE_NO]" class="td-input" value="${s.order_no || ''}" placeholder="Style / Order No"></td>
+      <td><input type="text" name="styles[${si}][BUYER_NAME]" class="td-input" value="${s.buyer_name || '-'}" readonly style="background:#f8f9fa;color:#6c757d;"></td>
+      <td><input type="number" name="styles[${si}][PO_QTY]" class="td-input" value="${s.po_qty || ''}" placeholder="0" style="width:80px;"></td>
+      <td><button type="button" class="btn btn-outline-danger btn-xs" onclick="removeRow(this,'styleBody')"><i class="bi bi-trash"></i></button></td>
     `;
 
                 styleBody.appendChild(tr);
@@ -774,26 +770,23 @@
 
                     const tr2 = document.createElement('tr');
 
+                    // FIX 4: Detail rows now include all missing columns: PERCENTAGE, CURR, ITEM_REMARKS, delete button
+                    // Also fixed: oninput handlers for updateTotal() and updateValue() are now present
                     tr2.innerHTML = `
-        <td>${++di}</td>
-       
-  <td><input name="details[${di}][PUR_ORDER_PK]" value="${d.pur_order_pk || ''}"></td>
-
-  <td><input name="details[${di}][PO_NUMBER_ID]" value="${d.po_number_id || ''}"></td>
-
-  <td><input name="details[${di}][ITEM_NO]" value="${d.item_id || ''}"></td>
-
-  <td><input name="details[${di}][ITEM_NAME]" value="${d.item_name || ''}" readonly></td>
-
-  <td><input name="details[${di}][ITEM_UNIT]" value="${d.itm_unit || ''}"></td>
-
-  <td><input name="details[${di}][PUR_QTY]" value="${d.quantity || 0}"></td>
-
-  <td><input name="details[${di}][ITEM_QTY]" value="${d.quantity || 0}"></td>
-
-  <td><input name="details[${di}][RATE]" value="${d.item_rate || ''}"></td>
-
-  <td><input name="details[${di}][VALUE]" value="${d.value || ''}" readonly></td>
+        <td class="row-no">${++di}</td>
+        <td><input type="text" name="details[${di}][PUR_ORDER_PK]" class="td-input mono" style="width:85px;" value="${d.pur_order_pk || ''}"></td>
+        <td><input type="text" name="details[${di}][PO_NUMBER_ID]" class="td-input mono" style="width:85px;" value="${d.po_number_id || ''}"></td>
+        <td><input type="text" name="details[${di}][ITEM_NO]" class="td-input mono" style="width:80px;" value="${d.item_id || ''}" placeholder="Item ID"></td>
+        <td><input type="text" name="details[${di}][ITEM_NAME]" class="td-input" style="width:130px;background:#f8f9fa;" value="${d.item_name || ''}" readonly></td>
+        <td><input type="text" name="details[${di}][ITEM_UNIT]" class="td-input" style="width:55px;" value="${d.itm_unit || ''}" placeholder="Unit"></td>
+        <td><input type="number" name="details[${di}][PUR_QTY]" class="td-input qty-input" style="width:70px;" value="${d.quantity || 0}" placeholder="0" step="0.01" min="0" oninput="updateTotal()"></td>
+        <td><input type="number" name="details[${di}][ITEM_QTY]" class="td-input qty-input" style="width:70px;" value="${d.quantity || 0}" placeholder="0" step="0.01" min="0" oninput="updateTotal()"></td>
+        <td><input type="number" name="details[${di}][PERCENTAGE]" class="td-input" style="width:55px;" value="" placeholder="0" step="0.01"></td>
+        <td><input type="number" name="details[${di}][RATE]" class="td-input" style="width:70px;" value="${d.item_rate || ''}" placeholder="0.00" step="0.01" oninput="updateValue(this)"></td>
+        <td><input type="text" name="details[${di}][CURR]" class="td-input mono" style="width:48px;" value="USD"></td>
+        <td><input type="number" name="details[${di}][VALUE]" class="td-input value-input" style="width:80px;background:#f8f9fa;" value="${d.value || ''}" placeholder="0.00" step="0.01" readonly></td>
+        <td><input type="text" name="details[${di}][ITEM_REMARKS]" class="td-input" style="width:100px;" placeholder="Remarks"></td>
+        <td><button type="button" class="btn btn-outline-danger btn-xs" onclick="removeRow(this,'detailBody')"><i class="bi bi-trash"></i></button></td>
       `;
 
                     detailBody.appendChild(tr2);
@@ -803,6 +796,7 @@
             setTimeout(() => {
                 attachStyleEvents();
                 autoSelectFirstStyle();
+                updateTotal();
             }, 100);
 
         }
@@ -869,29 +863,37 @@
             const tr = document.createElement('tr');
 
             tr.innerHTML = `
-    <td>${index}</td>
+    <td class="row-no">${index}</td>
 
-    <td><input name="details[${index}][PUR_ORDER_PK]"></td>
+    <td><input type="text" name="details[${index}][PUR_ORDER_PK]" class="td-input mono" style="width:85px;"></td>
 
     <td>
-      <input name="details[${index}][PO_NUMBER_ID]" value="${activeStyleId}">
+      <input type="text" name="details[${index}][PO_NUMBER_ID]" class="td-input mono" style="width:85px;" value="${activeStyleId}">
     </td>
 
     <td>
-      <input name="details[${index}][ITEM_NO]" onclick="openLov('item', ${index})">
+      <input type="text" name="details[${index}][ITEM_NO]" class="td-input mono" style="width:80px;" onclick="openLov('item', ${index})" placeholder="Item ID">
     </td>
 
-    <td><input name="details[${index}][ITEM_NAME]" readonly></td>
+    <td><input type="text" name="details[${index}][ITEM_NAME]" class="td-input" style="width:130px;background:#f8f9fa;" readonly></td>
 
-    <td><input name="details[${index}][ITEM_UNIT]"></td>
+    <td><input type="text" name="details[${index}][ITEM_UNIT]" class="td-input" style="width:55px;" placeholder="Unit"></td>
 
-    <td><input name="details[${index}][PUR_QTY]"></td>
+    <td><input type="number" name="details[${index}][PUR_QTY]" class="td-input qty-input" style="width:70px;" placeholder="0" step="0.01" min="0" oninput="updateTotal()"></td>
 
-    <td><input name="details[${index}][ITEM_QTY]"></td>
+    <td><input type="number" name="details[${index}][ITEM_QTY]" class="td-input qty-input" style="width:70px;" placeholder="0" step="0.01" min="0" oninput="updateTotal()"></td>
 
-    <td><input name="details[${index}][RATE]"></td>
+    <td><input type="number" name="details[${index}][PERCENTAGE]" class="td-input" style="width:55px;" placeholder="0" step="0.01"></td>
 
-    <td><input name="details[${index}][VALUE]" readonly></td>
+    <td><input type="number" name="details[${index}][RATE]" class="td-input" style="width:70px;" placeholder="0.00" step="0.01" oninput="updateValue(this)"></td>
+
+    <td><input type="text" name="details[${index}][CURR]" class="td-input mono" style="width:48px;" value="USD"></td>
+
+    <td><input type="number" name="details[${index}][VALUE]" class="td-input value-input" style="width:80px;background:#f8f9fa;" placeholder="0.00" step="0.01" readonly></td>
+
+    <td><input type="text" name="details[${index}][ITEM_REMARKS]" class="td-input" style="width:100px;" placeholder="Remarks"></td>
+
+    <td><button type="button" class="btn btn-outline-danger btn-xs" onclick="removeRow(this,'detailBody')"><i class="bi bi-trash"></i></button></td>
   `;
 
             tbody.appendChild(tr);

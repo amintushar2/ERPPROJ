@@ -14,7 +14,7 @@ class LeaveEntryDetails extends Model
     public $incrementing = false;
 
 
-    protected $fileable=[
+    protected $fillable =[
 'lv_cat_id',
 'year',
 'empno',

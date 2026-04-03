@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmpPersonal extends Model
 {
-    protected $table = 'HRM.EMP_PERSONAL';
+    protected $table='EMP_PERSONAL';
     public $timestamps = false;
     public $incrementing = false;
- protected $primaryKey = 'empno'; // or your actual PK
-    protected $keyType = 'string'; // if empno is not an integer
-    protected $fillable = [
+    use HasFactory;
+
+    protected $fileable=[
         'empno',
         'card_no',
         'first_name',
@@ -65,47 +65,39 @@ class EmpPersonal extends Model
         'emp_sign',
         'update_user',
     ];
- 
-    // ─────── RELATIONSHIPS ───────
-    public function getempofficial()
-    {
-        return $this->hasMany(EmpOfficial::class, 'empno', 'empno');
-    }
- 
-    public function getemploc()
-    {
-        return $this->hasMany(EmpLocation::class, 'empno', 'empno');
-    }
- 
-    public function empQualification()
-    {
-        return $this->hasMany(Emp_qualificationModel::class, 'empno', 'empno');
-    }
- 
-    public function getEmpShortModel()
-    {
-        return $this->hasMany(Emp_ShortModel::class, 'empno', 'empno');
-    }
- 
-    public function getEmpFamily()
-    {
-        return $this->hasMany(Emp_familyModel::class, 'empno', 'empno');
-    }
- 
-    public function getEmpHistory()
-    {
-        return $this->hasMany(Emp_historyModel::class, 'empno', 'empno');
-    }
- 
-    public function getEmpTraining()
-    {
-        return $this->hasMany(Emp_trainingModel::class, 'empno', 'empno');
-    }
- 
-    public function getEmpWorkExp()
-    {
-        return $this->hasMany(Emp_work_expModel::class, 'empno', 'empno');
-    }
 
+    
+    public function getempofficial(){
+
+        return $this->hasMany('App\Models\EmpOfficial','empno','empno');
+    }
+    public function getemploc(){
+
+        return $this->hasMany('App\Models\Emp_locationModel','empno','empno');
+    }
+    public function empQualification(){
+
+        return $this->hasMany('App\Models\Emp_qualificationModel','empno','empno');
+    }
+    public function getEmpShortModel(){
+
+        return $this->hasMany('App\Models\Emp_ShortModel','empno','empno');
+    }
+    public function getEmpFamily(){
+
+        return $this->hasMany('App\Models\Emp_familyModel','empno','empno');
+    }
+    public function getEmpHistory(){
+
+        return $this->hasMany('App\Models\Emp_historyModel','empno','empno');
+    }
+    public function getEmpTraining(){
+
+        return $this->hasMany('App\Models\Emp_trainingModel','empno','empno');
+    }
+    public function getEmpWorkExp(){
+
+        return $this->hasMany('App\Models\Emp_work_expModel','empno','empno');
+    }
 }
 
