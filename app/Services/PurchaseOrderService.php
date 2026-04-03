@@ -209,16 +209,166 @@ public function getOrder($id)
 }
 
 // UPDATE
-public function updateOrder($id, $data)
+public function updateOrder($data)
 {
-    DB::statement("
-        UPDATE PUR_ORDER_MASTER
-        SET SUPPLIER_NO = :supp
-        WHERE PUR_ORDER_PK = :id
-    ", [
-        'supp' => $data['SUPPLIER_NO'],
-        'id' => $id
-    ]);
+    DB::beginTransaction();
+
+    try {
+
+        $master = $data['master'];
+        $styles = $data['styles'];
+
+        // 🔁 UPDATE MASTER
+        DB::update("
+            UPDATE PUR_ORDER_MASTER SET
+                PUR_ORDER_DATE = TO_DATE(:po_date, 'YYYY-MM-DD'),
+                SUPPLIER_NO = :supplier,
+                CURRENCY_RATE = :rate
+            WHERE PUR_ORDER_PK = :pk
+        ", [
+            'po_date' => $master['PUR_ORDER_DATE'],
+            'supplier' => $master['SUPPLIER_NO'],
+            'rate' => $master['CURRENCY_RATE'],
+            'pk' => $master['PUR_ORDER_PK']
+        ]);
+
+        // 🔥 EXISTING STYLE IDS
+        $existingStyles = DB::select("
+            SELECT PO_NUMBER_ID 
+            FROM PUR_ORDER_STYLE 
+            WHERE PUR_ORDER_PK = :pk
+        ", ['pk' => $master['PUR_ORDER_PK']]);
+
+        $existingStyleIds = collect($existingStyles)->pluck('po_number_id')->toArray();
+
+        $incomingStyleIds = [];
+
+        foreach ($styles as $style) {
+
+            $incomingStyleIds[] = $style['PO_NUMBER_ID'];
+
+            // 🔁 UPDATE OR INSERT STYLE
+            if (in_array($style['PO_NUMBER_ID'], $existingStyleIds)) {
+
+               DB::update("
+    UPDATE PUR_ORDER_STYLE SET
+        PO_NUMBER = :po,
+        ORDER_NO = :order_no,
+        PO_QTY = :qty
+    WHERE PUR_ORDER_PK = :pk
+    AND PO_NUMBER_ID = :poi
+", [
+    'po' => $style['PO_NUMBER'],
+    'order_no' => $style['ORDER_NO'], // ✅ FIXED
+    'qty' => $style['PO_QTY'],
+    'pk' => $master['PUR_ORDER_PK'],
+    'poi' => $style['PO_NUMBER_ID']
+]);
+
+            } else {
+
+                DB::insert("
+                    INSERT INTO PUR_ORDER_STYLE
+                    (PUR_ORDER_PK, PO_NUMBER, PO_NUMBER_ID, ORDER_NO,  PO_QTY)
+                    VALUES (:pk, :po, :poi, :order_no,  :qty)
+                ", [
+                    'pk' => $master['PUR_ORDER_PK'],
+                    'po' => $style['PO_NUMBER'],
+                    'poi' => $style['PO_NUMBER_ID'],
+                    'order_no' => $style['ORDER_NO'],
+                    'qty' => $style['PO_QTY']
+                ]);
+            }
+
+            // 🔥 DETAILS PROCESS
+            $existingDetails = DB::select("
+                SELECT ITEM_ID 
+                FROM PUR_ORDER_DETAILS
+                WHERE PUR_ORDER_PK = :pk AND PO_NUMBER_ID = :poi
+            ", [
+                'pk' => $master['PUR_ORDER_PK'],
+                'poi' => $style['PO_NUMBER_ID']
+            ]);
+
+            $existingItemIds = collect($existingDetails)->pluck('item_id')->toArray();
+            $incomingItemIds = [];
+
+            foreach ($style['details'] as $d) {
+
+                $incomingItemIds[] = $d['ITEM_ID'];
+
+                if (in_array($d['ITEM_ID'], $existingItemIds)) {
+
+                    // 🔁 UPDATE DETAIL
+                    DB::update("
+                        UPDATE PUR_ORDER_DETAILS SET
+                            QUANTITY = :qty,
+                            ITEM_RATE = :rate
+                        WHERE PUR_ORDER_PK = :pk
+                        AND PO_NUMBER_ID = :poi
+                        AND ITEM_ID = :item
+                    ", [
+                        'qty' => $d['QUANTITY'],
+                        'rate' => $d['ITEM_RATE'],
+                        'pk' => $master['PUR_ORDER_PK'],
+                        'poi' => $style['PO_NUMBER_ID'],
+                        'item' => $d['ITEM_ID']
+                    ]);
+
+                } else {
+
+                    // ➕ INSERT DETAIL
+                    DB::insert("
+                        INSERT INTO PUR_ORDER_DETAILS
+                        (PUR_ORDER_PK, PO_NUMBER_ID, ITEM_ID,  QUANTITY, ITEM_RATE)
+                        VALUES (:pk, :poi, :item,  :qty, :rate)
+                    ", [
+                        'pk' => $master['PUR_ORDER_PK'],
+                        'poi' => $style['PO_NUMBER_ID'],
+                        'item' => $d['ITEM_ID'],
+                        'qty' => $d['QUANTITY'],
+                        'rate' => $d['ITEM_RATE']
+                    ]);
+                }
+            }
+
+            // 🔥 DELETE REMOVED DETAILS
+            foreach ($existingItemIds as $oldItem) {
+                if (!in_array($oldItem, $incomingItemIds)) {
+                    DB::delete("
+                        DELETE FROM PUR_ORDER_DETAILS
+                        WHERE PUR_ORDER_PK = :pk
+                        AND PO_NUMBER_ID = :poi
+                        AND ITEM_ID = :item
+                    ", [
+                        'pk' => $master['PUR_ORDER_PK'],
+                        'poi' => $style['PO_NUMBER_ID'],
+                        'item' => $oldItem
+                    ]);
+                }
+            }
+        }
+
+        // 🔥 DELETE REMOVED STYLES
+        foreach ($existingStyleIds as $oldStyle) {
+            if (!in_array($oldStyle, $incomingStyleIds)) {
+                DB::delete("
+                    DELETE FROM PUR_ORDER_STYLE
+                    WHERE PUR_ORDER_PK = :pk
+                    AND PO_NUMBER_ID = :poi
+                ", [
+                    'pk' => $master['PUR_ORDER_PK'],
+                    'poi' => $oldStyle
+                ]);
+            }
+        }
+
+        DB::commit();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        throw $e;
+    }
 }
 
 // DELETE
@@ -242,4 +392,7 @@ public function importFromExcel($data)
 {
     return ['success' => true];
 }
+
+
+
 }

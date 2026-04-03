@@ -47,14 +47,37 @@ class PurchaseOrderController extends Controller
 
  public function store(Request $request)
     {
-        try {
+        
+    $data = $request->all();
 
-        $pk = $this->service->saveOrder($request->all());
+    $pk = $data['master']['PUR_ORDER_PK'];
 
-        return response()->json([
-            'message' => 'Saved successfully',
-            'pk' => $pk
-        ]);
+    // 🔥 CHECK IF EXISTS
+
+    
+    
+    try {
+$data = $request->all();
+
+    $pk = $data['master']['PUR_ORDER_PK'];
+
+    // 🔥 CHECK IF EXISTS
+    $exists = DB::selectOne("
+        SELECT COUNT(*) AS CNT 
+        FROM PUR_ORDER_MASTER 
+        WHERE PUR_ORDER_PK = :pk
+    ", ['pk' => $pk]);
+
+    if ($exists->cnt > 0) {
+        // 🔁 UPDATE
+        $this->service->updateOrder($data);
+        return response()->json(['message' => 'Record updated successfully']);
+    } else {
+        // ➕ INSERT
+        $this->service->saveOrder($data);
+        return response()->json(['message' => 'Record inserted successfully']);
+    }
+       
 
     } catch (\Throwable $e) {
 
@@ -187,15 +210,42 @@ public function generatePk(Request $request)
     // =====================================================
     // DELETE
     // =====================================================
-    public function destroy($id)
-    {
-        $this->service->deleteOrder($id);
+  public function destroy($id)
+{
+    try {
+
+        DB::beginTransaction();
+
+        // 🔥 DELETE CHILD FIRST
+        DB::delete("
+            DELETE FROM PUR_ORDER_DETAILS 
+            WHERE PUR_ORDER_PK = :pk
+        ", ['pk' => $id]);
+
+        DB::delete("
+            DELETE FROM PUR_ORDER_STYLE 
+            WHERE PUR_ORDER_PK = :pk
+        ", ['pk' => $id]);
+
+        // 🔥 DELETE MASTER LAST
+        DB::delete("
+            DELETE FROM PUR_ORDER_MASTER 
+            WHERE PUR_ORDER_PK = :pk
+        ", ['pk' => $id]);
+
+        DB::commit();
 
         return response()->json([
-            'success' => true,
-            'message' => 'Deleted'
+            'message' => 'Purchase Order deleted successfully'
         ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     // =====================================================
     // LOV — PO
@@ -249,19 +299,39 @@ public function generatePk(Request $request)
 public function getItemsByPo($poId)
 {
     $data = DB::select("
-        SELECT 
-            POD.ITEM_ID,
-            IM.ITEM_NAME,
-            POD.ITM_UNIT,
-            POD.QUANTITY,
-            POD.ITEM_RATE,
-            POD.PO_NUMBER_ID,
-            CURRENCY_CODE,
-            (QUANTITY * ITEM_RATE) AS VALUE,
-            (QUANTITY * ITEM_RATE * 110) AS VALUE_BDT
-        FROM PUR_ORDER_DETAILS POD, ITEM_MASTER IM
-        WHERE POD.ITEM_ID = IM.ITEM_ID
-        AND POD.PUR_ORDER_PK  = :poId
+      SELECT 
+    POS.PUR_ORDER_PK,
+    POD.ITEM_ID,
+    IM.ITEM_NAME,
+    POD.ITM_UNIT,
+    POD.QUANTITY,
+    POD.ITEM_RATE,
+    POS.PO_NUMBER_ID,
+    POD.CURRENCY_CODE,
+
+    -- STYLE DATA
+    OPN.PO_NUMBER,
+    POS.ORDER_NO,
+    GET_PO_BUYER_NAME(OPN.PO_NUMBER) AS BUYER_NAME,
+    POS.PO_QTY,
+
+    -- CALCULATIONS
+    (POD.QUANTITY * POD.ITEM_RATE) AS VALUE,
+    (POD.QUANTITY * POD.ITEM_RATE * 110) AS VALUE_BDT
+
+FROM PUR_ORDER_STYLE POS   -- ✅ MAIN TABLE
+
+LEFT JOIN PUR_ORDER_DETAILS POD
+    ON POD.PUR_ORDER_PK = POS.PUR_ORDER_PK
+   AND POD.PO_NUMBER_ID = POS.PO_NUMBER_ID
+
+LEFT JOIN ITEM_MASTER IM 
+    ON POD.ITEM_ID = IM.ITEM_ID
+
+LEFT JOIN ORDER_PO_NUMBER OPN 
+    ON OPN.PO_NUMBER_ID = POS.PO_NUMBER_ID
+
+WHERE POS.PUR_ORDER_PK =   :poId
     ", ['poId' => $poId]);
 
     return response()->json($data);
@@ -285,7 +355,22 @@ public function getItemsByPo($poId)
             $this->service->getPoCheckData()
         );
     }
+public function search(Request $request)
+{
+    $q = '%' . $request->q . '%';
 
+    $data = DB::select("
+        SELECT 
+        PUR_ORDER_NO,
+            PUR_ORDER_PK,
+            SUPPLIER_NO
+        FROM PUR_ORDER_MASTER
+        WHERE PUR_ORDER_NO LIKE UPPER(:q)
+        FETCH FIRST 100 ROWS ONLY
+    ", ['q' => $q]);
+
+    return response()->json($data);
+}
 public function generatePoNo(Request $request)
 {
     try {

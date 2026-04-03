@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 
 use Session;
@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
    
 public function boot()
 {
+
+   Paginator::defaultView('vendor.pagination.custom');
+        Paginator::defaultSimpleView('vendor.pagination.custom');
     View::composer('*', function ($view) {
 
         $uri = request()->path();

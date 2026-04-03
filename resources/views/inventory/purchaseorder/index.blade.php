@@ -21,6 +21,12 @@
       <button class="btn btn-outline-secondary btn-sm" onclick="toggleSearch()">Cancel</button>
     </div>
   </div>
+  <div id="searchSuggestions"
+       class="list-group position-absolute w-100"
+       style="z-index:1000;"></div>
+</div>
+
+{{-- ── Offcanvas for PO Details Preview (before import) ── --}}
 </div>
 
 {{-- ══════════════════════════════════════════
@@ -254,7 +260,7 @@
 
 {{-- ── Action Buttons ── --}}
 <div class="d-flex gap-2 mb-5 justify-content-center">
-  <button class="btn btn-primary" onclick="saveOrder()">
+  <button class="btn btn-primary" id="saveBtn" onclick="saveOrder()">
     <i class="bi bi-check-lg me-1"></i>Save (Commit)
   </button>
   <button class="btn btn-outline-secondary" onclick="showToast('Exit — exit_form(no_commit)', 'warning')">
@@ -314,7 +320,7 @@ function toggleSearch() {
 // }
 async function doSearch() {
 
-  const pk = document.getElementById('searchInput').value;
+  const pk = document.getElementById('searchInput').value.trim();
 
   if (!pk) {
     showToast('Enter PO Number', 'danger');
@@ -322,39 +328,60 @@ async function doSearch() {
   }
 
   try {
+    CURRENT_STYLE = null;
+CURRENT_PO_ID = null;
 
+    // 🔥 LOADING STATE
+    showToast('Loading record...', 'info');
+
+    // 🔥 CLEAR OLD DATA (IMPORTANT)
+    document.getElementById('styleRows').innerHTML = '';
+    document.getElementById('detailRows').innerHTML = '';
+    detailIdx = 0;
+
+    // 🔥 FETCH MASTER
     const res = await fetch(`/purchase-orders/${pk}`);
-    const data = await res.json();
 
-    if (!data) {
-      showToast('No record found', 'warning');
+    if (!res.ok) {
+      showToast('Record not found', 'danger');
       return;
     }
 
-    console.log('LOADED DATA:', data);
+    let data = await res.json();
 
-   let record = data;
+    console.log('RAW RESPONSE:', data);
 
-// handle array
-if (Array.isArray(data)) {
-  record = data[0];
-}
+    // 🔥 NORMALIZE RESPONSE
+    let record = data;
+    if (Array.isArray(data)) record = data[0];
+    if (data.data) record = data.data;
 
-// handle wrapped response
-if (data.data) {
-  record = data.data;
-}
+    console.log('FINAL RECORD:', record);
 
-console.log('FINAL RECORD:', record);
+    if (!record || !record.pur_order_pk) {
+      showToast('Invalid record data', 'danger');
+      return;
+    }
 
-loadMaster(record);
-loadStylesAndDetails(record);
+    // 🔥 LOAD MASTER
+    loadMaster(record);
 
-    showToast('Record loaded', 'success');
+    // 🔥 LOAD STYLE + DETAILS
+    await loadStylesAndDetails(record);
 
+
+    
+    // 🔥 SET EDIT MODE
+    CURRENT_MASTER_ID = record.pur_order_pk;
+document.getElementById('PUR_ORDER_DATE').disabled = true;
+    // 🔥 UX IMPROVEMENT
+    document.getElementById('block-style').scrollIntoView({ behavior: 'smooth' });
+
+    showToast('Record loaded successfully', 'success');
+document.getElementById('PUR_ORDER_DATE').focus();
   } catch (e) {
     console.error(e);
-    showToast('Search failed', 'danger');
+    showToast('Search failed (server error)', 'danger');
   }
 }
 
@@ -388,7 +415,8 @@ function loadMaster(data) {
     }
   }
 
-  CURRENT_MASTER_ID = data.PUR_ORDER_PK;
+  CURRENT_MASTER_ID = data.pur_order_pk;
+  updateSaveButton();
 }
 
 async function loadStylesAndDetails(master) {
@@ -413,9 +441,9 @@ async function loadStylesAndDetails(master) {
   console.log('ITEMS RESPONSE:', items);
 
   if (!items.length) {
-    console.warn('No items found');
-    return;
-  }
+  showToast('No style/details found', 'warning');
+  return;
+}
 
   let grouped = {};
 
@@ -430,12 +458,14 @@ async function loadStylesAndDetails(master) {
   });
 
   Object.keys(grouped).forEach((poId, idx) => {
-
+document.querySelector('#styleRows tr')?.click();
     addStyleRow({
-      po_number_id: poId,
-      order_no: grouped[poId][0].ORDER_NO || grouped[poId][0].order_no || '',
-      buyer_name: grouped[poId][0].BUYER_NAME || '',
-      po_quantity: grouped[poId][0].PO_QTY || ''
+     pur_order_pk: CURRENT_MASTER_ID, // ✅ already correct
+  po_number_id: poId,
+  po_number: grouped[poId][0].po_number || '',
+  order_no: grouped[poId][0].order_no || '',
+  buyer_name: grouped[poId][0].buyer_name || '',
+  po_quantity: grouped[poId][0].po_qty || ''
     });
 
     const tr = document.getElementById(`sr-${idx}`);
@@ -816,9 +846,10 @@ function collectFormData() {
     const itemId = tr.querySelector('[id$="_item"]');
     if (!itemId || !itemId.value) return;
     details.push({
+      PUR_ORDER_PK: CURRENT_MASTER_ID, // ✅ ADD
       PO_NUMBER_ID: tr.querySelector('[id$="_poi"]')?.value     || null,
       ITEM_ID:      itemId.value,
-      ITEM_NAME:    tr.querySelector('[id$="_itemname"]')?.value || '',
+      ITEM_NAME:    tr.querySelector('[id$="_name"]')?.value || '',
       QUANTITY:     tr.querySelector('[id$="_qty"]')?.value      || 0,
       ITEM_RATE:    tr.querySelector('[id$="_rate"]')?.value     || 0,
     });
@@ -828,6 +859,7 @@ function collectFormData() {
     const poi = tr.querySelector('[id$="_poi"]')?.value;
     if (!poi) return;
     styles.push({
+      PUR_ORDER_PK: CURRENT_MASTER_ID, // ✅ ADD
       PO_NUMBER:    tr.querySelector('[id$="_po"]')?.value    || '',
       PO_NUMBER_ID: poi,
       ORDER_NO:     tr.querySelector('[id$="_order"]')?.value || '',
@@ -850,10 +882,7 @@ function collectFormData() {
 }
 
 async function saveOrder() {
-  if (!CURRENT_PO_ID) {
-    showToast('Please select a PO before saving.', 'danger');
-    return;
-  }
+
 
   const payload = collectFormData();
 
@@ -876,6 +905,137 @@ async function saveOrder() {
     showToast('Network error — save failed.', 'danger');
   }
 }
+
+
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F8') {
+    e.preventDefault();
+    doSearch();
+  }
+});
+
+
+
+
+
+
+
+
+document.getElementById('searchInput').addEventListener('input', async function () {
+
+  const query = this.value.trim();
+
+  const box = document.getElementById('searchSuggestions');
+
+  if (query.length < 2) {
+    box.innerHTML = '';
+    return;
+  }
+
+  try {
+
+    const res = await fetch(`/purchase-orders/search?q=${query}`);
+    const data = await res.json();
+
+    console.log('SUGGESTIONS:', data);
+
+    box.innerHTML = '';
+
+    if (!data.length) {
+      box.innerHTML = '<div class="list-group-item text-muted">No results</div>';
+      return;
+    }
+
+    data.forEach(row => {
+
+      const item = document.createElement('div');
+      item.className = 'list-group-item list-group-item-action';
+
+      item.innerHTML = `
+        <strong>${row.pur_order_no}</strong>"-"
+        <strong>${row.pur_order_pk}</strong><br>
+        <small>${row.supplier_no || ''}</small>
+      `;
+
+      item.onclick = () => {
+        document.getElementById('searchInput').value = row.pur_order_pk;
+        box.innerHTML = '';
+        doSearch(); // 🔥 AUTO SEARCH
+      };
+
+      box.appendChild(item);
+    });
+
+  } catch (e) {
+    console.error(e);
+  }
+});
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#searchInput')) {
+    document.getElementById('searchSuggestions').innerHTML = '';
+  }
+});
+
+
+
+function updateSaveButton() {
+  const button = document.getElementById('saveBtn');
+
+  if (!button) return;
+
+  if (CURRENT_MASTER_ID) {
+    button.innerText = 'Update';
+  } else {
+    button.innerText = 'Save';
+  }
+}
+async function deletePO() {
+
+  if (!CURRENT_MASTER_ID) {
+    showToast('No record selected', 'danger');
+    return;
+  }
+
+ 
+  // 🔥 PROFESSIONAL CONFIRMATION
+  const result = await Swal.fire({
+    title: 'Delete Purchase Order?',
+    text: `PO: ${CURRENT_MASTER_ID}`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+
+    const res = await fetch(`/purchase-orders/delete/${CURRENT_MASTER_ID}`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await res.json();
+
+    showToast(data.message || 'Deleted successfully', 'success');
+
+    // 🔥 CLEAR FORM AFTER DELETE
+    location.reload();
+
+  } catch (e) {
+    console.error(e);
+    showToast('Delete failed', 'danger');
+  }
+}
+
+
 </script>
 @endpush
 

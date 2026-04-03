@@ -18,6 +18,7 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\ItemController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
+use App\Http\Controllers\Inventory\ItemReceivedController;
 
 
 /*
@@ -261,10 +262,12 @@ Route::prefix('purchase-orders')->name('purchase-orders.')->group(function () {
     Route::post('/',          [PurchaseOrderController::class, 'store'])   ->name('store');
     Route::get('/generate-pk', [PurchaseOrderController::class, 'generatePk']);
     Route::get('/generate-po-no', [PurchaseOrderController::class, 'generatePoNo']);
-    
+    Route::get('/search', [PurchaseOrderController::class, 'search']);
+
+
     Route::get('/{id}',       [PurchaseOrderController::class, 'show'])    ->name('show');
     Route::put('/{id}',       [PurchaseOrderController::class, 'update'])  ->name('update');
-    Route::delete('/{id}',    [PurchaseOrderController::class, 'destroy']) ->name('destroy');
+    Route::post('delete/{id}',    [PurchaseOrderController::class, 'destroy']) ->name('destroy');
  
     // LOV endpoints — replace Oracle Forms LOV popups
     // WHEN-BUTTON-PRESSED on PO_NUMBER field → PO_LV LOV
@@ -291,3 +294,29 @@ Route::prefix('purchase-orders')->name('purchase-orders.')->group(function () {
     Route::get('/generate-pk', [PurchaseOrderController::class, 'generatePk']);
 });
  
+
+
+Route::prefix('item-received')->name('item-received.')->group(function () {
+    Route::get('/',            [ItemReceivedController::class, 'index'])   ->name('index');
+    Route::get('/create',      [ItemReceivedController::class, 'create'])  ->name('create');
+    Route::post('/',           [ItemReceivedController::class, 'store'])   ->name('store');
+    Route::get('/generate-pk', [ItemReceivedController::class, 'generatePk']);
+    Route::get('/{id}/view', [ItemReceivedController::class, 'edit'])->name('view');
+
+
+    Route::get('/po-full/{pk}', [ItemReceivedController::class, 'getPoFullData']);
+    Route::get('/{id}',        [ItemReceivedController::class, 'show'])    ->name('show');
+    Route::get('{id}/edit', [ItemReceivedController::class, 'editForm'])->name('edit');
+    Route::put('/{id}',        [ItemReceivedController::class, 'update'])  ->name('update');
+    Route::delete('/{id}',     [ItemReceivedController::class, 'destroy']) ->name('destroy');
+
+});
+
+
+
+Route::prefix('item-received/lov')->group(function () {
+    Route::get('/items',     [ItemReceivedController::class, 'lovItems']);
+    Route::get('/po-by-supplier/{supplierId}', [ItemReceivedController::class, 'getPoBySupplier']);
+    Route::get('/suppliers', [ItemReceivedController::class, 'lovSuppliers']);
+    Route::get('/po-numbers',[ItemReceivedController::class, 'lovPo']);
+});

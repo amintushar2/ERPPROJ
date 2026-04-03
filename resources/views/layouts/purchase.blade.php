@@ -85,9 +85,9 @@
 
 
 {{-- ── Page content ── --}}
-<div class="content-wrapper" style="max-width:1500px">
+<div class="content-wrapper" style="margin-left: 2vw; padding: 2vw;" >
   {{-- ── Navbar ── --}}
-<nav class="navbar navbar-expand sticky-top shadow-sm px-3 py-2">
+<nav class="navbar navbar-expand-lg sticky-top shadow-sm px-3 py-2">
   <div class="d-flex align-items-center gap-3 me-auto">
     <span class="navbar-brand mb-0 text-primary">
       <i class="bi bi-file-earmark-text me-1"></i>Purchase Order Entry
@@ -96,6 +96,7 @@
     <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size:10px">CANVAS_MAIN</span>
   </div>
   <div class="d-flex gap-2">
+    <button onclick="deletePO()" class="btn btn-danger btn-sm"> <i class="bi bi-trash"></i> Delete Full Po </button>
     <button class="btn btn-outline-secondary btn-sm" onclick="toggleSearch()">
       <i class="bi bi-search me-1"></i>Search
     </button>
@@ -105,11 +106,11 @@
     <button class="btn btn-outline-info btn-sm" onclick="showSummary()">
       <i class="bi bi-file-text me-1"></i>Summary
     </button>
-    <button class="btn btn-primary btn-sm" onclick="saveOrder()">
+    <button class="btn btn-primary btn-sm" id="saveBtn" onclick="saveOrder()">
       <i class="bi bi-check-lg me-1"></i>Save
     </button>
-    <button class="btn btn-outline-danger btn-sm" onclick="showToast('Exit — exit_form(no_commit)', 'warning')">
-      <i class="bi bi-x-lg me-1"></i>Exit
+    <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">
+     <i class="bi bi-arrow-clockwise"></i></i>Exit
     </button>
   </div>
 </nav>
