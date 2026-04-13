@@ -1149,7 +1149,7 @@ public function deleteEmpRecord($id, Request $request)
                      'EMP_PERSONAL.MOTHER_NAME', 'EMP_PERSONAL.RELIGION_NAME',
                      'EMP_PERSONAL.SEX', 'EMP_OFFICIAL.JOINING_DATE', 'EMP_PERSONAL.EMP_MOBILE_NO', 'EMP_OFFICIAL.AC_NO')
                     ->where('EMP_PERSONAL.EMPNO', '=', DB::raw('EMP_OFFICIAL.EMPNO'))
-                    // ->where('EMP_PERSONAL.STATUS', '=', 'Active')
+                    ->where('EMP_PERSONAL.STATUS', '=', 'Active')
                     ->get();
                 return view('hrm.emplist', ['data' => $data, 'menu' => $leftmenu, 'submenu' => $submenu, 'submenu2' => $submenu2, 'headeer' => $headeer, 'empList' => $empList]);
             } catch (Exception $e) {

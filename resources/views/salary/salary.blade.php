@@ -415,7 +415,7 @@
     {{-- ── Footer ── --}}
     <footer class="main-footer text-center py-2" style="background:#0b1828;border-top:2px solid #f59e0b;">
         <span class="fw-bold text-uppercase"
-            style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1.5px;color:#f59e0b;">FDL</span>
+            style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1.5px;color:#f59e0b;"></span>
         <span class="mx-1" style="color:#4a6a8a;">·</span>
         <span class="text-uppercase"
             style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;color:#94aec4;">Enterprise

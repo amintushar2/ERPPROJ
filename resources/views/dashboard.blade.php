@@ -206,7 +206,7 @@
             ]);
 
             var options = {
-                title: 'Monthly Total OverTime Graph By Yearly',
+                title: 'Monthly Total Average OverTime Graph By Yearly',
                 vAxis: {
                     title: 'Total OverTime'
                 },

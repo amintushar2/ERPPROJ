@@ -19,12 +19,12 @@ use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\ItemController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\ItemReceivedController;
+use App\Http\Controllers\Accounts\VoucherController;
 use Illuminate\Support\Facades\Auth;
 
 
 /*
-|--------------------------------------------------------------------------
-| Web Routes
+        | Web Routes
 |--------------------------------------------------------------------------
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
@@ -394,3 +394,57 @@ Route::prefix('item-received/lov')->middleware('auth')->group(function () {
 });
 
 
+Route::prefix('vouchers')->middleware('auth')->name('vouchers.')->group(function () {
+
+    // Search / Index canvas (BLOCK_SCRH)
+    Route::get('/',             [VoucherController::class, 'index'])   ->name('index');
+
+    // Create / NEW_BTN
+    Route::get('/create',       [VoucherController::class, 'create'])  ->name('create');
+    Route::post('/',            [VoucherController::class, 'store'])   ->name('store');
+    Route::get('/index',       [VoucherController::class,'index']) ->name('summary');
+    Route::get('/ajax/stats', [VoucherController::class, 'ajaxStats'])
+    ->name('ajax.stats');
+
+    
+    // AJAX helpers
+    Route::get('/api/account-flags', [VoucherController::class, 'accountFlags'])->name('api.flags');
+    Route::get('/api/account-lov',   [VoucherController::class, 'accountLov'])  ->name('api.lov');
+//ajaztable
+Route::get('/ajax/list', [VoucherController::class, 'ajaxList'])
+    ->name('ajax.list');
+
+
+    Route::get('/ajax/chart', [VoucherController::class, 'ajaxChart'])
+    ->name('ajax.chart');
+    // Show (POST-QUERY view)
+  //  Route::get('/{id}',         [VoucherController::class, 'show'])    ->name('show');
+
+  Route::get('/{id}', [VoucherController::class, 'show'])
+    ->where('id', '[0-9]+')   // ⭐ VERY IMPORTANT
+    ->name('show');
+    // Edit / BTN_MODIFY
+    Route::get('/{id}/edit',    [VoucherController::class, 'edit'])    ->name('edit');
+    Route::put('/{id}',         [VoucherController::class, 'update'])  ->name('update');
+
+    // Delete
+    Route::delete('/{id}',      [VoucherController::class, 'destroy']) ->name('destroy');
+
+    // Detail line operations (BTN_ADD / BTN_MODIFY on detail grid)
+    Route::post('/{id}/lines',              [VoucherController::class, 'addLine'])    ->name('lines.add');
+    Route::put('/{id}/lines/{sl}',          [VoucherController::class, 'updateLine']) ->name('lines.update');
+
+    // Workflow buttons (PB_SUBMIT, Approve)
+    Route::post('/{id}/submit',  [VoucherController::class, 'submit'])  ->name('submit');
+    Route::post('/{id}/approve', [VoucherController::class, 'approve']) ->name('approve');
+
+
+    // AJAX helpers
+    Route::get('/api/account-flags', [VoucherController::class, 'accountFlags'])->name('api.flags');
+    Route::get('/api/account-lov',   [VoucherController::class, 'accountLov'])  ->name('api.lov');
+
+
+     // AJAX — party / employee name lookup
+    Route::get('/api/party',    [VoucherController::class, 'partyName'])   ->name('api.party');
+    Route::get('/api/employee', [VoucherController::class, 'employeeName'])->name('api.employee');
+});

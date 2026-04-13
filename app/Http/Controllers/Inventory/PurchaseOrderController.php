@@ -121,17 +121,6 @@ $data = $request->all();
     }
 
 
-
-
-
-
-
-
-
-
-
-  
-
     // =====================================================
     // SHOW (LOAD PO)
     // =====================================================
@@ -142,7 +131,7 @@ $data = $request->all();
         PUR_ORDER_PK,
         PUR_ORDER_NO,
         TO_CHAR(PUR_ORDER_DATE, 'YYYY-MM-DD') AS PUR_ORDER_DATE,
-        SUPPLIER_NO
+        SUPPLIER_NO,COM.GET_PARTY_NAME(SUPPLIER_NO) AS SUPPLIER_NAME
     FROM PUR_ORDER_MASTER
     WHERE PUR_ORDER_PK = :id
 ", ['id' => $id]);
@@ -213,20 +202,16 @@ public function generatePk(Request $request)
   public function destroy($id)
 {
     try {
-
         DB::beginTransaction();
-
         // 🔥 DELETE CHILD FIRST
         DB::delete("
             DELETE FROM PUR_ORDER_DETAILS 
             WHERE PUR_ORDER_PK = :pk
         ", ['pk' => $id]);
-
         DB::delete("
             DELETE FROM PUR_ORDER_STYLE 
             WHERE PUR_ORDER_PK = :pk
         ", ['pk' => $id]);
-
         // 🔥 DELETE MASTER LAST
         DB::delete("
             DELETE FROM PUR_ORDER_MASTER 
@@ -266,7 +251,6 @@ public function generatePk(Request $request)
             $this->service->getItemLov($request->q, $request->order_no)
         );
     }
-
     // =====================================================
     // LOV — SUPPLIER
     // =====================================================
@@ -363,10 +347,9 @@ public function search(Request $request)
         SELECT 
         PUR_ORDER_NO,
             PUR_ORDER_PK,
-            SUPPLIER_NO
+            SUPPLIER_NO,COM.GET_PARTY_NAME(SUPPLIER_NO) AS SUPPLIER_NAME
         FROM PUR_ORDER_MASTER
         WHERE PUR_ORDER_NO LIKE UPPER(:q)
-        FETCH FIRST 100 ROWS ONLY
     ", ['q' => $q]);
 
     return response()->json($data);

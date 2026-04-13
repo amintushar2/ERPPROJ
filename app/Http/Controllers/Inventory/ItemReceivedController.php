@@ -93,7 +93,6 @@ public function lovSuppliers(Request $request)
             (:q IS NULL 
              OR UPPER(PP.PARTY_NAME) LIKE '%' || :q || '%'
              OR UPPER(SUPPLIER_NO) LIKE '%' || :q || '%')
-        FETCH FIRST 20 ROWS ONLY
     ", ['q' => $q]);
 }
 
@@ -129,7 +128,6 @@ public function getPoBySupplier(Request $request, $supplierId)
                OR UPPER(PM.PUR_ORDER_NO) LIKE '%' || :q || '%'
                OR UPPER(PM.PUR_ORDER_PK) LIKE '%' || :q || '%')
         ORDER BY PM.PUR_ORDER_PK DESC
-        FETCH FIRST 20 ROWS ONLY
     ", [
         'supplier' => $supplierId,
         'q' => $q

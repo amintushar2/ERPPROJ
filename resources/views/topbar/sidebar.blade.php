@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ERP</title>
-
+    @vite(['resources/js/app.js'])
     <link rel="stylesheet" href="{{ URL::asset('dist/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ URL::asset('plugins/fontawesome-free/css/all.min.css') }}">
     <link
