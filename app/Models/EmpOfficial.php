@@ -9,6 +9,9 @@ class EmpOfficial extends Model
 {
     use HasFactory;
     protected $table='EMP_Official';
+        protected $primaryKey = 'empno'; // ⭐ FIX
+    protected $keyType = 'string'; // use 'int' if empno is numeric
+
     public $timestamps = false;
     public $incrementing = false;
 
@@ -35,6 +38,7 @@ class EmpOfficial extends Model
        'resigned_date',
        'weekly_off',
        'bank_name',
+
 'res_ent',
 'conform_date',
        'tin_no',
@@ -48,6 +52,7 @@ class EmpOfficial extends Model
        'des_id',
        'des_name',
        'floor_id',
+       'floor_desc',
        'line',
        'line_info',
        'piece_rate',

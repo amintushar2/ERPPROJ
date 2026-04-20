@@ -3,9 +3,19 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/js/app.js'])
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ asset('dist/css/adminlte.min.css') }}" rel="stylesheet">
 
+    <link href="{{ asset('bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('erpcss/select2.min.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('erpcss/sweetalert2.min.css') }}" rel="stylesheet">
+
+    {{-- Icons loaded async so they never block paint --}}
+    <link rel="stylesheet" href="{{ URL::asset('plugins/fontawesome-free/css/all.min.css') }}" media="print"
+        onload="this.media='all'">
+    <link rel="stylesheet" href="{{ URL::asset('bootstrap_icon/bootstrap-icons.min.css') }}" media="print"
+        onload="this.media='all'">
     <style>
         body {
             background: #f9fafb;
@@ -15,15 +25,42 @@
     @stack('styles')
 </head>
 
-<body>
-    @include('topbar.sidebar')
+<body class="sidebar-mini layout-fixed sidebar-collapse">
+    <div class="wrapper">
 
-    @section('title', 'Page Title')
-    <div class="container py-4">
-        @yield('content')
+        {{-- Sidebar included normally - AdminLTE handles it --}}
+        @include('topbar.sidebar')
+
+        <div class="content-wrapper">
+
+            @section('title', 'Page Title')
+            @yield('content')
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="{{ URL::asset('mainjs/jquery.min.js') }}"></script>
+
+    <!-- 2. Select2 CSS -->
+
+    <!-- 3. Select2 JS -->
+
+    <script src="{{ URL::asset('mainjs/select2.min.js') }}"></script>
+
+    <!-- 4. Your helper AFTER Select2 -->
+    <script src="{{ URL::asset('mainjs/lov_helper.js') }}"></script>
+
+    <!-- 5. Other scripts -->
+    <script src="{{ asset('bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+
+    <script src="{{ URL::asset('dist/js/adminlte.min.js') }}"></script>
+
+    <script src="{{ URL::asset('mainjs/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/buttons.bootstrap5.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/sweetalert2.all.min.js') }}"></script>
+
 
     <script>
         function showToast(message, type = 'success') {
@@ -41,25 +78,17 @@
     </script>
 
     @stack('scripts')
-</body>
 
-
-
-
-<div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
-
-    <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert">
-        <div class="d-flex">
-            <div class="toast-body" id="toastMessage">
-                Success message
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">
+                    Success message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     </div>
-
-</div>
 </body>
 
 </html>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

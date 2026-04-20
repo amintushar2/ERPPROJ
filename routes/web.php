@@ -9,18 +9,40 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EmpEntListController;
 use App\Http\Controllers\LoanController;
 use App\Http\controllers\HrmSetupController;
+use App\Http\controllers\ReportCenterController;
+use App\Http\controllers\HrmDashboardController;
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SalProcessController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LovController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\ItemController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
 use App\Http\Controllers\Inventory\ItemReceivedController;
 use App\Http\Controllers\Accounts\VoucherController;
+
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\RouteController;
+use App\Http\Controllers\Admin\UserGroupController;
+use App\Http\Controllers\Admin\GroupMenuController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserMenuPermissionController;
+
+
+
+
+
+
 use Illuminate\Support\Facades\Auth;
+
+
+
+
 
 
 /*
@@ -104,12 +126,16 @@ Route::get('/',[LoginController::class,'login'])->name('login');
     Route::get('/login', [LoginController::class, 'login'])->name('login');
     Route::post('auth/check', [LoginController::class, 'check'])->name('auth.check');
 
-    Route::get('/dashboard', [LoginController::class, 'dashboard'])->name('dashboard');
+   // Route::get('/dashboard', [LoginController::class, 'dashboard'])->name('dashboard');
 
 });
 
 
-
+ 
+Route::middleware(['auth'])->name('hrm.')->group(function () {
+    Route::get('/dashboard', [HrmDashboardController::class, 'index'])->name('dashboard');
+});
+ 
 
 
 //login Page
@@ -117,8 +143,61 @@ Route::get('/',[LoginController::class,'login'])->name('login');
 // Route::get('/login',[LoginController::class,'login'])->name('login');
 
 // Route::post('auth/check',[LoginController::class,'check'])->name('auth.check');
-Route::get('dashboard',[LoginController::class, 'dashboard'])->name('dashboard');
+//Route::get('dashboard',[LoginController::class, 'dashboard'])->name('dashboard');
 Route::get('/auth/logout',[LoginController::class, 'logout'])->name('auth.logout');
+
+
+
+
+
+
+Route::middleware(['web','auth'])->group(function () {
+
+    // Employee pages
+    Route::get('/hrm/emplist',          [EmpControllers::class,'empList'])->name('emplist');
+    Route::get('/hrm/empentry',         [EmpControllers::class,'empentry'])->name('empnewentry');
+    Route::get('/hrm/empedit/{empno}',  [EmpControllers::class,'empEdit'])->name('empedit');
+
+    // Lazy AJAX tab loaders
+    Route::get('/hrm/tab/official/{empno}',    [EmpControllers::class,'tabOfficial'])->name('tab.official');
+    Route::get('/hrm/tab/location/{empno}',    [EmpControllers::class,'tabLocation'])->name('tab.location');
+    Route::get('/hrm/tab/education/{empno}',   [EmpControllers::class,'tabEducation'])->name('tab.education');
+    Route::get('/hrm/tab/shortcourse/{empno}', [EmpControllers::class,'tabShortCourse'])->name('tab.shortcourse');
+    Route::get('/hrm/tab/training/{empno}',    [EmpControllers::class,'tabTraining'])->name('tab.training');
+    Route::get('/hrm/tab/experience/{empno}',  [EmpControllers::class,'tabExperience'])->name('tab.experience');
+    Route::get('/hrm/tab/nominee/{empno}',     [EmpControllers::class,'tabNominee'])->name('tab.nominee');
+    Route::get('/hrm/tab/jobhistory/{empno}',  [EmpControllers::class,'tabJobHistory'])->name('tab.jobhistory');
+
+    // Autocomplete
+    Route::get('/hrm/empsearch',        [EmpControllers::class,'empsearch']);
+    Route::post('/hrm/empSearchExist',  [EmpControllers::class,'empSearchExist']);
+
+    // ── LOV AJAX endpoints (all return {results:[{id,text}]}) ──
+    Route::get('/lov/dept',        [LovController::class,'dept']);
+    Route::get('/lov/section',     [LovController::class,'section']);
+    Route::get('/lov/floor',       [LovController::class,'floor']);
+    Route::get('/lov/line',        [LovController::class,'line']);
+    Route::get('/lov/designation', [LovController::class,'designation']);
+    Route::get('/lov/grade',       [LovController::class,'grade']);
+    Route::get('/lov/shift',       [LovController::class,'shift']);
+    Route::get('/lov/calendar',    [LovController::class,'calendar']);
+    Route::get('/lov/weeklyoff',   [LovController::class,'weeklyoff']);
+    Route::get('/lov/bank',        [LovController::class,'bank']);
+    Route::get('/lov/leavecat',    [LovController::class,'leavecat']);
+    Route::get('/lov/allwcat',     [LovController::class,'allwcat']);
+    Route::get('/lov/thana',       [LovController::class,'thana']);
+    Route::get('/lov/district',    [LovController::class,'district']);
+    Route::get('/lov/yesno',       [LovController::class,'yesno']);
+
+    // Leave
+    Route::get('/hrm/getLeaveDetails/{empno}/{year}',     [EmpControllers::class,'getLeaveDetails']);
+    Route::get('/hrm/getLeavePrebal/{empno}/{year}/{lv}', [EmpControllers::class,'getLeavePrebal']);
+    Route::get('/hrm/getLeavBal/{lv}',                    [EmpControllers::class,'getLeavBal']);
+    Route::post('/hrm/leaveEntryIns',                     [EmpControllers::class,'leaveEntryIns']);
+    Route::post('/hrm/leaveEntryDet',                     [EmpControllers::class,'leaveEntryDet']);
+    Route::delete('/hrm/deleteLeave/{empno}/{year}/{sl}', [EmpControllers::class,'deleteLeave']);
+});
+
 
 
 //report
@@ -137,10 +216,8 @@ Route::get('/common/gatepass',[GpController::class, 'gatepass'])->name('common.g
 
 
 //emp_controller 
-Route::get('/empnewentry',[EmpControllers::class,'empentry'])->name('empnewentry')->middleware(['auth']);
 // Route::get('/empnewentryfind',[EmpControllers::class,'empnewentryfind']);
 Route::get('/empsearch',[EmpControllers::class,'empsearch'])->middleware(['auth']);
-Route::get('/empList',[EmpControllers::class,'getAllEmpList'])->middleware(['auth']);
 
 Route::get('/index',[EmpControllers::class,'index']);
 Route::post('/emppersonalsave',[EmpControllers::class,'employeePersonalInsert'])->name('employeePersonalInsert')->middleware(['auth']);
@@ -196,6 +273,22 @@ Route::get('/getemp/{comid}',[LoanController::class,'getEmpNO'])->middleware(['a
 Route::get('/getempdet',[LoanController::class,'getEMPdetails'])->middleware(['auth']);
 Route::get('/getinEmp',[EmpControllers::class,'getEmpDet'])->middleware(['auth']);
 Route::get('/getprevgross',[EmpControllers::class,'getPrevGross'])->middleware(['auth']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -447,4 +540,104 @@ Route::get('/ajax/list', [VoucherController::class, 'ajaxList'])
      // AJAX — party / employee name lookup
     Route::get('/api/party',    [VoucherController::class, 'partyName'])   ->name('api.party');
     Route::get('/api/employee', [VoucherController::class, 'employeeName'])->name('api.employee');
+});
+
+
+
+
+
+// HRM REPORT
+
+ Route::prefix('reports')->middleware(['web', 'auth'])->name('reports.')->group(function () {
+ 
+    // WHEN-NEW-FORM-INSTANCE → loads report list dropdown
+    Route::get('/', [ReportCenterController::class, 'index'])->name('center');
+ 
+    // WHEN-LIST-CHANGED → SHOW_PRM_IN_MOOD → returns parameters + LOV options as JSON
+    Route::get('/{reportId}/parameters', [ReportCenterController::class, 'getParameters'])
+         ->whereNumber('reportId')
+         ->name('parameters');
+ 
+    // LOV options for a specific block_item (standalone endpoint, called by JS if needed)
+    // e.g. GET /reports/lov/DEPT_NAME
+    Route::get('/lov/{blockItem}', [ReportCenterController::class, 'getLovOptions'])
+         ->name('lov');
+ 
+    // WHEN-BUTTON-PRESSED → EXEC_REPORT → RUN_REPORT_ACTUAL → proxies PDF
+    Route::post('/run', [ReportCenterController::class, 'runReport'])->name('run');
+});
+
+
+
+
+
+
+// Dashboard
+Route::get('/AdminDashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+// Menu Hierarchy  →  ALL_MENU_HIERARCHY
+Route::prefix('menus')->name('menus.')->group(function () {
+    Route::get('/',          [MenuController::class, 'index'])->name('index');
+    Route::post('/',         [MenuController::class, 'store'])->name('store');
+    Route::get('/tree',      [MenuController::class, 'tree'])->name('tree');
+    Route::get('/{id}/edit', [MenuController::class, 'edit'])->name('edit');
+    Route::put('/{id}',      [MenuController::class, 'update'])->name('update');
+    Route::delete('/{id}',   [MenuController::class, 'destroy'])->name('destroy');
+});
+
+// Route Entry  →  ALL_ROUTE_DETAILS
+Route::prefix('routes')->name('routes.')->group(function () {
+    Route::get('/',        [RouteController::class, 'index'])->name('index');
+    Route::post('/',       [RouteController::class, 'store'])->name('store');
+    Route::delete('/{id}', [RouteController::class, 'destroy'])->name('destroy');
+});
+
+// User Groups  →  ALL_USER_GROUP_MASTER
+Route::prefix('groups')->name('groups.')->group(function () {
+    Route::get('/',        [UserGroupController::class, 'index'])->name('index');
+    Route::post('/',       [UserGroupController::class, 'store'])->name('store');
+    Route::delete('/{id}', [UserGroupController::class, 'destroy'])->name('destroy');
+});
+
+// Group Menu Access  →  ALL_USER_GROUP_DETAILS (group-level toggles)
+Route::prefix('group-menu')->name('group-menu.')->group(function () {
+    Route::get('/',                     [GroupMenuController::class, 'index'])->name('index');
+    Route::post('/{groupId}/save',      [GroupMenuController::class, 'save'])->name('save');
+});
+
+// Route Permissions  →  ALL_USER_SUB_DETAILS
+Route::prefix('permissions')->name('permissions.')->group(function () {
+    Route::get('/',                              [PermissionController::class, 'index'])->name('index');
+    Route::post('/',                             [PermissionController::class, 'store'])->name('store');
+    Route::put('/{groupId}/{subMenuId}',         [PermissionController::class, 'update'])->name('update');
+    Route::delete('/{groupId}/{subMenuId}',      [PermissionController::class, 'destroy'])->name('destroy');
+});
+
+// Users  →  ALL_USER_INFO
+Route::prefix('users')->name('users.')->group(function () {
+    Route::get('/',          [UserController::class, 'index'])->name('index');
+    Route::post('/',         [UserController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+    Route::put('/{id}',      [UserController::class, 'update'])->name('update');
+    Route::delete('/{id}',   [UserController::class, 'destroy'])->name('destroy');
+});
+
+// User Menu Permission  →  ALL_USER_GROUP_DETAILS (user-level, USER_ID set)
+
+Route::prefix('user-menu')->middleware(['auth'])->group(function () {
+
+    // Page shell (col 1 users only, no heavy data)
+    Route::get('/',                                [UserMenuPermissionController::class, 'index'])->name('user-menu.index');
+
+    // AJAX: load all menus + enabled flags for a user  (col 2)
+    Route::get('/{userId}/menus',                  [UserMenuPermissionController::class, 'getMenus'])->name('user-menu.menus');
+
+    // AJAX: load all routes for a menu + enabled flags (col 3)
+    Route::get('/{userId}/routes/{menuId}',        [UserMenuPermissionController::class, 'getRoutes'])->name('user-menu.routes');
+
+    // Save permissions
+    Route::post('/{userId}/save',                  [UserMenuPermissionController::class, 'save'])->name('user-menu.save');
+
+    // Reset user overrides back to group defaults
+    Route::post('/{userId}/reset',                 [UserMenuPermissionController::class, 'reset'])->name('user-menu.reset');
 });

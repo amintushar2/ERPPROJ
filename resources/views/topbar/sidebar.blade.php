@@ -65,6 +65,20 @@
             border-radius: 4px;
         }
 
+
+        .main-header .nav-link[data-widget="home"] {
+            color: var(--amber) !important;
+            font-size: 18px !important;
+            padding: 0 14px !important;
+            line-height: var(--topbar-h) !important;
+            transition: color var(--transition), background var(--transition);
+        }
+
+        .main-header .nav-link[data-widget="home"]:hover {
+            background: var(--amber-dim) !important;
+            border-radius: 4px;
+        }
+
         /* Center page title */
         .main-header .container-fluid {
             display: flex !important;
@@ -135,6 +149,14 @@
             color: var(--amber) !important;
         }
 
+        .main-header .navbar-nav.ml-auto .nav-link.log::before {
+            content: '' !important;
+            display: none !important;
+            font-weight: 900;
+            font-size: 13px;
+            color: var(--amber);
+        }
+
         .main-header .navbar-nav.ml-auto .nav-link::before {
             content: '\f007';
             font-family: 'Font Awesome 5 Free';
@@ -142,6 +164,8 @@
             font-size: 13px;
             color: var(--amber);
         }
+
+
 
         .dropdown-menu {
             background: var(--navy-2) !important;
@@ -535,11 +559,16 @@
                     <i class="fas fa-bars"></i>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-widget="home" href="/">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
         </ul>
 
         {{-- Center: page title --}}
         <div class="container-fluid justify-content-center">
-            @if (!empty($headeer))
+            @if (($headeer ?? collect())->isNotEmpty())
                 @foreach ($headeer as $h)
                     <h4>{{ $h->sub_menu_name ?? 'l' }}</h4>
                 @endforeach
@@ -561,6 +590,12 @@
                         Log Out
                     </a>
                 </div>
+
+            </li>
+            <li class="nav-item">
+                <a class="nav-link log" href="{{ route('auth.logout') }}" class="dropdown-item">
+                    <i class="bi bi-power"></i>
+                </a>
             </li>
 
         </ul>
@@ -586,7 +621,9 @@
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" data-accordion="false">
 
-                    @include('topbar.menu')
+                    @if ($data)
+                        @include('topbar.menu')
+                    @endif
 
                     {{-- Static Gate Pass --}}
                     <li class="nav-item">

@@ -1,76 +1,99 @@
 @foreach ($menu as $value)
 
-    @if($value->user_group_id == $data->user_group_id)
+    @if ($value->user_group_id == $data->user_group_id)
+        @php
+            /*
+             * Determine if ANY child of this top-level item matches
+             * the current URL so we can auto-open the parent.
+             */
+            $isParentActive = false;
 
-    <li class="nav-item has-treeview">
+            foreach ($submenu as $s) {
+                if ($s->menu_item_id != $value->menu_item_id) {
+                    continue;
+                }
 
-        <a href="#" class="nav-link">
-            <i class="nav-icon fas fa-tachometer-alt"></i>
-            <p>
-                {{$value->title}}
-                <i class="right fas fa-angle-left"></i>
-            </p>
-        </a>
+                // Does this submenu link to the current page?
+                if ($s->route && request()->is(ltrim($s->route, '/'))) {
+                    $isParentActive = true;
+                    break;
+                }
 
-        <ul class="nav nav-treeview">
+                // Does any level-3 child match?
+                foreach ($submenu2 as $s2) {
+                    if ($s2->sub_menu_2 == $s->sub_menu_id && $s2->route && request()->is(ltrim($s2->route, '/'))) {
+                        $isParentActive = true;
+                        break 2;
+                    }
+                }
+            }
+        @endphp
 
-            @foreach($submenu as $submenus)
+        <li class="nav-item has-treeview {{ $isParentActive ? 'menu-open' : '' }}">
 
-                @if($value->menu_item_id == $submenus->menu_item_id)
+            <a href="#" class="nav-link {{ $isParentActive ? 'active' : '' }}">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    {{ $value->title }}
+                    <i class="right fas fa-angle-left"></i>
+                </p>
+            </a>
 
-                    @php
-                        // Check if submenu2 exists
-                        $child2 = collect($submenu2)->where('sub_menu_2', $submenus->sub_menu_id);
-                    @endphp
+            <ul class="nav nav-treeview">
 
-                    {{-- IF submenu2 EXISTS --}}
-                    @if($child2->count() > 0)
+                @foreach ($submenu as $submenus)
+                    @if ($value->menu_item_id == $submenus->menu_item_id)
+                        @php
+                            $child2 = collect($submenu2)->where('sub_menu_2', $submenus->sub_menu_id);
 
-                        <li class="nav-item has-treeview">
+                            // Is any level-3 item under this group active?
+                            $isGroupActive = $child2->contains(function ($s2) {
+                                return $s2->route && request()->is(ltrim($s2->route, '/'));
+                            });
+                        @endphp
 
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>
-                                    {{$submenus->sub_menu_name}}
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
+                        {{-- HAS level-3 children --}}
+                        @if ($child2->count() > 0)
+                            <li class="nav-item has-treeview {{ $isGroupActive ? 'menu-open' : '' }}">
 
-                            <ul class="nav nav-treeview">
+                                <a href="#" class="nav-link {{ $isGroupActive ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>
+                                        {{ $submenus->sub_menu_name }}
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                </a>
 
-                                @foreach($child2 as $submenus2)
-                                    <li class="nav-item">
-                                        <a href="{{ url($submenus2->route) }}" class="nav-link {{ request()->is(ltrim($submenus2->route, '/')) ? 'active' : '' }}">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            {{$submenus2->sub_menu_name}}
-                                        </a>
-                                    </li>
-                                @endforeach
+                                <ul class="nav nav-treeview">
+                                    @foreach ($child2 as $submenus2)
+                                        <li class="nav-item">
+                                            <a href="{{ url($submenus2->route) }}"
+                                                class="nav-link {{ $submenus2->route && request()->is(ltrim($submenus2->route, '/')) ? 'active' : '' }}">
+                                                <i class="far fa-dot-circle nav-icon"></i>
+                                                {{ $submenus2->sub_menu_name }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
 
-                            </ul>
+                            </li>
 
-                        </li>
-
-                    {{-- IF submenu2 NOT EXISTS --}}
-                    @else
-
-                        <li class="nav-item">
-                            <a href="{{ url($submenus->route) }}" class="nav-link {{ request()->is(ltrim($submenus->route, '/')) ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                {{$submenus->sub_menu_name}}
-                            </a>
-                        </li>
-
+                            {{-- NO level-3 children --}}
+                        @else
+                            <li class="nav-item">
+                                <a href="{{ url($submenus->route) }}"
+                                    class="nav-link {{ $submenus->route && request()->is(ltrim($submenus->route, '/')) ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    {{ $submenus->sub_menu_name }}
+                                </a>
+                            </li>
+                        @endif
                     @endif
+                @endforeach
 
-                @endif
+            </ul>
 
-            @endforeach
-
-        </ul>
-
-    </li>
-
+        </li>
     @endif
 
 @endforeach

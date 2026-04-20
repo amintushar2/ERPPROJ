@@ -8,7 +8,7 @@
     <title>@yield('title', 'Purchase Order Entry')</title>
 
     <!-- Bootstrap 5 CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link href="{{ asset('bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
@@ -348,9 +348,19 @@
     </div>
 
     {{-- ── Scripts ── --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="{{ URL::asset('mainjs/jquery.min.js') }}"></script>
+
+    <script src="{{ URL::asset('mainjs/select2.min.js') }}"></script>
+
+    <!-- 5. Other scripts -->
+    <script src="{{ asset('bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ URL::asset('dist/js/adminlte.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/buttons.bootstrap5.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/sweetalert2.all.min.js') }}"></script>
 
     <script>
         // Bootstrap instances

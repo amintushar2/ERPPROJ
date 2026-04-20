@@ -1,41 +1,69 @@
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed sidebar-collapse">
 
     <div class="wrapper">
 
+        {{-- ── Sidebar (carries $data, $menu, $submenu, $submenu2, $headeer
+                 shared automatically by BaseController) ── --}}
         @include('topbar.sidebar')
 
         <div class="content-wrapper bg-light">
             <div class="container-fluid py-4 px-4">
 
+                {{-- ── Flash messages ── --}}
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show py-2 mb-3" role="alert"
+                        style="font-size:13px;border-left:4px solid #198754;">
+                        <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                @if (session('fail'))
+                    <div class="alert alert-danger alert-dismissible fade show py-2 mb-3" role="alert"
+                        style="font-size:13px;border-left:4px solid #dc3545;">
+                        <i class="fas fa-exclamation-circle me-1"></i> {{ session('fail') }}
+                        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
                 {{-- ── Page Header ── --}}
-                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-primary">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2"
+                    style="border-bottom:2px solid #f59e0b;">
                     <div class="d-flex align-items-center gap-2">
-                        <span class="d-inline-flex align-items-center justify-content-center rounded bg-emp-dark"
-                            style="width:36px;height:36px;">
-                            <i class="fas fa-users text-amber"></i>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded"
+                            style="width:36px;height:36px;background:#0b1828;">
+                            <i class="fas fa-users" style="color:#f59e0b;"></i>
                         </span>
                         <div>
-                            <h5 class="mb-0 fw-bold text-uppercase text-emp-dark lh-sm"
-                                style="font-family:'Rajdhani',sans-serif;letter-spacing:1.5px;">Employee List</h5>
-                            <small class="text-muted text-uppercase" style="font-size:10px;letter-spacing:.5px;">Human
-                                Resource Management</small>
+                            <h5 class="mb-0 fw-bold text-uppercase lh-sm"
+                                style="font-family:'Rajdhani',sans-serif;letter-spacing:1.5px;color:#0b1828;">
+                                Employee List
+                            </h5>
+                            <small class="text-muted text-uppercase" style="font-size:10px;letter-spacing:.5px;">
+                                Human Resource Management
+                            </small>
                         </div>
                     </div>
                     <a href="{{ route('empnewentry') }}"
-                        class="btn btn-emp-dark btn-sm fw-bold text-uppercase text-white d-inline-flex align-items-center gap-2">
-                        <i class="fas fa-plus text-amber"></i> Add New Employee
+                        class="btn btn-sm fw-bold text-uppercase text-white d-inline-flex align-items-center gap-2"
+                        style="background:#1a3a5c;border-color:#1a3a5c;border-radius:4px;
+                              font-family:'Rajdhani',sans-serif;letter-spacing:1px;">
+                        <i class="fas fa-plus" style="color:#f59e0b;"></i> Add New Employee
                     </a>
                 </div>
 
                 {{-- ── Card ── --}}
                 <div class="card border-0 shadow-sm rounded-1 overflow-hidden">
 
-                    <div
-                        class="card-header d-flex align-items-center gap-2 py-2 px-3 border-0 border-bottom border-amber bg-emp-dark">
-                        <i class="fas fa-table text-amber" style="font-size:13px;"></i>
+                    <div class="card-header d-flex align-items-center gap-2 py-2 px-3 border-0"
+                        style="background:#1a3a5c;border-bottom:2px solid #f59e0b;">
+                        <i class="fas fa-table" style="color:#f59e0b;font-size:13px;"></i>
                         <span class="fw-bold text-white text-uppercase"
-                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.5px;">Employee
-                            Records</span>
+                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.5px;">
+                            Employee Records
+                        </span>
+                        <span class="ms-auto badge" style="background:#f59e0b;color:#0b1828;font-size:11px;">
+                            {{ $empList->count() }} Total
+                        </span>
                     </div>
 
                     <div class="card-body p-3">
@@ -43,36 +71,95 @@
                             <table class="table table-bordered table-striped table-hover align-middle" id="datatab"
                                 style="width:100%;font-size:13px;">
                                 <thead>
-                                    <tr class="bg-emp-dark">
-                                        <th class="text-white text-uppercase fw-bold py-2 px-3 border-0"
-                                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;background:#1a3a5c;">
+                                    <tr>
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;">
+                                            #</th>
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;">
                                             Emp No</th>
-                                        <th class="text-white text-uppercase fw-bold py-2 px-3 border-0"
-                                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;background:#1a3a5c;">
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;">
                                             New Emp No</th>
-                                        <th class="text-white text-uppercase fw-bold py-2 px-3 border-0"
-                                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;background:#1a3a5c;">
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;">
                                             Name</th>
-                                        <th class="text-white text-uppercase fw-bold py-2 px-3 border-0"
-                                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;background:#1a3a5c;">
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;">
                                             Father Name</th>
-                                        <th class="text-white text-uppercase fw-bold py-2 px-3 border-0"
-                                            style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;background:#1a3a5c;">
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;white-space:nowrap;">
                                             Mother Name</th>
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;text-align:center;">
+                                            Sex</th>
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;text-align:center;">
+                                            Status</th>
+                                        <th
+                                            style="background:#1a3a5c;color:#fff;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.2px;text-align:center;white-space:nowrap;">
+                                            Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($empList as $emp)
+                                    @forelse($empList as $i => $emp)
                                         <tr>
+                                            <td class="px-3 py-2 text-muted" style="font-size:11px;">{{ $i + 1 }}
+                                            </td>
                                             <td class="px-3 py-2 fw-semibold">{{ $emp->empno }}</td>
                                             <td class="px-3 py-2">{{ $emp->new_empno }}</td>
                                             <td class="px-3 py-2 fw-medium">{{ $emp->empname }}</td>
                                             <td class="px-3 py-2">{{ $emp->father_name }}</td>
                                             <td class="px-3 py-2">{{ $emp->mother_name }}</td>
+                                            <td class="px-3 py-2 text-center">
+                                                @php $sex = strtolower($emp->sex ?? ''); @endphp
+                                                @if ($sex == 'male' || $sex == 'm')
+                                                    <span class="badge"
+                                                        style="background:#dbeafe;color:#1e40af;font-size:10px;">
+                                                        <i class="fas fa-mars me-1"></i>Male
+                                                    </span>
+                                                @elseif($sex == 'female' || $sex == 'f')
+                                                    <span class="badge"
+                                                        style="background:#fce7f3;color:#9d174d;font-size:10px;">
+                                                        <i class="fas fa-venus me-1"></i>Female
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary"
+                                                        style="font-size:10px;">{{ $emp->sex }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-2 text-center">
+                                                @if (strtolower($emp->status ?? '') == 'active')
+                                                    <span class="badge"
+                                                        style="background:#dcfce7;color:#166534;font-size:10px;">
+                                                        <i class="fas fa-circle me-1" style="font-size:7px;"></i>Active
+                                                    </span>
+                                                @else
+                                                    <span class="badge"
+                                                        style="background:#fee2e2;color:#991b1b;font-size:10px;">
+                                                        <i class="fas fa-circle me-1"
+                                                            style="font-size:7px;"></i>{{ $emp->status ?? 'N/A' }}
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="px-3 py-2 text-center" style="white-space:nowrap;">
+                                                <a href="{{ route('empedit', $emp->empno) }}" class="btn btn-sm me-1"
+                                                    style="background:#1a3a5c;color:#f59e0b;border:none;
+                                                          border-radius:4px;padding:3px 10px;font-size:11px;"
+                                                    title="Edit Employee">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                                <a href="{{ route('empedit', $emp->empno) }}" class="btn btn-sm"
+                                                    style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;
+                                                          border-radius:4px;padding:3px 10px;font-size:11px;"
+                                                    title="View Details">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-5 text-muted fst-italic">
+                                            <td colspan="9" class="text-center py-5 text-muted fst-italic">
                                                 <i class="fas fa-inbox d-block mb-2 text-secondary"
                                                     style="font-size:24px;"></i>
                                                 No Data Found
@@ -89,19 +176,18 @@
             </div>
         </div>{{-- /content-wrapper --}}
 
-        {{-- ── Footer ── --}}
         <footer class="main-footer text-center py-2" style="background:#0b1828;border-top:2px solid #f59e0b;">
             <span class="fw-bold text-uppercase"
                 style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1.5px;color:#f59e0b;">FDL</span>
             <span class="mx-1" style="color:#4a6a8a;">·</span>
             <span class="text-uppercase"
-                style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;color:#94aec4;">Enterprise
-                Resource Planning</span>
+                style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;color:#94aec4;">
+                Enterprise Resource Planning
+            </span>
         </footer>
 
     </div>{{-- /wrapper --}}
 
-    {{-- ── Scripts (all original, untouched) ── --}}
     <script src="{{ URL::asset('mainjs/jquery.min.js') }}"></script>
     <script src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ URL::asset('dist/js/adminlte.min.js') }}"></script>
@@ -109,42 +195,11 @@
     <script src="{{ URL::asset('mainjs/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ URL::asset('mainjs/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('mainjs/buttons.bootstrap5.min.js') }}"></script>
+    <script src="{{ URL::asset('mainjs/lov_helper.js') }}"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
 
-        /* ── Custom utility classes ── */
-        .bg-emp-dark {
-            background-color: #1a3a5c !important;
-        }
-
-        .text-emp-dark {
-            color: #1a3a5c !important;
-        }
-
-        .text-amber {
-            color: #f59e0b !important;
-        }
-
-        .border-amber {
-            border-bottom: 2px solid #f59e0b !important;
-        }
-
-        .btn-emp-dark {
-            background-color: #1a3a5c;
-            border-color: #1a3a5c;
-            border-radius: 4px;
-            font-family: 'Rajdhani', sans-serif;
-            letter-spacing: 1px;
-        }
-
-        .btn-emp-dark:hover {
-            background-color: #2257a0;
-            border-color: #2257a0;
-            color: #fff;
-        }
-
-        /* ── DataTables UI overrides ── */
         #datatab_wrapper .dataTables_length label,
         #datatab_wrapper .dataTables_filter label,
         #datatab_wrapper .dataTables_info {
@@ -163,8 +218,8 @@
         }
 
         #datatab_wrapper .dataTables_filter input:focus {
-            border-color: #2257a0;
-            box-shadow: 0 0 0 2px rgba(34, 87, 160, .12);
+            border-color: #1a3a5c;
+            box-shadow: 0 0 0 2px rgba(26, 58, 92, .12);
             outline: none;
         }
 
@@ -199,7 +254,6 @@
             border-color: #e0eaf4 !important;
         }
 
-        /* ── Table rows ── */
         #datatab tbody tr:nth-child(even) {
             background-color: #f2f7fc;
         }
@@ -212,7 +266,6 @@
             border-color: #dde8f2;
         }
 
-        /* ── Scrollbar ── */
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
@@ -233,7 +286,14 @@
             $('#datatab').DataTable({
                 responsive: true,
                 lengthChange: true,
-                autoWidth: false
+                autoWidth: false,
+                columnDefs: [{
+                    orderable: false,
+                    targets: [0, 8]
+                }],
+                order: [
+                    [1, 'asc']
+                ]
             });
         });
     </script>
