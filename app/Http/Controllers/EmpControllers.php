@@ -11,7 +11,19 @@ use DB;
 use Illuminate\Http\Request;
 
 class EmpControllers extends BaseController
+
 {
+
+
+
+
+    const NET_PHOTO   = '\\\\192.168.210.205\\emp_photo\\'; // Y: drive
+    const NET_SIGN    = '\\\\192.168.210.205\\emp_sign\\';  // Z: drive
+    const HTTP_PHOTO  = 'http://192.168.210.18:81/';
+    const HTTP_SIGN   = 'http://192.168.210.18:82/';
+
+
+
     // ── Tab 1 data only (2 queries) ───────────────────────
     private function tab1Data(): array {
         return [
@@ -20,6 +32,7 @@ class EmpControllers extends BaseController
         ];
     }
 
+    
     // ─────────────────────────────────────────────────────
     //  LIST
     // ─────────────────────────────────────────────────────
@@ -160,32 +173,110 @@ $q->when(!empty($status), function ($query) use ($status) {
     // ─────────────────────────────────────────────────────
     public function saveEmpPersonal(Request $request) {
         $empno  = trim($request->input('empno'));
-        $record = EmpPersonal::where('empno',$empno)->first();
-        $validator = Validator::make($request->all(),[
-            'empno'=>'required|string','first_name'=>'nullable|string|max:100',
-            'last_name'=>'nullable|string|max:100','dob'=>'nullable|date',
-            'company_id'=>'nullable|integer','emp_mobile_no'=>'nullable|string|max:20',
+        $record = EmpPersonal::where('empno', $empno)->first();
+
+        $validator = Validator::make($request->all(), [
+            'empno'         => 'required|string',
+            'first_name'    => 'nullable|string|max:100',
+            'last_name'     => 'nullable|string|max:100',
+            'company_id'    => 'nullable|integer',
+            'emp_mobile_no' => 'nullable|string|max:20',
+            'photo'         => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'signature'     => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-        if($validator->fails()) return response()->json(['success'=>false,'errors'=>$validator->errors()],422);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
         try {
             $data = array_merge($request->only([
-                'empno','first_name','middle_name','last_name','b_name','father_name',
-                'mother_name','husband_name','gurdian_name','dob','sex','marial_status',
-                'religion_id','blood_group','national_id_no','id_card_issue','valid_till',
-                'passport_no','place_of_issue','birthday_id','id_mark','company_id','as_on',
-                'emp_mobile_no','sms_mobile_no','office_food','status','hbs_test',
-                'nationality_desc','last_education',
-            ]),['update_by'=>auth()->id()??1,'update_date'=>now()]);
-            if($record) {
+                'empno', 'first_name', 'middle_name', 'last_name', 'b_name', 'father_name',
+                'mother_name', 'husband_name', 'gurdian_name', 'sex', 'marial_status',
+                'religion_id', 'blood_group', 'national_id_no', 'id_mark', 'company_id',
+                'passport_no', 'place_of_issue', 'birthday_id',
+                'emp_mobile_no', 'sms_mobile_no', 'office_food', 'status', 'hbs_test',
+                'nationality_desc', 'last_education',
+            ]), [
+                'dob'           => $this->parseDate($request->input('dob')),
+                'as_on'         => $this->parseDate($request->input('as_on')),
+                'id_card_issue' => $this->parseDate($request->input('id_card_issue')),
+                'valid_till'    => $this->parseDate($request->input('valid_till')),
+                'update_by'     => auth()->id() ?? 1,
+                'update_date'   => now(),
+            ]);
+
+            // ── Photo → Y column (network drive Y:) ──
+           // PHOTO
+$photoFile = $this->saveImage($request, 'photo', $empno);
+if ($photoFile) {
+    $data['emp_img'] = $photoFile;   // store filename with extension
+}
+
+// SIGNATURE
+$signFile = $this->saveImage($request, 'signature', $empno);
+if ($signFile) {
+    $data['emp_sign'] = $signFile;   // store filename with extension
+}
+
+            // ── Build HTTP URLs for front-end preview update ──
+            $photoUrl = $this->imageUrl('photo', $photoFile ?? ($record->Y ?? null));
+            $signUrl  = $this->imageUrl('sign',  $signFile  ?? ($record->Z  ?? null));
+
+            if ($record) {
                 $record->update($data);
-                return response()->json(['success'=>true,'message'=>'Personal info updated.'],200);
+                return response()->json([
+                    'success'   => true,
+                    'message'   => 'Personal info updated successfully.',
+                    'photo_url' => $photoFile ? $this->imageUrl('photo', $photoFile) : null,
+                    'sign_url'  => $signFile  ? $this->imageUrl('sign',  $signFile)  : null,
+                ], 200);
             }
-            $data['insert_by']=auth()->id()??1; $data['insert_date']=now();
+
+            $data['insert_by']   = auth()->id() ?? 1;
+            $data['insert_date'] = now();
             EmpPersonal::create($data);
-            return response()->json(['success'=>true,'message'=>'Personal info saved.'],201);
-        } catch(\Exception $e) {
-            return response()->json(['success'=>false,'message'=>$e->getMessage()],500);
+
+            return response()->json([
+                'success'   => true,
+                'message'   => 'Personal info saved successfully.',
+                'photo_url' => $photoFile ? $this->imageUrl('photo', $photoFile) : null,
+                'sign_url'  => $signFile  ? $this->imageUrl('sign',  $signFile)  : null,
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+       // ─────────────────────────────────────────────────────
+    //  Helper: save uploaded image to network drive
+    //  $field : 'photo'  → Y: drive (\\192.168.210.205\emp_photo)
+    //           'signature' → Z: drive (\\192.168.210.205\emp_sign)
+    //  $empno : used as filename base e.g. EMP001.jpg
+    //  Returns: filename only e.g. "EMP001.jpg"  or null on failure
+    // ─────────────────────────────────────────────────────
+    private function saveImage(Request $request, string $field, string $empno): ?string
+    {
+        if (!$request->hasFile($field)) return null;
+        $file = $request->file($field);
+        if (!$file->isValid()) return null;
+
+        // Y: = photo,  Z: = signature
+        $networkPath = ($field === 'photo') ? self::NET_PHOTO : self::NET_SIGN;
+
+        $ext      = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $filename = strtoupper($empno) . '.' . $ext;
+
+        // Ensure network directory is accessible
+        if (!file_exists($networkPath)) {
+            mkdir($networkPath, 0775, true);
+        }
+
+        // Move file directly to network drive
+        $file->move($networkPath, $filename);
+
+        // Store only the filename in the DB (Y or Z column)
+        return $filename; // e.g. EMP001.jpg
     }
 
     // ═════════════════════════════════════════════════════════════════════
