@@ -618,7 +618,7 @@
                     @if (isset($emp))
                         <button type="button" class="btn btn-del btn-sm" id="deleteEmpBtn"
                             data-empno="{{ $emp->empno }}">
-                            🗑 Delete
+                            <i class="fa-solid fa-trash-can"></i> Delete
                         </button>
                     @endif
                 </div>
@@ -1148,12 +1148,15 @@
 
                         <div class="action-bar">
                             <button class="btn {{ isset($emp) ? 'btn-upd' : 'btn-save' }}" type="submit">
-                                ✔ {{ isset($emp) ? 'Update Personal' : 'Save Personal' }}
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                {{ isset($emp) ? 'Update Personal' : 'Save Personal' }}
                             </button>
-                            <button class="btn btn-clr" type="button" id="clearPersonal">✖ Clear</button>
+                            <button class="btn btn-clr" type="button" id="clearPersonal"><i
+                                    class="fa-solid fa-eraser"></i> Clear</button>
                             @if (isset($emp))
                                 <button class="btn btn-del" type="button" id="deleteEmpBtn2"
-                                    data-empno="{{ $emp->empno }}">🗑 Delete Employee</button>
+                                    data-empno="{{ $emp->empno }}"><i class="fa-solid fa-trash-can"></i> Delete
+                                    Employee</button>
                             @endif
                         </div>
                     </form>
@@ -1187,18 +1190,11 @@
             </div>
 
 
-            <footer class="main-footer">
-                <span
-                    style="font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--amber);font-weight:700;letter-spacing:1.5px;">FDL</span>
-                <span style="color:#4a6a8a;margin:0 6px;">·</span>
-                <span style="font-family:'Rajdhani',sans-serif;font-size:12px;color:#94aec4;letter-spacing:1px;">Enterprise
-                    Resource Planning</span>
-            </footer>
         </div>{{-- /wrapper --}}
 
         {{-- ③ ALL scripts at bottom --}}
 
-
+        <script src="{{ asset('flatpickr/dist/flatpickr.min.js') }}"></script>
         <script>
             // ════════════════════════════════════════════
             //  GLOBALS
