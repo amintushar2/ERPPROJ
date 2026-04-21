@@ -22,7 +22,7 @@ class EmpControllers extends BaseController
     const HTTP_PHOTO  = 'http://192.168.210.18:81/';
     const HTTP_SIGN   = 'http://192.168.210.18:82/';
 
-
+ //ll
 
     // ── Tab 1 data only (2 queries) ───────────────────────
     private function tab1Data(): array {
