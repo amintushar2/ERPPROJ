@@ -6,14 +6,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/js/app.js'])
     <link href="{{ asset('dist/css/adminlte.min.css') }}" rel="stylesheet">
-
+    <link rel="stylesheet" href="{{ URL::asset('plugins/fontawesome7/css/all.min.css') }}" media="print"
+        onload="this.media='all'">
     <link href="{{ asset('bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('erpcss/select2.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('erpcss/sweetalert2.min.css') }}" rel="stylesheet">
 
     {{-- Icons loaded async so they never block paint --}}
-    <link rel="stylesheet" href="{{ URL::asset('plugins/fontawesome-free/css/all.min.css') }}" media="print"
-        onload="this.media='all'">
+
     <link rel="stylesheet" href="{{ URL::asset('bootstrap_icon/bootstrap-icons.min.css') }}" media="print"
         onload="this.media='all'">
     <style>
@@ -35,7 +35,10 @@
 
             @section('title', 'Page Title')
             @yield('content')
+
+
         </div>
+
     </div>
 
 
@@ -89,6 +92,18 @@
             </div>
         </div>
     </div>
+    dvdd
 </body>
+<div>
+    <footer class="main-footer text-center py-2" style="background:#0b1828;border-top:2px solid #f59e0b;">
+        <span class="fw-bold text-uppercase"
+            style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1.5px;color:#f59e0b;">FDL</span>
+        <span class="mx-1" style="color:#4a6a8a;">·</span>
+        <span class="text-uppercase"
+            style="font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:1px;color:#94aec4;">
+            Enterprise Resource Planning
+        </span>
+    </footer>
+</div>
 
 </html>

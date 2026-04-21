@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserGroupDetail extends Model
 {
-    protected $table    = 'F_STORE.ALL_USER_GROUP_DETAILS';
+    protected $table    = 'F_STORE.ALL_USER_GROUP_DETAILS_WEB';
     public    $timestamps = false;
 
     protected $fillable = [

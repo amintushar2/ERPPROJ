@@ -62,7 +62,7 @@ class UserMenuPermissionController extends Controller
 
         $groupId = $userInfo ? trim($userInfo->user_group_id) : '';
 
-        $userMenuPerms = DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+        $userMenuPerms = DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
             ->select(
                 DB::raw('TRIM(MENU_ITEM_ID) AS menu_item_id'),
                 DB::raw('TRIM(ENABLED)      AS enabled')
@@ -74,7 +74,7 @@ class UserMenuPermissionController extends Controller
 
         $hasUserOverrides = $userMenuPerms->isNotEmpty();
 
-        $groupMenuPerms = DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+        $groupMenuPerms = DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
             ->select(
                 DB::raw('TRIM(MENU_ITEM_ID) AS menu_item_id'),
                 DB::raw('TRIM(ENABLED)      AS enabled')
@@ -220,7 +220,7 @@ class UserMenuPermissionController extends Controller
         // ── Check once: does this user already have ANY rows in ALL_USER_GROUP_DETAILS? ──
         // If YES → only UPDATE existing rows, never INSERT new ones (skip missing menus).
         // If NO  → this is a fresh save, INSERT all rows.
-        $userHasGroupDetails = DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+        $userHasGroupDetails = DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
             ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
             ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
             ->exists();
@@ -230,7 +230,7 @@ class UserMenuPermissionController extends Controller
             $enabled = ($data['enabled'] ?? false) ? 'Y' : 'N';
 
             // ── ALL_USER_GROUP_DETAILS: menu-level ────────────────────────────
-            $menuRowExists = DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+            $menuRowExists = DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
                 ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
                 ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
                 ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
@@ -238,7 +238,7 @@ class UserMenuPermissionController extends Controller
 
             if ($menuRowExists) {
                 // Row exists → always UPDATE
-                DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+                DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
                     ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
                     ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
                     ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
@@ -249,7 +249,7 @@ class UserMenuPermissionController extends Controller
                     ]);
             } elseif (!$userHasGroupDetails) {
                 // No rows at all for this user → fresh INSERT
-                DB::table('F_STORE.ALL_USER_GROUP_DETAILS')->insert([
+                DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')->insert([
                     'MENU_ITEM_ID'  => $menuId,
                     'USER_GROUP_ID' => $groupId,
                     'USER_ID'       => $userId,
@@ -342,7 +342,7 @@ class UserMenuPermissionController extends Controller
         $userId  = trim((string) $userId);
         $groupId = trim((string) $request->input('user_group_id'));
 
-        DB::table('F_STORE.ALL_USER_GROUP_DETAILS')
+        DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')
             ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
             ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
             ->delete();

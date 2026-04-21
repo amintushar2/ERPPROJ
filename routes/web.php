@@ -172,6 +172,11 @@ Route::middleware(['web','auth'])->group(function () {
     Route::get('/hrm/empsearch',        [EmpControllers::class,'empsearch']);
     Route::post('/hrm/empSearchExist',  [EmpControllers::class,'empSearchExist']);
 
+
+    Route::get('/hrm/emplist',        [EmpControllers::class, 'empList'])->name('emplist');
+ 
+    // AJAX search endpoint — called by the filter bar
+    Route::get('/hrm/emplist/search', [EmpControllers::class, 'empListSearch'])->name('emplist.search');
     // ── LOV AJAX endpoints (all return {results:[{id,text}]}) ──
     Route::get('/lov/dept',        [LovController::class,'dept']);
     Route::get('/lov/section',     [LovController::class,'section']);

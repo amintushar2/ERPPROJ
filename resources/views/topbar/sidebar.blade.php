@@ -629,7 +629,7 @@
                     <li class="nav-item">
                         <a href="{{ route('common.gatepass') }}"
                             class="nav-link {{ request()->is('common/gatepass') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-th"></i>
+                            <i class="nav-icon fa-solid fa-gauge-simple-high"></i>
                             <p>Gate Pass</p>
                         </a>
                     </li>

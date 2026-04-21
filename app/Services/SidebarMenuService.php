@@ -53,7 +53,7 @@ class SidebarMenuService
 
     private function enabledMenus(string $groupId, string $userId)
     {
-        return DB::table('ALL_USER_GROUP_DETAILS as ugd')
+        return DB::table('ALL_USER_GROUP_DETAILS_WEB as ugd')
             ->join('ALL_MENU_HIERARCHY as mh', 'mh.CHILD_ID', '=', 'ugd.MENU_ITEM_ID')
             ->select(
                 DB::raw('ugd.MENU_ITEM_ID as "menu_item_id"'),
