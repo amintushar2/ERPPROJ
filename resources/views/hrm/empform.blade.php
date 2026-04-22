@@ -1272,9 +1272,7 @@
                         'X-CSRF-TOKEN': $('meta[name=csrf-token]').attr('content')
                     }
                 });
-                $('input,select').on('keydown', e => {
-                    if (e.keyCode === 13) e.preventDefault();
-                });
+
 
                 // ── Swal helpers ──
                 window.swalOk = msg => Swal.fire({
@@ -1647,6 +1645,18 @@
                 // Expose for lazy-loaded AJAX tabs
                 window.initDatePick = initDatePick;
             })();
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Enter') return;
+                const focusable =
+                    'input:not([type=hidden]):not([readonly]):not([disabled]), select:not([disabled]), textarea:not([disabled])';
+                const fields = Array.from(document.querySelectorAll(focusable)).filter(el => el.offsetParent !== null);
+                const idx = fields.indexOf(document.activeElement);
+                if (idx === -1) return;
+                e.preventDefault();
+                const next = fields[idx + 1];
+                if (next) next.focus();
+            });
         </script>
     </body>
 

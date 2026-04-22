@@ -18,12 +18,13 @@ class LoginController extends BaseController
       try {
         DB::connection()->getPdo();
     } catch (PDOException $e) {
+        dd($e);
         return response()->view('errors.db', [
-            'message' => 'Database connection failed (Oracle)'
+            'message' => 'Database connection failed (Oracle)' . $e 
         ], 500);
     } catch (\Exception $e) {
         return response()->view('errors.db', [
-            'message' => 'System unavailable'
+            'message' => 'System unavailable' .$e 
         ], 500);
     }
 
@@ -38,23 +39,31 @@ class LoginController extends BaseController
     // ─────────────────────────────────────────
     //  AUTHENTICATE
     // ─────────────────────────────────────────
-    public function check(Request $request)
+       public function check(Request $request)
     {
         $request->validate([
             'user_id'          => 'required',
             'initial_password' => 'required',
         ]);
 
-        $user = User::where('user_id', Str::upper($request->user_id))->first();
+        $oracleUser = Str::upper($request->user_id);
+        $oraclePass = $request->initial_password;
+
+        // ── Step 1: Validate credentials against Oracle ──────────────
+        if (!$this->validateOracleCredentials($oracleUser, $oraclePass)) {
+            return back()->with('fail', 'Invalid UserName or Password');
+        }
+
+        // ── Step 2: Load app user profile from User model ─────────────
+        $user = User::where('user_id', $oracleUser)->first();
 
         if (!$user) {
-            return back()->with('fail', 'We do not recognize your UserName');
-        }
+            return back()->with('fail', 'User account not found in the system');
+        }elseif($user->user_status == 'L'){
+                        return back()->with('fail', 'User account is Locked . Please Contact Administrator');
 
-        if ($request->initial_password !== $user->initial_password) {
-            return back()->with('fail', 'Invalid password');
         }
-
+        // ── Step 3: Log in & set session ──────────────────────────────
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
@@ -64,6 +73,50 @@ class LoginController extends BaseController
         ]);
 
         return redirect('/dashboard');
+    }
+
+    // ─────────────────────────────────────────
+    //  ORACLE CREDENTIAL VALIDATOR
+    //  Attempts a real Oracle connection using
+    //  the supplied username & password.
+    //  Returns true on success, false on failure.
+    // ─────────────────────────────────────────
+    private function validateOracleCredentials(string $username, string $password): bool
+    {
+        // Pull base config from your default Oracle connection
+        $baseConfig = config('database.connections.oracle'); // adjust key if needed
+
+        $testConfig = array_merge($baseConfig, [
+            'username' => $username,
+            'password' => $password,
+            // Give it a unique name so it doesn't collide with the default connection
+            'driver'   => $baseConfig['driver'] ?? 'oracle',
+        ]);
+
+        // Register a temporary connection
+        config(['database.connections.oracle_auth_test' => $testConfig]);
+
+        try {
+            $pdo = DB::connection('oracle_auth_test')->getPdo();
+
+            // Optionally confirm the schema user exists and is not locked
+            // SELECT 1 FROM dual is the lightest possible Oracle query
+            DB::connection('oracle_auth_test')->select('SELECT 1 FROM dual');
+
+            return true;
+        } catch (\Exception $e) {
+            // ORA-01017 = invalid username/password
+            // ORA-28000 = account locked
+            // Any exception means auth failed
+            \Log::warning('Oracle auth failed for user: ' . $username, [
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        } finally {
+            // Always clean up the temporary connection
+            DB::purge('oracle_auth_test');
+            config(['database.connections.oracle_auth_test' => null]);
+        }
     }
 
     // ─────────────────────────────────────────

@@ -32,12 +32,7 @@ use App\Http\Controllers\Admin\GroupMenuController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserMenuPermissionController;
-
-
-
-
-
-
+use App\Http\Controllers\TempEmpPersonalController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -645,4 +640,26 @@ Route::prefix('user-menu')->middleware(['auth'])->group(function () {
 
     // Reset user overrides back to group defaults
     Route::post('/{userId}/reset',                 [UserMenuPermissionController::class, 'reset'])->name('user-menu.reset');
+});
+
+
+
+
+Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function () {
+
+    // ── Employee CRUD ────────────────────────────────────────────────────────
+    Route::prefix('tempEMp')->name('employees.')->group(function () {
+        Route::get('/',            [TempEmpPersonalController::class, 'index'])->name('index');
+        Route::get('/create',      [TempEmpPersonalController::class, 'create'])->name('create');
+        Route::post('/',           [TempEmpPersonalController::class, 'store'])->name('store');
+        Route::get('/{empno}',     [TempEmpPersonalController::class, 'show'])->name('show');
+        Route::get('/{empno}/edit',[TempEmpPersonalController::class, 'edit'])->name('edit');
+        Route::put('/{empno}',     [TempEmpPersonalController::class, 'update'])->name('update');
+        Route::delete('/{empno}',  [TempEmpPersonalController::class, 'destroy'])->name('destroy');
+
+        // AJAX helpers
+        Route::get('/api/search',  [TempEmpPersonalController::class, 'search'])->name('search');
+        Route::get('/api/list',    [TempEmpPersonalController::class, 'list'])->name('list');
+    });
+
 });

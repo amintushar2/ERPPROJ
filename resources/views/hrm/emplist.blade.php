@@ -39,11 +39,18 @@
                         </small>
                     </div>
                 </div>
-                <a href="{{ route('empnewentry') }}"
-                    class="btn btn-sm fw-bold text-uppercase text-white d-inline-flex align-items-center gap-2"
-                    style="background:#1a3a5c;border-color:#1a3a5c;border-radius:4px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">
-                    <i class="fas fa-plus" style="color:#f59e0b;"></i> Add New Employee
-                </a>
+                <div>
+                    <a href="{{ route('empnewentry') }}"
+                        class="btn btn-sm fw-bold text-uppercase text-white d-inline-flex align-items-center gap-2"
+                        style="background:#1a3a5c;border-color:#1a3a5c;border-radius:4px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">
+                        <i class="fas fa-plus" style="color:#f59e0b;"></i> Add New Employee
+                    </a>
+                    <a href="{{ route('empnewentry') }}"
+                        class="btn btn-sm fw-bold text-uppercase text-white d-inline-flex align-items-center gap-2"
+                        style="background:#1a3a5c;border-color:#1a3a5c;border-radius:4px;font-family:'Rajdhani',sans-serif;letter-spacing:1px;">
+                        <i class="fas fa-plus" style="color:#f59e0b;"></i> Add Temp. Employee
+                    </a>
+                </div>
             </div>
 
             {{-- ── FILTER BAR ── --}}

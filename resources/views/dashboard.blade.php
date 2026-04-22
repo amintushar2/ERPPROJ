@@ -336,6 +336,27 @@
             font-size: .65rem;
             color: var(--hrm-success);
         }
+
+        .hrm-clock-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            padding: 10px 20px;
+            border-radius: 30px;
+
+            background: #fff3e0;
+            border: 1px solid #ffe0b2;
+
+            font-size: 1.1rem;
+            /* 🔥 Bigger text */
+            font-weight: 700;
+            /* Bold */
+
+            color: #7a3800;
+
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
     </style>
 @endpush
 
@@ -353,9 +374,10 @@
                     <span class="hrm-db-dot"></span>
                     Oracle HRM · Live
                 </span>
-                <span class="text-muted" style="font-size:.75rem">
-                    {{ $today->format('d M Y') }}
-                </span>
+                <div class="hrm-clock-box">
+                    <span class="hrm-db-dot"></span>
+                    <span id="liveClock"></span>
+                </div>
             </div>
         </div>
 
@@ -904,5 +926,34 @@
                 win.print();
             }, 500);
         }
+    </script>
+    <script>
+        function updateClock() {
+            const now = new Date();
+
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
+
+            const date = now.toLocaleDateString('en-GB', options);
+
+            const time = now.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+
+            });
+
+            document.getElementById('liveClock').innerHTML = date + ' ' + time;
+        }
+
+        // run immediately
+        updateClock();
+
+        // update every second
+        setInterval(updateClock, 1000);
     </script>
 @endpush

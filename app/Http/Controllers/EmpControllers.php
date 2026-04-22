@@ -9,6 +9,8 @@ use App\Models\LeaveEntryDetails;
 use Illuminate\Support\Facades\Validator;
 use DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 class EmpControllers extends BaseController
 
@@ -174,12 +176,13 @@ $q->when(!empty($status), function ($query) use ($status) {
     public function saveEmpPersonal(Request $request) {
         $empno  = trim($request->input('empno'));
         $record = EmpPersonal::where('empno', $empno)->first();
-
+//dd(Carbon::parse($request->input('dob'))->format('Y-m-d'));
+//dd($request->input('dob'));
         $validator = Validator::make($request->all(), [
             'empno'         => 'required|string',
-            'first_name'    => 'nullable|string|max:100',
-            'last_name'     => 'nullable|string|max:100',
-            'company_id'    => 'nullable|integer',
+            'first_name'    => 'required|string|max:100',
+            'last_name'     => 'required|string|max:100',
+            'company_id'    => 'required|integer',
             'emp_mobile_no' => 'nullable|string|max:20',
             'photo'         => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
             'signature'     => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
@@ -198,10 +201,10 @@ $q->when(!empty($status), function ($query) use ($status) {
                 'emp_mobile_no', 'sms_mobile_no', 'office_food', 'status', 'hbs_test',
                 'nationality_desc', 'last_education',
             ]), [
-                'dob'           => $this->parseDate($request->input('dob')),
-                'as_on'         => $this->parseDate($request->input('as_on')),
-                'id_card_issue' => $this->parseDate($request->input('id_card_issue')),
-                'valid_till'    => $this->parseDate($request->input('valid_till')),
+                'dob'           => Carbon::parse($request->input('dob'))->format('Y-m-d'),
+                'as_on'         =>Carbon::parse($request->input('as_on'))->format('Y-m-d'),
+                'id_card_issue' => Carbon::parse($request->input('id_card_issue'))->format('Y-m-d'),
+                'valid_till'    => Carbon::parse($request->input('valid_till'))->format('Y-m-d'),
                 'update_by'     => auth()->id() ?? 1,
                 'update_date'   => now(),
             ]);
@@ -220,17 +223,30 @@ if ($signFile) {
 }
 
             // ── Build HTTP URLs for front-end preview update ──
-            $photoUrl = $this->imageUrl('photo', $photoFile ?? ($record->Y ?? null));
-            $signUrl  = $this->imageUrl('sign',  $signFile  ?? ($record->Z  ?? null));
+            // $photoUrl = $this->imageUrl('photo', $photoFile ?? ($record->Y ?? null));
+            // $signUrl  = $this->imageUrl('sign',  $signFile  ?? ($record->Z  ?? null));
 
+$photoUrl = null;
+$signUrl  = null;
+
+if ($photoFile) {
+    $photoUrl = $this->imageUrl('photo', $photoFile);
+} elseif ($record && !empty($record->emp_img)) {
+    $photoUrl = $this->imageUrl('photo', $record->emp_img);
+}
+
+if ($signFile) {
+    $signUrl = $this->imageUrl('sign', $signFile);
+} elseif ($record && !empty($record->emp_sign)) {
+    $signUrl = $this->imageUrl('sign', $record->emp_sign);
+}
             if ($record) {
                 $record->update($data);
                 return response()->json([
                     'success'   => true,
                     'message'   => 'Personal info updated successfully.',
-                    'photo_url' => $photoFile ? $this->imageUrl('photo', $photoFile) : null,
-                    'sign_url'  => $signFile  ? $this->imageUrl('sign',  $signFile)  : null,
-                ], 200);
+'photo_url' => $photoUrl,
+'sign_url'  => $signUrl,                ], 200);
             }
 
             $data['insert_by']   = auth()->id() ?? 1;

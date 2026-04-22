@@ -93,6 +93,29 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+
+
+            'oracle_hrm' => [
+        'driver'         => 'oracle',
+        'tns'            => env('DB_HRM_TNS', ''),          // use TNS alias if set
+        'host'           => env('DB_HRM_HOST', '192.168.18.205'),
+        'port'           => env('DB_HRM_PORT', '1521'),
+        'database'       => env('DB_HRM_DATABASE', 'ORCL'), // SID or Service Name
+        'service_name'   => env('DB_HRM_SERVICE', ''),      // preferred over SID
+        'username'       => env('DB_HRM_USERNAME', 'F_STORE'),
+        'password'       => env('DB_HRM_PASSWORD', 'fstore'),
+        'charset'        => env('DB_HRM_CHARSET', 'AL32UTF8'),
+        'prefix'         => '',
+        'prefix_schema'  => env('DB_HRM_SCHEMA', 'F_STORE'),       // e.g. 'HRM'
+        'edition'        => env('DB_HRM_EDITION', 'ora$base'),
+        'server_version' => env('DB_HRM_VERSION', '11g'),
+        'load_balance'   => 'yes',
+        'options'        => [
+            // Increase fetch buffer for large HRM result sets
+            \PDO::ATTR_PERSISTENT         => false,
+            \PDO::ATTR_EMULATE_PREPARES   => false,
+        ],
+    ],
     ],
 
     /*
