@@ -1892,5 +1892,9 @@
                 delay: 3000
             }).show();
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('headername').innerText = 'Employee Official Information';
+        });
     </script>
 @endpush

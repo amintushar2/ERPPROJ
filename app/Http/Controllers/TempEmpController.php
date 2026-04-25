@@ -111,7 +111,6 @@ class TempEmpController extends Controller
                 $query->where('empno',      $q)
                       ->orWhere('first_name', 'LIKE', "%{$q}%")
                       ->orWhere('last_name',  'LIKE', "%{$q}%")
-                      ->orWhere('emp_name',   'LIKE', "%{$q}%")
                       ->orWhere('card_no',    'LIKE', "%{$q}%");
             })
             ->first();
@@ -161,11 +160,6 @@ class TempEmpController extends Controller
         ]);
     }
 
-    /* ═══════════════════════════════════════════
-       STORE  —  POST /temp-emp
-       Auto-generates EMPNO.
-       Saves BOTH id AND name for all LOV fields.
-    ═══════════════════════════════════════════ */
     public function store(TempEmpRequest $request): JsonResponse
     {
         $this->auth();
@@ -205,7 +199,7 @@ class TempEmpController extends Controller
                 'dob'             => $request->dob,
                 'sex'             => $request->sex,
                 'permanent_empno' => $request->permanent_empno,
-                'insert_by'       => session('LoggedUser'),
+                'insert_by'       => auth()->id(),
                 'insert_date'     => now(),
             ]);
 
@@ -244,7 +238,7 @@ class TempEmpController extends Controller
                 /* line: id=line_no, name=line */
                 'line_no'      => $off['line_no']      ?? null,
                 'line'         => $off['line']         ?? null,
-                'insert_by'    => session('LoggedUser'),
+                'insert_by'    => auth()->id(),
                 'insert_date'  => now(),
             ]));
 
@@ -293,7 +287,7 @@ class TempEmpController extends Controller
                 'dob'             => $request->dob,
                 'sex'             => $request->sex,
                 'permanent_empno' => $request->permanent_empno,
-                'update_by'       => session('LoggedUser'),
+                'update_by'       => auth()->id(),
                 'update_date'     => now(),
             ]);
 
@@ -322,7 +316,7 @@ class TempEmpController extends Controller
                     'work_ent'     => $off['work_ent']     ?? null,
                     'line_no'      => $off['line_no']      ?? null,
                     'line'         => $off['line']         ?? null,
-                    'update_by'    => session('LoggedUser'),
+                    'update_by'    => auth()->id(),
                     'update_date'  => now(),
                 ]
             );
@@ -354,7 +348,7 @@ class TempEmpController extends Controller
     public function migrate(Request $request, string $empno): JsonResponse
     {
         $this->auth();
-        $request->validate(['permanent_empno' => 'required|string|max:20']);
+        $request->validate(['permanent_empno' => 'required|string|max:7']);
 
         $permEmpNo = trim($request->permanent_empno);
         $temp      = EmpPersonal::with('getempofficial')->where('worker_type','T')->findOrFail($empno);
@@ -381,12 +375,12 @@ class TempEmpController extends Controller
                 'middle_name'  => $temp->middle_name,
                 'last_name'    => $temp->last_name,
                 'emp_name'     => $temp->emp_name,
-                'card_no'      => $temp->card_no,
+                'card_no'      => $permEmpNo, // card_no = empno for permanent as well
                 'status'       => $temp->status ?? 'Active',
                 'dob'          => $temp->dob,
                 'sex'          => $temp->sex,
                 'permanent_empno' => $permEmpNo,
-                'insert_by'    => session('LoggedUser'),
+                'insert_by'    => auth()->id(),
                 'insert_date'  => now(),
             ]);
 
@@ -395,7 +389,7 @@ class TempEmpController extends Controller
                 unset($off['id'], $off['created_at'], $off['updated_at']);
                 EmpOfficial::create(array_merge($off, [
                     'empno'       => $permEmpNo,
-                    'insert_by'   => session('LoggedUser'),
+                    'insert_by'   => auth()->id(),
                     'insert_date' => now(),
                 ]));
             }
@@ -403,6 +397,14 @@ class TempEmpController extends Controller
             DB::table('ATTENDANCE_DETAILS')
                 ->where('EMPNO', $empno)
                 ->update(['EMPNO' => $permEmpNo, 'EMPNO_NEW' => $permEmpNo]);
+
+            // After migration: Set temporary employee to Inactive and clear card_no
+            EmpPersonal::where('empno', $empno)->update([
+                'status'      => 'Inactive',
+                'card_no'     => null,
+                'update_by'   => session('LoggedUser'),
+                'update_date' => now(),
+            ]);
 
             DB::commit();
 
