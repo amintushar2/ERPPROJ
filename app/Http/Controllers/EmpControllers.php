@@ -119,7 +119,7 @@ $q->when(!empty($status), function ($query) use ($status) {
     }
 public function empEditEntry($empno) {
         if(!session('LoggedUser')) return redirect('login');
-        $emp = EmpPersonal::where('empno',$empno)->first();
+        $emp = EmpPersonal::where('new_empno',$empno)->first();
         if(!$emp) return redirect()->route('empnewentry')->with('fail','Employee not found.');
         return view('hrm.empform', array_merge(['emp'=>$emp], $this->tab1Data()));
     }
@@ -498,7 +498,8 @@ private function imageUrl(string $type, ?string $filename): ?string
                 's_group_name'    => $request->input('s_group_name'),
                 
                 // ─── Joining & Date Information ───────────────────────
-                'joining_date'       => $request->input('join_date'),
+                'joining_date'       => Carbon::createFromFormat('d-m-Y', $request->input('join_date'))
+                              ->format('Y-m-d'),
                 'join_time'       => $request->input('join_time'),
                 'conform_date' => $request->input('confirmation_date'),
                 'confirmation_duration' => $request->input('confirmation_duration'),

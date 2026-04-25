@@ -1,6 +1,6 @@
 {{-- resources/views/hrm/tabs/tab_official.blade.php --}}
 {{-- Loaded via AJAX — no layout. All dropdowns use LOV AJAX except emp_type (passed from controller) --}}
-@php $off = optional(optional($emp)->getempofficial?->first()); @endphp
+@php $off = optional(optional($emp)->getempofficial); @endphp
 
 <form id="frmOfficial">
     @csrf
@@ -421,6 +421,7 @@
         // ═══════════════════════════════════════════════════════════════
         lovInitAll('#frmOfficial');
         initDatePick(document);
+
 
         // ═══════════════════════════════════════════════════════════════
         //  Form Submission with LOV Values AND Text
