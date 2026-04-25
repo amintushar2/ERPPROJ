@@ -598,20 +598,7 @@
     <body>
         <div class="wrapper">
 
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show py-2 mb-2" role="alert"
-                    style="font-size:13px;border-left:4px solid #198754;">
-                    <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
-                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
-            @if (session('fail'))
-                <div class="alert alert-danger alert-dismissible fade show py-2 mb-2" role="alert"
-                    style="font-size:13px;border-left:4px solid #dc3545;">
-                    <i class="fas fa-exclamation-circle me-1"></i> {{ session('fail') }}
-                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+
 
             {{-- MODE BANNER --}}
             <div class="mode-banner">
@@ -627,7 +614,6 @@
                     @endif
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    <a href="{{ route('empnewentry') }}" class="btn-back">← Back</a>
                     <a href="{{ route('emplist') }}" class="btn-back">← Back to List</a>
                     @if (isset($emp))
                         <button type="button" class="btn btn-del btn-sm" id="deleteEmpBtn"
@@ -679,18 +665,17 @@
                                     <div class="input-group" style="width:240px;">
                                         <input list="empno_list" type="text" class="form-control" id="empnoInput"
                                             placeholder="Type Employee ID" autocomplete="off">
-                                        <a href="#" class="btn btn-secondary" id="findemp"
-                                            style="background:#1a3a5c;color:#f59e0b;border:none;border-radius:4px;padding:3px 10px;font-size:11px;">
+                                        <button class="btn btn-secondary" type="button" id="findemp">
                                             <i class="bi bi-search"></i>
-                                        </a>
+                                        </button>
                                         <datalist id="empno_list"></datalist>
                                     </div>
                                 @endif
                             </div>
                             <div>
                                 <label>Card No</label>
-                                <input type="text" class="form-control" name="card_no"
-                                    value="{{ $emp->card_no ?? '' }}" style="width:140px;">
+                                <input type="text" class="form-control" name="card_no" value="{{ $emp->card_no ?? '' }}"
+                                    style="width:140px;">
                             </div>
                             <div style="min-width:190px;">
                                 <label>Company</label>
@@ -1052,7 +1037,7 @@
                                     {{-- ── PHOTO (Y: drive) ── --}}
                                     @php
                                         // Y column stores filename e.g. EMP001.jpg
-                                        // Served at http://192.168.210.205:81/EMP001.jpg
+                                        // Served at http://192.168.18.205:81/EMP001.jpg
                                         $photoFile = $emp->emp_img ?? null;
                                         $photoUrl = $photoFile
                                             ? 'http://192.168.210.205:81/' . $photoFile . '?v=' . time()
@@ -1106,7 +1091,7 @@
                                     {{-- ── SIGNATURE (Z: drive) ── --}}
                                     @php
                                         // Z column stores filename e.g. EMP001.jpg
-                                        // Served at http://192.168.210.205:81/emp_sign/EMP001.jpg
+                                        // Served at http://192.168.189.205:81/emp_sign/EMP001.jpg
                                         $signFile = $emp->emp_sign ?? null;
                                         $signUrl = $signFile
                                             ? 'http://192.168.210.205:82/' . $signFile . '?v=' . time()
@@ -1390,8 +1375,7 @@
 
                             // ── Load existing photo / signature from network drive ──
                             if (e.Y) {
-                                const pUrl = 'http://192.168.210.205:81/' + e.emp_img +
-                                    '?v=' + Date
+                                const pUrl = 'http://192.168.189.205:81/emp_photo/' + e.Y + '?v=' + Date
                                     .now();
                                 $('#photoPreview').attr('src', pUrl).show();
                                 $('#photoPlaceholder').hide();
@@ -1399,7 +1383,7 @@
                                 $('#photoFilename').html('📁 ' + e.Y);
                             }
                             if (e.Z) {
-                                const sUrl = 'http://192.168.210.205:82/' + e.emp_sign + '?v=' + Date
+                                const sUrl = 'http://192.168.189.205:81/emp_sign/' + e.Z + '?v=' + Date
                                     .now();
                                 $('#signPreview').attr('src', sUrl).show();
                                 $('#signPlaceholder').hide();
@@ -1673,22 +1657,7 @@
                 const next = fields[idx + 1];
                 if (next) next.focus();
             });
-
-
-            document.getElementById('findemp').addEventListener('click', function(e) {
-                const empno = document.getElementById('empnoInput').value.trim();
-
-                if (!empno) {
-                    alert('Please enter Employee ID');
-                    e.preventDefault();
-                    return;
-                }
-
-                // redirect dynamically
-                this.href = `/hrm/empedite/${empno}`;
-            });
         </script>
-
     </body>
 
     </html>

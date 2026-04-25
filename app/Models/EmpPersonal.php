@@ -69,7 +69,7 @@ class EmpPersonal extends Model
     // ─────── RELATIONSHIPS ───────
     public function getempofficial()
     {
-        return $this->hasMany(EmpOfficial::class, 'empno', 'empno');
+        return $this->hasOne(EmpOfficial::class, 'empno', 'empno');
     }
  
     public function getemploc()

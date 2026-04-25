@@ -15,7 +15,18 @@ class LovController extends Controller
     private function auth() {
         if (!session('LoggedUser')) abort(401);
     }
-
+  public function company(Request $request) {
+        $this->auth();
+        $rows = DB::table('COMPANY_PROFILE as cp')
+            ->join('COMPANY_PERMISSION as perm', 'cp.COMPANY_ID', '=', 'perm.COMPANY_ID')
+            ->select('cp.COMPANY_ID as id', DB::raw("cp.COMPANY_NAME as text"))
+            ->when($request->q, fn($q) => $q->where('cp.COMPANY_NAME', 'like', '%'.$request->q.'%'))
+            ->orderBy('cp.COMPANY_NAME')
+            ->limit(50)
+            ->distinct()
+            ->get();
+        return response()->json(['results' => $rows]);
+    }
     // Department  GET /lov/dept
     public function dept(Request $request) {
         $this->auth();
@@ -46,6 +57,16 @@ class LovController extends Controller
         return response()->json(['results' => $rows]);
     }
 
+
+
+    public function emp_type(Request $request) {
+        $this->auth();
+        $rows = DB::table('EMP_TYPE')
+            ->select('EMP_TYPE as id', DB::raw("EMP_TYPE as text"))
+            ->when($request->q, fn($q) => $q->where('EMP_TYPE','like','%'.$request->q.'%'))
+            ->orderBy('EMP_TYPE')->limit(50)->get();
+        return response()->json(['results' => $rows]);
+    }
     // Line  GET /lov/line
     public function line(Request $request) {
         $this->auth();

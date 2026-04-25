@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Carbon\Carbon;
+
 
 class LoginController extends BaseController
 {
@@ -28,7 +30,6 @@ class LoginController extends BaseController
         ], 500);
     }
 
-    // ✅ Existing session check
     if (session('LoggedUser')) {
         return redirect('dashboard');
     }
@@ -188,4 +189,184 @@ class LoginController extends BaseController
         Auth::logout();
         return redirect('login');
     }
+
+
+
+    
+public function liveData(Request $request)
+{
+    if (!session('LoggedUser')) {
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
+ 
+    try {
+        // ── KPI: Total Active Employees ──────────────────────────────────────
+        $totalEmployees = DB::table('emp_personal')
+            ->where('status', 'Active')
+            ->count();
+ 
+        // ── KPI: Today's Attendance Summary ─────────────────────────────────
+$companyId = session('company_id', '100');
+
+        // ── UI DATE (for display) ──
+        $today = Carbon::today();
+
+        // ── EFFECTIVE WORKING DATE (skip Friday + holidays) ──
+        $effectiveDate = DB::select("
+            SELECT MAX(dt) AS dt
+            FROM (
+                SELECT TRUNC(SYSDATE) - LEVEL + 1 AS dt
+                FROM DUAL
+                CONNECT BY LEVEL <= 7
+            )
+            WHERE TO_CHAR(dt, 'DY', 'NLS_DATE_LANGUAGE=ENGLISH') != 'FRI'
+              AND NOT EXISTS (
+                    SELECT 1
+                    FROM HRM.CALENDER_DETAILS c
+                    WHERE dt IN (
+                        TRUNC(c.HOLIDAY_1),
+                        TRUNC(c.HOLIDAY_2),
+                        TRUNC(c.OTHERS)
+                    )
+              )
+        ")[0]->dt;
+ 
+       $todayAtt = DB::select("
+            SELECT
+                SUM(CASE WHEN STATUS2 IN ('P','WO') THEN 1 ELSE 0 END) AS present,
+                SUM(CASE WHEN STATUS2 = 'A' THEN 1 ELSE 0 END) AS absent,
+                SUM(CASE WHEN STATUS2 = 'L' THEN 1 ELSE 0 END) AS on_leave,
+                SUM(CASE WHEN LATE > 0 THEN 1 ELSE 0 END) AS late
+            FROM HRM.ATTENDANCE_DETAILS
+            WHERE TRUNC(ATT_DATE) = :dt
+              AND COMPANY_ID = :cid
+        ", [
+            'dt' => $effectiveDate,
+            'cid' => $companyId
+        ])[0];
+        // ── Dept Headcount ───────────────────────────────────────────────────
+        $deptCount = DB::table('emp_official as eo')
+            ->join('emp_personal as ep', 'ep.empno', '=', 'eo.empno')
+            ->select('eo.dept_name', DB::raw('COUNT(eo.empno) as cnt'))
+            ->where('ep.status', 'Active')
+            ->whereNotNull('eo.dept_name')
+            ->groupBy('eo.dept_name')
+            ->orderByDesc('cnt')
+            ->limit(8)
+            ->get();
+ 
+        // ── Gender Split ─────────────────────────────────────────────────────
+        $genderSplit = DB::table('emp_personal')
+            ->select('sex', DB::raw('COUNT(*) as cnt'))
+            ->where('status', 'Active')
+            ->whereNotNull('sex')
+            ->groupBy('sex')
+            ->get();
+ 
+        // ── Avg Monthly OT (last 6 months) ───────────────────────────────────
+          $avgOT = DB::select("
+            SELECT
+                TO_CHAR(ATT_DATE,'Mon YYYY') AS att_month,
+                ROUND(AVG(OTHOUR + NVL(OTHOUR2,0) + NVL(OTHOUR3,0)),2) AS avg_ot
+            FROM HRM.ATTENDANCE_DETAILS
+            WHERE COMPANY_ID = :cid
+              AND ATT_DATE >= ADD_MONTHS(TRUNC(SYSDATE,'MM'), -5)
+              AND OTHOUR > 0
+            GROUP BY TRUNC(ATT_DATE,'MM'), TO_CHAR(ATT_DATE,'Mon YYYY')
+            ORDER BY TRUNC(ATT_DATE,'MM')
+        ", ['cid' => $companyId]);
+ 
+        // ── Alerts: Probation / Increment counts ─────────────────────────────
+        $probationEnd = DB::select("
+    SELECT eo.EMPNO,
+           ep.FIRST_NAME || ' ' || ep.LAST_NAME AS EMP_NAME,
+           eo.DEPT_NAME,
+           eo.DESIGNATION_NAME,
+           eo.JOINING_DATE,
+           eo.CONFORM_DATE,
+           eo.PROVISION_PERIOD,
+           ROUND(MONTHS_BETWEEN(SYSDATE, eo.JOINING_DATE)) AS months_served
+    FROM HRM.EMP_OFFICIAL eo
+    JOIN HRM.EMP_PERSONAL ep ON ep.EMPNO = eo.EMPNO
+    WHERE eo.COMPANY_ID = :cid
+      AND eo.CONFORM_DATE IS NULL
+      AND TRUNC(ADD_MONTHS(eo.JOINING_DATE,
+            TO_NUMBER(NVL(eo.PROVISION_PERIOD,'3'))),'MM')
+          = TRUNC(SYSDATE,'MM')
+        ", ['cid' => $companyId]);
+       $incrementThisMonth = DB::select("
+           SELECT
+  eo.EMPNO,
+  ep.FIRST_NAME || ' ' || ep.LAST_NAME AS EMP_NAME,
+  eo.DEPT_NAME,
+  eo.DESIGNATION_NAME,
+  eo.GROSS,
+  eo.INCREMENT_DATE,
+  NVL(
+    (
+      SELECT MAX(ii.CUR_GROSS)
+      KEEP (DENSE_RANK FIRST ORDER BY ii.INCR_DATE DESC)
+      FROM HRM.INCREMENT_INFO ii
+      WHERE TRIM(ii.EMPNO) = TRIM(eo.EMPNO)
+        AND ii.CUR_GROSS IS NOT NULL
+    ),
+    eo.GROSS
+  ) AS LAST_GROSS
+FROM HRM.EMP_OFFICIAL eo
+JOIN HRM.EMP_PERSONAL ep ON ep.EMPNO = eo.EMPNO
+WHERE eo.COMPANY_ID = :cid
+  AND ep.STATUS = 'Active'
+  AND eo.TERMINATION_DATE IS NULL
+  AND eo.RESIGNED_DATE IS NULL
+  AND eo.INCREMENT_DATE IS NOT NULL
+  AND EXTRACT(MONTH FROM NVL(eo.INCREMENT_DATE, eo.JOINING_DATE)) = EXTRACT(MONTH FROM SYSDATE)
+ORDER BY eo.INCREMENT_DATE
+        ", ['cid' => $companyId]);
+        $incrementNextMonth = DB::select("
+    SELECT eo.EMPNO,
+       ep.FIRST_NAME || ' ' || ep.LAST_NAME AS EMP_NAME,
+       eo.DEPT_NAME,
+       eo.DESIGNATION_NAME,
+       eo.GROSS,
+       eo.INCREMENT_DATE
+FROM HRM.EMP_OFFICIAL eo
+JOIN HRM.EMP_PERSONAL ep ON ep.EMPNO = eo.EMPNO
+WHERE eo.COMPANY_ID = :cid
+  AND eo.TERMINATION_DATE IS NULL
+  AND eo.RESIGNED_DATE IS NULL
+    AND ep.STATUS = 'Active'
+  AND EXTRACT(MONTH FROM NVL(eo.INCREMENT_DATE, eo.JOINING_DATE))=EXTRACT(MONTH FROM ADD_MONTHS(SYSDATE,1))
+ORDER BY eo.INCREMENT_DATE
+", ['cid' => $companyId]);
+ 
+        // ── Attendance rate % ─────────────────────────────────────────────────
+        $attendanceRate = $totalEmployees > 0
+            ? round((($todayAtt->present ?? 0) / $totalEmployees) * 100, 1)
+            : 0;
+ 
+        return response()->json([
+            'success'            => true,
+            'updated_at'         => now()->format('d M Y, h:i:s A'),
+            // KPI cards
+            'total_employees'    => number_format($totalEmployees),
+            'present'            => $todayAtt->present ?? 0,
+            'absent'             => $todayAtt->absent  ?? 0,
+            'on_leave'           => $todayAtt->on_leave ?? 0,
+            'late'               => $todayAtt->late    ?? 0,
+            'attendance_rate'    => $attendanceRate,
+            // Charts
+            'deptCount'         => $deptCount,
+            'genderSplit'       => $genderSplit,
+            'avg_ot'             => $avgOT,
+            // Alert badge counts
+            'probationEnd'    => $probationEnd,
+            'incrementThisMonth'     => $incrementThisMonth,
+            'incrementNextMonth'     => $incrementNextMonth,
+        ]);
+ 
+    } catch (\Exception $e) {
+        \Log::error('Dashboard liveData error: ' . $e->getMessage());
+        return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+    }
+}
 }

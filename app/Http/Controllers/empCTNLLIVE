@@ -117,12 +117,7 @@ $q->when(!empty($status), function ($query) use ($status) {
         if(!$emp) return redirect()->route('emplist')->with('fail','Employee not found.');
         return view('hrm.empform', array_merge(['emp'=>$emp], $this->tab1Data()));
     }
-public function empEditEntry($empno) {
-        if(!session('LoggedUser')) return redirect('login');
-        $emp = EmpPersonal::where('empno',$empno)->first();
-        if(!$emp) return redirect()->route('empnewentry')->with('fail','Employee not found.');
-        return view('hrm.empform', array_merge(['emp'=>$emp], $this->tab1Data()));
-    }
+
     // ─────────────────────────────────────────────────────
     //  AJAX TAB: OFFICIAL  (loads dropdown + emp data)
     // ─────────────────────────────────────────────────────
@@ -199,6 +194,7 @@ public function saveEmpPersonal(Request $request)
     }
 
     try {
+        // ── Null-safe date parsing helper ──
         $parseDate = fn($val) => !empty($val) ? Carbon::parse($val)->format('Y-m-d') : null;
 
         $data = array_merge($request->only([
@@ -217,29 +213,25 @@ public function saveEmpPersonal(Request $request)
             'update_date'   => now(),
         ]);
 
-        // ── Images: only update column if a new file was uploaded ──
-        // ── otherwise keep whatever is already stored             ──
+        // ── Save images to FTP (replaces if exists) ──
         $photoFile = $this->saveImage($request, 'photo', $empno);
-        $signFile  = $this->saveImage($request, 'signature', $empno);
-
         if ($photoFile) {
-            // New file uploaded → update column
             $data['emp_img'] = $photoFile;
-        } elseif ($record) {
-            // No new file → preserve existing value from DB
-            $data['emp_img'] = $record->emp_img;
         }
-        // If it's a brand-new record and no file uploaded → leave emp_img out of $data (stays null)
 
+        $signFile = $this->saveImage($request, 'signature', $empno);
         if ($signFile) {
             $data['emp_sign'] = $signFile;
-        } elseif ($record) {
-            $data['emp_sign'] = $record->emp_sign;
         }
 
-        // ── Build preview URLs (use new file first, fall back to DB value) ──
-        $photoUrl = $this->imageUrl('photo', $photoFile ?? ($record->emp_img ?? null));
-        $signUrl  = $this->imageUrl('sign',  $signFile  ?? ($record->emp_sign ?? null));
+        // ── Build preview URLs ──
+        $photoUrl = $photoFile
+            ? $this->imageUrl('photo', $photoFile)
+            : ($record && !empty($record->emp_img)  ? $this->imageUrl('photo', $record->emp_img)  : null);
+
+        $signUrl = $signFile
+            ? $this->imageUrl('sign', $signFile)
+            : ($record && !empty($record->emp_sign) ? $this->imageUrl('sign',  $record->emp_sign) : null);
 
         // ── Update or Insert ──
         if ($record) {

@@ -62,7 +62,8 @@ return [
             'port'     => env('21'),
             'root' => '/',
              'ssl'      => env('FTP_SSL', false),
-             'timeout'  => env('FTP_TIMEOUT', 30)
+             'timeout'  => env('FTP_TIMEOUT', 30),
+                 'url'      => env('FTP_URL'),   // ← add this
         ],
         'ftp2' => [
             'driver' => 'ftp',

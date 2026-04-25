@@ -18,6 +18,7 @@ use App\Http\Controllers\SalProcessController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LovController;
+use App\Http\Controllers\TempEmpController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\ItemController;
 use App\Http\Controllers\Inventory\PurchaseOrderController;
@@ -129,6 +130,8 @@ Route::get('/',[LoginController::class,'login'])->name('login');
  
 Route::middleware(['auth'])->name('hrm.')->group(function () {
     Route::get('/dashboard', [HrmDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/live-data', [LoginController::class, 'liveData'])->name('dashboard.liveData');
+
 });
  
 
@@ -152,6 +155,7 @@ Route::middleware(['web','auth'])->group(function () {
     Route::get('/hrm/emplist',          [EmpControllers::class,'empList'])->name('emplist');
     Route::get('/hrm/empentry',         [EmpControllers::class,'empentry'])->name('empnewentry');
     Route::get('/hrm/empedit/{empno}',  [EmpControllers::class,'empEdit'])->name('empedit');
+    Route::get('/hrm/empedite/{empno}',  [EmpControllers::class,'empEditEntry'])->name('empedite');
 
     // Lazy AJAX tab loaders
     Route::get('/hrm/tab/official/{empno}',    [EmpControllers::class,'tabOfficial'])->name('tab.official');
@@ -644,22 +648,95 @@ Route::prefix('user-menu')->middleware(['auth'])->group(function () {
 
 
 
+/* ─────────────────────────────────────────────────────────────
+   LOV ENDPOINTS (used by Select2 AJAX in the Blade view)
+   Source: LovController.php (provided)
+───────────────────────────────────────────────────────────── */
+Route::prefix('lov')->name('lov.')->group(function () {
 
-Route::middleware(['web', 'auth'])->prefix('hrm')->name('hrm.')->group(function () {
+    /*
+     | GET /lov/company?q=
+     | Table: COMPANY_PROFILE JOIN COMPANY_PERMISSION
+     | Source: team_emp.fmb → SELECT COMPANY_NAME, COMPANY_ID FROM COMPANY_PROFILE
+     |         WHERE COMPANY_ID IN (SELECT COMPANY_ID FROM COMPANY_PERMISSION)
+    */
+    Route::get('/company',     [LovController::class, 'company'])->name('company');
 
-    // ── Employee CRUD ────────────────────────────────────────────────────────
-    Route::prefix('tempEMp')->name('employees.')->group(function () {
-        Route::get('/',            [TempEmpPersonalController::class, 'index'])->name('index');
-        Route::get('/create',      [TempEmpPersonalController::class, 'create'])->name('create');
-        Route::post('/',           [TempEmpPersonalController::class, 'store'])->name('store');
-        Route::get('/{empno}',     [TempEmpPersonalController::class, 'show'])->name('show');
-        Route::get('/{empno}/edit',[TempEmpPersonalController::class, 'edit'])->name('edit');
-        Route::put('/{empno}',     [TempEmpPersonalController::class, 'update'])->name('update');
-        Route::delete('/{empno}',  [TempEmpPersonalController::class, 'destroy'])->name('destroy');
+    /*
+     | GET /lov/dept?q=
+     | Table: DEPT  →  {DEPT_NO, DEPT_NAME}
+    */
+    Route::get('/dept',        [LovController::class, 'dept'])->name('dept');
 
-        // AJAX helpers
-        Route::get('/api/search',  [TempEmpPersonalController::class, 'search'])->name('search');
-        Route::get('/api/list',    [TempEmpPersonalController::class, 'list'])->name('list');
-    });
+    /*
+     | GET /lov/section?q=
+     | Table: SECTION  →  {SECTION_NO, SECTION_NAME}
+    */
+    Route::get('/section',     [LovController::class, 'section'])->name('section');
 
+    /*
+     | GET /lov/floor?q=
+     | Table: FLOOR  →  {FLOOR_ID, FLOOR_DESC}
+    */
+    Route::get('/floor',       [LovController::class, 'floor'])->name('floor');
+
+    /*
+     | GET /lov/line?q=
+     | Table: LINE_INFO  →  {LINE_NO, LINE}
+    */
+    Route::get('/line',        [LovController::class, 'line'])->name('line');
+    Route::get('/emp_type',        [LovController::class, 'emp_type'])->name('emp_type');
+
+    /*
+     | GET /lov/designation?q=
+     | Table: DESIGNATION_DETAILS  →  {DES_ID, DESIGNATION_NAME}
+    */
+    Route::get('/designation', [LovController::class, 'designation'])->name('designation');
+
+    /*
+     | GET /lov/shift?q=
+     | Table: HRM.SHIFT_INFO  →  {SHIFT_CODE, SHIFT_NAME}
+    */
+    Route::get('/shift',       [LovController::class, 'shift'])->name('shift');
+
+    /*
+     | GET /lov/weeklyoff
+     | Static: Friday / Saturday / Sunday
+    */
+    Route::get('/weeklyoff',   [LovController::class, 'weeklyoff'])->name('weeklyoff');
+
+    /*
+     | GET /lov/yesno
+     | Static: Y=Yes / N=No  (used for OT field)
+    */
+    Route::get('/yesno',       [LovController::class, 'yesno'])->name('yesno');
+});
+Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
+
+    // GET  /temp-emp          → Render Blade view
+    Route::get('/',                   [TempEmpController::class, 'index'])  ->name('index');
+
+    // GET  /temp-emp/next-id  → Auto EMPNO: MAX(TO_NUMBER(EMPNO))+1
+    Route::get('/next-id',            [TempEmpController::class, 'nextId']) ->name('next-id');
+
+    // GET  /temp-emp/search?q=  → Quick toolbar search
+    Route::get('/search',             [TempEmpController::class, 'search']) ->name('search');
+
+    // GET  /temp-emp/lov?q=   → Employee LOV modal list
+    Route::get('/lov',                [TempEmpController::class, 'lov'])    ->name('lov');
+
+    // GET  /temp-emp/{empno}  → Load one record (personal + official)
+    Route::get('/{empno}',            [TempEmpController::class, 'show'])   ->name('show');
+
+    // POST /temp-emp          → Create (EMPNO auto-generated)
+    Route::post('/',                  [TempEmpController::class, 'store'])  ->name('store');
+
+    // PUT  /temp-emp/{empno}  → Update existing
+    Route::put('/{empno}',            [TempEmpController::class, 'update']) ->name('update');
+
+    // POST /temp-emp/{empno}/migrate → PB_TRANSFER: Temp → Permanent
+    Route::post('/{empno}/migrate',   [TempEmpController::class, 'migrate'])->name('migrate');
+
+    // DELETE /temp-emp/{empno} → Delete (cascades to emp_official)
+    Route::delete('/{empno}',         [TempEmpController::class, 'destroy'])->name('destroy');
 });
