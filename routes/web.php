@@ -75,16 +75,17 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     Route::post('/saveEmpLocation', [EmpControllers::class, 'saveEmpLocation']);
     
     // ──── EDUCATION/QUALIFICATION ────
-    Route::post('/saveEmpQualification', [EmpControllers::class, 'saveEmpQualification']);
-    Route::get('/getEmpQualifications/{empno}', [EmpControllers::class, 'getEmpQualifications']);
+    Route::post('/saveEmpQualification', [EmpControllers::class, 'saveEmpQualification'])->name('saveEmpQualification');
+    Route::get('/getEmpQualifications/{empno}', [EmpControllers::class, 'getEmpQualifications'])->name('getEmpQualifications');
+    Route::get('/getPassedExams', [EmpControllers::class, 'getPassedExams'])->name('getPassedExams');
     
     // ──── SHORT COURSES ────
     Route::post('/saveEmpShortCourse', [EmpControllers::class, 'saveEmpShortCourse']);
-    Route::get('/getEmpShortCourses/{empno}', [EmpControllers::class, 'getEmpShortCourses']);
+    Route::get('/getEmpShortCourses/{empno}', [EmpControllers::class, 'getEmpShortCourses'])->name('getEmpShortCourses');
     
     // ──── FAMILY INFORMATION ────
     Route::post('/saveEmpFamily', [EmpControllers::class, 'saveEmpFamily']);
-    Route::get('/getEmpFamily/{empno}', [EmpControllers::class, 'getEmpFamily']);
+    Route::get('/getEmpFamily/{empno}', [EmpControllers::class, 'getEmpFamily'])->name('getEmpFamily');
     
     // ──── JOB HISTORY ────
     Route::post('/saveEmpHistory', [EmpControllers::class, 'saveEmpHistory']);

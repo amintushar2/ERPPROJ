@@ -6,6 +6,14 @@ use App\Models\EmpOfficial;
 use App\Models\EmpPersonal;
 use App\Models\LeaveEntryMaster;
 use App\Models\LeaveEntryDetails;
+use App\Models\EmpLocation;
+use App\Models\Emp_qualificationModel;
+use App\Models\Emp_ShortModel;
+use App\Models\Emp_familyModel;
+use App\Models\Emp_historyModel;
+use App\Models\Emp_trainingModel;
+use App\Models\Emp_work_expModel;
+use App\Models\Emp_leaveModel;
 use Illuminate\Support\Facades\Validator;
 use DB;
 use Illuminate\Http\Request;
@@ -199,20 +207,23 @@ public function saveEmpPersonal(Request $request)
     }
 
     try {
-        $parseDate = fn($val) => !empty($val) ? Carbon::parse($val)->format('Y-m-d') : null;
-
         $data = array_merge($request->only([
-            'empno', 'first_name', 'middle_name', 'last_name', 'b_name', 'father_name',
+            'first_name', 'middle_name', 'last_name', 'b_name', 'father_name',
             'mother_name', 'husband_name', 'gurdian_name', 'sex', 'marial_status',
             'religion_id', 'blood_group', 'national_id_no', 'id_mark', 'company_id',
             'passport_no', 'place_of_issue', 'birthday_id',
             'emp_mobile_no', 'sms_mobile_no', 'office_food', 'status', 'hbs_test',
             'nationality_desc', 'last_education',
         ]), [
-            'dob'           => $parseDate($request->input('dob')),
-            'as_on'         => $parseDate($request->input('as_on')),
-            'id_card_issue' => $parseDate($request->input('id_card_issue')),
-            'valid_till'    => $parseDate($request->input('valid_till')),
+             'empno'     => $empno,
+                'card_no'   => $empno,
+                'new_empno' => $empno,
+
+
+            'dob'           => $this->parseDate($request->input('dob')),
+            'as_on'         => $this->parseDate($request->input('as_on')),
+            'id_card_issue' => $this->parseDate($request->input('id_card_issue')),
+            'valid_till'    => $this->parseDate($request->input('valid_till')),
             'update_by'     => auth()->id() ?? 1,
             'update_date'   => now(),
         ]);
@@ -435,6 +446,11 @@ private function imageUrl(string $type, ?string $filename): ?string
 //dd($baseUrl);
     return rtrim($baseUrl, '/') . '/' . $folder . '/' . $filename;
 }
+
+private function parseDate($val)
+{
+    return !empty($val) ? Carbon::parse($val)->format('Y-m-d') : null;
+}
     // ═════════════════════════════════════════════════════════════════════
     //  SAVE OFFICIAL (Enhanced with LOV Value + Text Support)
     // ═════════════════════════════════════════════════════════════════════
@@ -498,24 +514,23 @@ private function imageUrl(string $type, ?string $filename): ?string
                 's_group_name'    => $request->input('s_group_name'),
                 
                 // ─── Joining & Date Information ───────────────────────
-                'joining_date'       => Carbon::createFromFormat('d-m-Y', $request->input('join_date'))
-                              ->format('Y-m-d'),
+                'joining_date'       => $this->parseDate($request->input('join_date')),
                 'join_time'       => $request->input('join_time'),
-                'conform_date' => $request->input('confirmation_date'),
+                'conform_date' => $this->parseDate($request->input('join_date')),
                 'confirmation_duration' => $request->input('confirmation_duration'),
-                'last_promo_date' => $request->input('last_promo_date'),
-                'last_increment_date' => $request->input('last_increment_date'),
+                'last_promo_date' => $this->parseDate($request->input('last_promo_date')),
+                'last_increment_date' => $this->parseDate($request->input('last_increment_date')),
                 
                 // ─── Attendance & Card Information ────────────────────
                 'punch_card_no'   => $request->input('punch_card_no'),
                 'proximity_card_no' => $request->input('proximity_card_no'),
                 'ot_cat'          => $request->input('ot_cat'),
-                'attn_eff_date'   => $request->input('attn_eff_date'),
+                'attn_eff_date'   => $this->parseDate($request->input('attn_eff_date')),
                 
                 // ─── Leave Information (LOV) ──────────────────────────
                 'lv_cat_id'       => $request->input('lv_cat_id'),
                 'lv_cat_name'     => $request->input('lv_cat_id_name'),
-                'entry_date'      => $request->input('entry_date'),
+                'entry_date'      => $this->parseDate($request->input('entry_date')),
                 
                 // ─── Salary & Bank Information ────────────────────────
                 'gross'           => $request->input('gross'),
@@ -528,8 +543,8 @@ private function imageUrl(string $type, ?string $filename): ?string
                 'ac_no'           => $request->input('ac_no'),
                 
                 // ─── Release Information ──────────────────────────────
-                'termination_date' => $request->input('termination_date'),
-                'resigned_date'   => $request->input('resigned_date'),
+                'termination_date' => $this->parseDate($request->input('termination_date')),
+                'resigned_date'   => $this->parseDate($request->input('resigned_date')),
                 'reason'          => $request->input('reason'),
                 'is_lefty'        => $request->input('is_lefty'),
                 
@@ -617,6 +632,913 @@ private function imageUrl(string $type, ?string $filename): ?string
             ], 500);
         }
     }
+
+
+
+
+
+
+
+
+public function saveEmpLocation(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'p_address' => 'nullable|string|max:500',
+                'p_city' => 'nullable|string|max:100',
+                'p_district' => 'nullable|string|max:100',
+                'p_pin_code' => 'nullable|string|max:20',
+                'p_phone' => 'nullable|string|max:20',
+                'p_fax' => 'nullable|string|max:20',
+                'p_cperson' => 'nullable|string|max:100',
+                'p_village' => 'nullable|string|max:100',
+                'p_post_off' => 'nullable|string|max:100',
+                'p_police_station' => 'nullable|string|max:100',
+                'r_address' => 'nullable|string|max:500',
+                'r_city' => 'nullable|string|max:100',
+                'r_district' => 'nullable|string|max:100',
+                'P_PIN_CODE' => 'nullable|numeric|max:20',
+                'r_phone' => 'nullable|string|max:20',
+                'r_fax' => 'nullable|string|max:20',
+                'r_mobile' => 'nullable|string|max:20',
+                'r_email' => 'nullable|email|max:100',
+                'r_cperson' => 'nullable|string|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $empno = $request->input('empno');
+            $empLocation = EmpLocation::where('empno', $empno)->first();
+
+            $locationData = [
+                'empno' => $empno,
+                'p_address' => $request->input('p_address'),
+                'p_city' => $request->input('p_city'),
+                'p_district' => $request->input('p_district'),
+                'p_pin_code' => $request->input('p_pin_code'),
+                'p_phone' => $request->input('p_phone'),
+                'p_fax' => $request->input('p_fax'),
+                'p_cperson' => $request->input('p_cperson'),
+                'p_village' => $request->input('p_village'),
+                'p_post_off' => $request->input('p_post_off'),
+                'p_police_station' => $request->input('p_police_station'),
+                'r_address' => $request->input('r_address'),
+                'r_city' => $request->input('r_city'),
+                'r_district' => $request->input('r_district'),
+                'r_pin_code' => $request->input('r_pin_cod'),
+                'r_phone' => $request->input('r_phone'),
+                'r_fax' => $request->input('r_fax'),
+                'r_mobile' => $request->input('r_mobile'),
+                'r_email' => $request->input('r_email'),
+                'r_cperson' => $request->input('r_cperson'),
+            ];
+
+            if ($empLocation) {
+                $empLocation->update($locationData);
+                $message = 'Employee location information updated successfully';
+                $statusCode = 200;
+            } else {
+                $empLocation = EmpLocation::create($locationData);
+                $message = 'Employee location information saved successfully';
+                $statusCode = 201;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $empLocation
+            ], $statusCode);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing employee location information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Qualification (CREATE)
+     * POST: /api/saveEmpQualification
+     * The route saveEmpQualification could not be found.
+     */
+    public function saveEmpQualification(Request $request)
+    {
+
+
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'name_of_ins' => 'nullable|string|max:255',
+                'passed_exam' => 'nullable|string|max:100',
+                'division' => 'nullable|string|max:50',
+                'year' => 'nullable|integer',
+                'board' => 'nullable|string|max:100',
+                'marks' => 'nullable|string|max:50',
+                'subject' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $qualification = Emp_qualificationModel::create([
+                'empno' => $request->input('empno'),
+                'name_of_ins' => $request->input('name_of_ins'),
+                'passed_exam' => $request->input('passed_exam'),
+                'division' => $request->input('division'),
+                'year' => $request->input('year'),
+                'board' => $request->input('board'),
+                'marks' => $request->input('marks'),
+                'subject' => $request->input('subject'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Qualification saved successfully',
+                'data' => $qualification
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving qualification',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function getEmpQualifications($empno)
+    {
+        try {
+            $qualifications = Emp_qualificationModel::where('empno', $empno)->get();
+            return response()->json([
+                'success' => true,
+                'data' => $qualifications
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching qualifications',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get Passed Exams
+     */
+    public function getPassedExams()
+    {
+        try {
+            $exams = DB::table('HRM.PASSED_EXAM')->select('PASSED_EXAM', 'BANGLA_NAME')->get();
+            return response()->json($exams);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching passed exams',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Qualification (UPDATE)
+     * PUT: /api/updateEmpQualification/{id}
+     */
+    public function updateEmpQualification($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'name_of_ins' => 'nullable|string|max:255',
+                'passed_exam' => 'nullable|string|max:100',
+                'division' => 'nullable|string|max:50',
+                'year' => 'nullable|integer',
+                'board' => 'nullable|string|max:100',
+                'marks' => 'nullable|string|max:50',
+                'subject' => 'nullable|string|max:255',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $qualification = Emp_qualificationModel::findOrFail($id);
+            $qualification->update($request->only([
+                'name_of_ins', 'passed_exam', 'division', 'year', 'board', 'marks', 'subject'
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Qualification updated successfully',
+                'data' => $qualification
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating qualification',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Qualification (DELETE)
+     * DELETE: /api/deleteEmpQualification/{id}
+     */
+    public function deleteEmpQualification($id)
+    {
+        try {
+            $qualification = Emp_qualificationModel::findOrFail($id);
+            $qualification->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Qualification deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting qualification',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Short Course (CREATE)
+     * POST: /api/saveEmpShortCourse
+     */
+    public function saveEmpShortCourse(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'course_name' => 'nullable|string|max:255',
+                'conducted_by' => 'nullable|string|max:255',
+                'c_from' => 'nullable|date',
+                'c_to' => 'nullable|date',
+                'certificate' => 'nullable|string|max:255',
+                'total_day' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $course = Emp_ShortModel::create([
+                'empno' => $request->input('empno'),
+                'course_name' => $request->input('course_name'),
+                'conducted_by' => $request->input('conducted_by'),
+                'c_from' => $this->parseDate($request->input('c_from')),
+                'c_to' => $this->parseDate($request->input('c_to')),
+                'certificate' => $request->input('certificate'),
+                'total_day' => $request->input('total_day'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Short course saved successfully',
+                'data' => $course
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving short course',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Short Course (UPDATE)
+     * PUT: /api/updateEmpShortCourse/{id}
+     */
+    public function updateEmpShortCourse($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'course_name' => 'nullable|string|max:255',
+                'conducted_by' => 'nullable|string|max:255',
+                'c_from' => 'nullable|date',
+                'c_to' => 'nullable|date',
+                'certificate' => 'nullable|string|max:255',
+                'total_day' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $course = Emp_ShortModel::findOrFail($id);
+            $course->update([
+                'course_name' => $request->input('course_name'),
+                'conducted_by' => $request->input('conducted_by'),
+                'c_from' => $this->parseDate($request->input('c_from')),
+                'c_to' => $this->parseDate($request->input('c_to')),
+                'certificate' => $request->input('certificate'),
+                'total_day' => $request->input('total_day'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Short course updated successfully',
+                'data' => $course
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating short course',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Short Course (DELETE)
+     * DELETE: /api/deleteEmpShortCourse/{id}
+     */
+    public function deleteEmpShortCourse($id)
+    {
+        try {
+            $course = Emp_ShortModel::findOrFail($id);
+            $course->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Short course deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting short course',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Family Member (CREATE)
+     * POST: /api/saveEmpFamily
+     */
+    public function saveEmpFamily(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'depd_no' => 'nullable|string|max:50',
+                'depd_name' => 'required|string|max:100',
+                'relationship' => 'nullable|string|max:50',
+                'd_dob' => 'nullable|date',
+                'd_age' => 'nullable|integer',
+                'd_sex' => 'nullable|string|max:10',
+                'd_as_on' => 'nullable|date',
+                'percentage' => 'nullable|numeric',
+                'address' => 'nullable|string|max:500',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $family = Emp_familyModel::create([
+                'empno' => $request->input('empno'),
+                'depd_no' => $request->input('depd_no'),
+                'depd_name' => $request->input('depd_name'),
+                'relationship' => $request->input('relationship'),
+                'd_dob' => $this->parseDate($request->input('d_dob')),
+                'd_age' => $request->input('d_age'),
+                'd_sex' => $request->input('d_sex'),
+                'd_as_on' => $this->parseDate($request->input('d_as_on')),
+                'percentage' => $request->input('percentage'),
+                'address' => $request->input('address'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Family member saved successfully',
+                'data' => $family
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving family member',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Family Member (UPDATE)
+     * PUT: /api/updateEmpFamily/{id}
+     */
+    public function updateEmpFamily($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'depd_name' => 'required|string|max:100',
+                'depd_no' => 'nullable|string|max:50',
+                'relationship' => 'nullable|string|max:50',
+                'd_dob' => 'nullable|date',
+                'd_age' => 'nullable|integer',
+                'd_sex' => 'nullable|string|max:10',
+                'd_as_on' => 'nullable|date',
+                'percentage' => 'nullable|numeric',
+                'address' => 'nullable|string|max:500',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $family = Emp_familyModel::findOrFail($id);
+            $family->update([
+                'depd_no' => $request->input('depd_no'),
+                'depd_name' => $request->input('depd_name'),
+                'relationship' => $request->input('relationship'),
+                'd_dob' => $this->parseDate($request->input('d_dob')),
+                'd_age' => $request->input('d_age'),
+                'd_sex' => $request->input('d_sex'),
+                'd_as_on' => $this->parseDate($request->input('d_as_on')),
+                'percentage' => $request->input('percentage'),
+                'address' => $request->input('address'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Family member updated successfully',
+                'data' => $family
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating family member',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Family Member (DELETE)
+     * DELETE: /api/deleteEmpFamily/{id}
+     */
+    public function deleteEmpFamily($id)
+    {
+        try {
+            $family = Emp_familyModel::findOrFail($id);
+            $family->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Family member deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting family member',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Job History (CREATE)
+     * POST: /api/saveEmpHistory
+     */
+    public function saveEmpHistory(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'join_as' => 'nullable|string|max:100',
+                'work_location' => 'nullable|string|max:100',
+                'join_date' => 'nullable|date',
+                'designation' => 'nullable|string|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $history = Emp_historyModel::create([
+                'empno' => $request->input('empno'),
+                'join_as' => $request->input('join_as'),
+                'work_location' => $request->input('work_location'),
+                'join_date' => $this->parseDate($request->input('join_date')),
+                'designation' => $request->input('designation'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job history saved successfully',
+                'data' => $history
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving job history',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Job History (UPDATE)
+     * PUT: /api/updateEmpHistory/{id}
+     */
+    public function updateEmpHistory($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'join_as' => 'nullable|string|max:100',
+                'work_location' => 'nullable|string|max:100',
+                'join_date' => 'nullable|date',
+                'designation' => 'nullable|string|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $history = Emp_historyModel::findOrFail($id);
+            $history->update([
+                'join_as' => $request->input('join_as'),
+                'work_location' => $request->input('work_location'),
+                'join_date' => $this->parseDate($request->input('join_date')),
+                'designation' => $request->input('designation'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job history updated successfully',
+                'data' => $history
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating job history',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Job History (DELETE)
+     * DELETE: /api/deleteEmpHistory/{id}
+     */
+    public function deleteEmpHistory($id)
+    {
+        try {
+            $history = Emp_historyModel::findOrFail($id);
+            $history->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job history deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting job history',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Training (CREATE)
+     * POST: /api/saveEmpTraining
+     */
+    public function saveEmpTraining(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                't_title' => 'nullable|string|max:255',
+                't_conducted_by' => 'nullable|string|max:255',
+                't_from' => 'nullable|date',
+                't_to' => 'nullable|date',
+                't_certificate' => 'nullable|string|max:255',
+                'skill_type' => 'nullable|string|max:100',
+                'to_days' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $training = Emp_trainingModel::create([
+                'empno' => $request->input('empno'),
+                't_title' => $request->input('t_title'),
+                't_conducted_by' => $request->input('t_conducted_by'),
+                't_from' => $this->parseDate($request->input('t_from')),
+                't_to' => $this->parseDate($request->input('t_to')),
+                't_certificate' => $request->input('t_certificate'),
+                'skill_type' => $request->input('skill_type'),
+                'to_days' => $request->input('to_days'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Training saved successfully',
+                'data' => $training
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving training',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Training (UPDATE)
+     * PUT: /api/updateEmpTraining/{id}
+     */
+    public function updateEmpTraining($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                't_title' => 'nullable|string|max:255',
+                't_conducted_by' => 'nullable|string|max:255',
+                't_from' => 'nullable|date',
+                't_to' => 'nullable|date',
+                't_certificate' => 'nullable|string|max:255',
+                'skill_type' => 'nullable|string|max:100',
+                'to_days' => 'nullable|integer',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $training = Emp_trainingModel::findOrFail($id);
+            $training->update([
+                't_title' => $request->input('t_title'),
+                't_conducted_by' => $request->input('t_conducted_by'),
+                't_from' => $this->parseDate($request->input('t_from')),
+                't_to' => $this->parseDate($request->input('t_to')),
+                't_certificate' => $request->input('t_certificate'),
+                'skill_type' => $request->input('skill_type'),
+                'to_days' => $request->input('to_days'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Training updated successfully',
+                'data' => $training
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating training',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Training (DELETE)
+     * DELETE: /api/deleteEmpTraining/{id}
+     */
+    public function deleteEmpTraining($id)
+    {
+        try {
+            $training = Emp_trainingModel::findOrFail($id);
+            $training->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Training deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting training',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Save Work Experience (CREATE)
+     * POST: /api/saveEmpWorkExp
+     */
+    public function saveEmpWorkExp(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'organization' => 'required|string|max:255',
+                'd_from' => 'required|date',
+                'd_to' => 'nullable|date',
+                'leave_reason' => 'nullable|string|max:500',
+                'prv_emp_no' => 'nullable|string|max:50',
+                'org_address' => 'nullable|string|max:500',
+                'org_tel' => 'nullable|string|max:20',
+                'last_sal_drawn' => 'nullable|numeric',
+                'total_years' => 'nullable|numeric',
+                'designation' => 'nullable|string|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $workExp = Emp_work_expModel::create([
+                'empno' => $request->input('empno'),
+                'organization' => $request->input('organization'),
+                'd_from' => $this->parseDate($request->input('d_from')),
+                'd_to' => $this->parseDate($request->input('d_to')),
+                'leave_reason' => $request->input('leave_reason'),
+                'prv_emp_no' => $request->input('prv_emp_no'),
+                'org_address' => $request->input('org_address'),
+                'org_tel' => $request->input('org_tel'),
+                'last_sal_drawn' => $request->input('last_sal_drawn'),
+                'total_days' => $request->input('total_years'),
+                'designation' => $request->input('designation'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Work experience saved successfully',
+                'data' => $workExp
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving work experience',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Work Experience (UPDATE)
+     * PUT: /api/updateEmpWorkExp/{id}
+     */
+    public function updateEmpWorkExp($id, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'organization' => 'required|string|max:255',
+                'd_from' => 'required|date',
+                'd_to' => 'nullable|date',
+                'leave_reason' => 'nullable|string|max:500',
+                'prv_emp_no' => 'nullable|string|max:50',
+                'org_address' => 'nullable|string|max:500',
+                'org_tel' => 'nullable|string|max:20',
+                'last_sal_drawn' => 'nullable|numeric',
+                'total_years' => 'nullable|numeric',
+                'designation' => 'nullable|string|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $workExp = Emp_work_expModel::findOrFail($id);
+            $workExp->update([
+                'organization' => $request->input('organization'),
+                'd_from' => $this->parseDate($request->input('d_from')),
+                'd_to' => $this->parseDate($request->input('d_to')),
+                'leave_reason' => $request->input('leave_reason'),
+                'prv_emp_no' => $request->input('prv_emp_no'),
+                'org_address' => $request->input('org_address'),
+                'org_tel' => $request->input('org_tel'),
+                'last_sal_drawn' => $request->input('last_sal_drawn'),
+                'total_years' => $request->input('total_years'),
+                'designation' => $request->input('designation'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Work experience updated successfully',
+                'data' => $workExp
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating work experience',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Work Experience (DELETE)
+     * DELETE: /api/deleteEmpWorkExp/{id}
+     */
+    public function deleteEmpWorkExp($id)
+    {
+        try {
+            $workExp = Emp_work_expModel::findOrFail($id);
+            $workExp->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Work experience deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting work experience',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // ═════════════════════════════════════════════════════════════════════
     //  GET OFFICIAL DATA (Helper method to retrieve official info with names)

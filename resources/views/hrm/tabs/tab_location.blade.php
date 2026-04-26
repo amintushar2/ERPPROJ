@@ -165,9 +165,9 @@
             e.preventDefault();
             const fd = {};
             $(this).serializeArray().forEach(f => fd[f.name] = f.value);
-            fd.empno = fd.empno || getEmpno();
+            fd.empno = fd.empno || $('#frmLoc [name="empno"]').val();
             $.ajax({
-                url: '/api/saveEmpLocation',
+                url: '/saveEmpLocation',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(fd),

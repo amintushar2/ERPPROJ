@@ -58,13 +58,16 @@
 <script>
     $(function() {
         loadJobRows();
+
         $('#frmJob').on('submit', function(e) {
             e.preventDefault();
+
             const fd = {};
             $(this).serializeArray().forEach(f => fd[f.name] = f.value);
-            fd.empno = fd.empno || getEmpno();
+            fd.empno = fd.empno || $('#frmJob [name="empno"]').val();
+
             $.ajax({
-                url: '/api/saveEmpJobHistory',
+                url: '/api/saveEmpHistory',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(fd),
@@ -80,87 +83,92 @@
     });
 
     function loadJobRows() {
-        $.get("{{ URL::to('getJob') }
-            setTimeout(function() {
-                if (window.initDatePick) initDatePick(document);
-            }, 50);
-        }
-        /"+getEmpno(),d=>$('#tbl_job').html(d)); }
+        const empno = $('#frmJob [name="empno"]').val();
+        if (!empno) return;
+
+        $.get("{{ URL::to('getJob') }}" + '/' + empno, function(d) {
+            $('#tbl_job').html(d);
+        });
+
+        setTimeout(function() {
+            if (window.initDatePick) initDatePick(document);
+        }, 50);
+    }
 
 
-        /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
-        (function() {
-            function initDatePick(scope) {
-                var scope = scope || document;
-                scope.querySelectorAll('input.date-pick').forEach(function(el) {
-                    if (el.dataset.fpInit) return; // skip if already init
-                    el.dataset.fpInit = '1';
+    /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
+    (function() {
+        function initDatePick(scope) {
+            var scope = scope || document;
+            scope.querySelectorAll('input.date-pick').forEach(function(el) {
+                if (el.dataset.fpInit) return; // skip if already init
+                el.dataset.fpInit = '1';
 
-                    // 1. Flatpickr calendar
-                    if (typeof flatpickr !== 'undefined') {
-                        flatpickr(el, {
-                            dateFormat: 'd-m-Y',
-                            allowInput: true,
-                            disableMobile: true,
-                            onReady: function(_, __, fp) {
-                                fp.calendarContainer && fp.calendarContainer.classList.add(
-                                    'fp-sm');
-                            }
-                        });
-                    }
-
-                    // 2. Smart 6/8-digit auto-format on keyup
-                    el.addEventListener('keydown', function(e) {
-                        if (e.key === 'Tab' || e.key === 'Enter') {
-                            autoFormatDate(this);
+                // 1. Flatpickr calendar
+                if (typeof flatpickr !== 'undefined') {
+                    flatpickr(el, {
+                        dateFormat: 'd-m-Y',
+                        allowInput: true,
+                        disableMobile: true,
+                        onReady: function(_, __, fp) {
+                            fp.calendarContainer && fp.calendarContainer.classList.add(
+                                'fp-sm');
                         }
                     });
-                    el.addEventListener('blur', function() {
-                        autoFormatDate(this);
-                    });
-                });
-            }
-
-            function autoFormatDate(el) {
-                var raw = el.value.replace(/\D/g, ''); // digits only
-                if (!raw) return;
-
-                var day, mon, yr;
-
-                if (raw.length === 6) {
-                    // 020496 → 02-04-1996
-                    day = raw.substr(0, 2);
-                    mon = raw.substr(2, 2);
-                    yr = raw.substr(4, 2);
-                    yr = (parseInt(yr, 10) <= 30 ? '20' : '19') + yr;
-                } else if (raw.length === 8) {
-                    // 02041996 → 02-04-1996
-                    day = raw.substr(0, 2);
-                    mon = raw.substr(2, 2);
-                    yr = raw.substr(4, 4);
-                } else {
-                    return; // don't reformat partial or already-formatted
                 }
 
-                // Validate range
-                var d = parseInt(day, 10),
-                    m = parseInt(mon, 10),
-                    y = parseInt(yr, 10);
-                if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900 || y > 2099) return;
+                // 2. Smart 6/8-digit auto-format on keyup
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Tab' || e.key === 'Enter') {
+                        autoFormatDate(this);
+                    }
+                });
+                el.addEventListener('blur', function() {
+                    autoFormatDate(this);
+                });
+            });
+        }
 
-                var formatted = day + '-' + mon + '-' + yr;
-                el.value = formatted;
+        function autoFormatDate(el) {
+            var raw = el.value.replace(/\D/g, ''); // digits only
+            if (!raw) return;
 
-                // Push value into Flatpickr instance if present
-                if (el._flatpickr) el._flatpickr.setDate(formatted, false, 'd-m-Y');
+            var day, mon, yr;
+
+            if (raw.length === 6) {
+                // 020496 → 02-04-1996
+                day = raw.substr(0, 2);
+                mon = raw.substr(2, 2);
+                yr = raw.substr(4, 2);
+                yr = (parseInt(yr, 10) <= 30 ? '20' : '19') + yr;
+            } else if (raw.length === 8) {
+                // 02041996 → 02-04-1996
+                day = raw.substr(0, 2);
+                mon = raw.substr(2, 2);
+                yr = raw.substr(4, 4);
+            } else {
+                return; // don't reformat partial or already-formatted
             }
 
-            // Init on DOMContentLoaded (for empform Tab1)
-            document.addEventListener('DOMContentLoaded', function() {
-                initDatePick(document);
-            });
+            // Validate range
+            var d = parseInt(day, 10),
+                m = parseInt(mon, 10),
+                y = parseInt(yr, 10);
+            if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900 || y > 2099) return;
 
-            // Expose for lazy-loaded AJAX tabs
-            window.initDatePick = initDatePick;
-        })();
+            var formatted = day + '-' + mon + '-' + yr;
+            el.value = formatted;
+
+            // Push value into Flatpickr instance if present
+            if (el._flatpickr) el._flatpickr.setDate(formatted, false, 'd-m-Y');
+        }
+
+        // Init on DOMContentLoaded (for empform Tab1)
+        document.addEventListener('DOMContentLoaded', function() {
+            initDatePick(document);
+        });
+
+        // Expose for lazy-loaded AJAX tabs
+        window.initDatePick = initDatePick;
+    })();
 </script>

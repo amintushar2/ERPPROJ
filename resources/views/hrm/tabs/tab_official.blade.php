@@ -448,7 +448,7 @@
             const formData = lovFormObjectWithNames('#frmOfficial');
 
             // Add empno if not already present
-            formData.empno = formData.empno || getEmpno();
+            formData.empno = formData.empno || $('#tabOfficialForm [name="empno"]').val();
 
             // ─── Show what data is being sent (for debugging) ──────────
             console.log('Form Data Being Sent:', formData);
@@ -456,7 +456,7 @@
 
             // ─── Submit via AJAX ───────────────────────────────────────
             $.ajax({
-                url: '/api/saveEmpOfficial',
+                url: '/saveEmpOfficial',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(formData),

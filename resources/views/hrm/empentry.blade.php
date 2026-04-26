@@ -1828,7 +1828,7 @@
                 };
 
                 $.ajax({
-                    url: '/api/saveEmpQualification',
+                    url: '/saveEmpQualification',
                     method: 'POST',
                     processData: false, // ✅ REQUIRED
                     contentType: false,

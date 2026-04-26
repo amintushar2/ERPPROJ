@@ -22,4 +22,5 @@ class Emp_qualificationModel extends Model
         'marks',
         'subject'
     ];
+    
 }

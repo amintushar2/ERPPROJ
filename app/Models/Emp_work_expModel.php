@@ -22,7 +22,7 @@ class Emp_work_expModel extends Model
         'org_address',
         'org_tel',
         'last_sal_drawn',
-        'total_years',
+        'total_days',
         'designation'
     ];
 }
