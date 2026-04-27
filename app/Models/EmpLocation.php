@@ -10,6 +10,7 @@ class EmpLocation extends Model
     use HasFactory;
     
     protected $table='EMP_LOCATION';
+    protected $primaryKey = 'empno';
     public $timestamps = false;
     public $incrementing = false;
 

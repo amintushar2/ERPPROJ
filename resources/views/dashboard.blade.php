@@ -359,6 +359,205 @@
         }
     </style>
 @endpush
+@push('styles')
+    <style>
+        /* ── HEATMAP ── */
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+
+        .heatmap-day-label {
+            font-size: .58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--hrm-muted);
+            text-align: center;
+            padding-bottom: 3px;
+            letter-spacing: .04em;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .55rem;
+            font-weight: 600;
+            cursor: default;
+            position: relative;
+            transition: transform .15s;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.25);
+            z-index: 10;
+        }
+
+        .heatmap-cell.empty {
+            background: transparent;
+        }
+
+        .heatmap-cell.future {
+            background: #f0f0f0;
+            color: #bbb;
+        }
+
+        .hm-0 {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .hm-25 {
+            background: #fed7aa;
+            color: #c2410c;
+        }
+
+        .hm-50 {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+
+        .hm-75 {
+            background: #bbf7d0;
+            color: #166534;
+        }
+
+        .hm-90 {
+            background: #86efac;
+            color: #14532d;
+        }
+
+        .hm-100 {
+            background: #4ade80;
+            color: #14532d;
+        }
+
+        /* ── DEPT ATTENDANCE RATE ── */
+        .dept-att-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 7px;
+        }
+
+        .dept-att-name {
+            font-size: .72rem;
+            color: #2c3e50;
+            min-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dept-att-bar-wrap {
+            flex: 1;
+            background: #e9ecef;
+            border-radius: 3px;
+            height: 7px;
+            overflow: hidden;
+        }
+
+        .dept-att-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .7s ease;
+        }
+
+        .dept-att-pct {
+            font-size: .7rem;
+            font-weight: 700;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* ── LATE TREND ── */
+        .late-bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .late-bar-outer {
+            width: 100%;
+            background: #e9ecef;
+            border-radius: 3px 3px 0 0;
+            height: 70px;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .late-bar-fill {
+            width: 100%;
+            border-radius: 3px 3px 0 0;
+            background: #fd7e14;
+            transition: height .7s ease;
+        }
+
+        .late-bar-label {
+            font-size: .6rem;
+            color: var(--hrm-muted);
+            text-align: center;
+        }
+
+        .late-bar-val {
+            font-size: .65rem;
+            font-weight: 700;
+            color: #c2410c;
+        }
+
+        /* ── OT COST TABLE ── */
+        .ot-cost-table td,
+        .ot-cost-table th {
+            padding: .45rem .65rem;
+        }
+
+        .ot-cost-bar-wrap {
+            background: #e9ecef;
+            border-radius: 3px;
+            height: 5px;
+            width: 80px;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: middle;
+        }
+
+        .ot-cost-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: #0d6efd;
+            transition: width .7s ease;
+        }
+
+        /* ── LEGEND DOT ── */
+        .hm-legend {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            align-items: center;
+        }
+
+        .hm-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: .6rem;
+            color: var(--hrm-muted);
+        }
+
+        .hm-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+    </style>
+@endpush
 
 @section('content')
     <div class="hrm-page">
@@ -495,10 +694,10 @@
                         @php
                             $male =
                                 collect($genderSplit)->firstWhere('sex', 'Male')->cnt ??
-                                (collect($genderSplit)->firstWhere('sex', 'M')->cnt ?? 0);
+                                (collect($genderSplit)->firstWhere('sex', 'Male')->cnt ?? 0);
                             $female =
                                 collect($genderSplit)->firstWhere('sex', 'Female')->cnt ??
-                                (collect($genderSplit)->firstWhere('sex', 'F')->cnt ?? 0);
+                                (collect($genderSplit)->firstWhere('sex', 'Female')->cnt ?? 0);
                             $gTotal = $male + $female ?: 1;
                             $mPct = round(($male / $gTotal) * 100);
                             $fPct = round(($female / $gTotal) * 100);
@@ -686,207 +885,216 @@
     </div>{{-- /hrm-page --}}
 
 
-    {{-- ══════════════════════════════════════════════════════════════════════════
+    <div class="row g-3 mb-3">
+
+
+
+
+
+        {{-- ══════════════════════════════════════════════════════════════════════════
      MODALS
 ════════════════════════════════════════════════════════════════════════════ --}}
 
-    {{-- ── MODAL: PROBATION ENDING THIS MONTH ── --}}
-    <div class="modal fade" id="modalProbation" tabindex="-1" aria-labelledby="modalProbationLabel">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header py-2 px-3" style="background:var(--hrm-primary)">
-                    <h6 class="modal-title text-white mb-0" id="modalProbationLabel">
-                        <i class="bi bi-hourglass-split me-2"></i>
-                        Probation Period Ending — {{ now()->format('F Y') }}
-                    </h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="table hrm-table" id="tblProbation">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Emp No</th>
-                                    <th>Name</th>
-                                    <th>Department</th>
-                                    <th>Designation</th>
-                                    <th>Join Date</th>
-                                    <th>Probation Period</th>
-                                    <th>Confirm Date</th>
-                                    <th>Months Served</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($probationEnd as $i => $emp)
-                                    <tr>
-                                        <td>{{ $i + 1 }}</td>
-                                        <td>{{ $emp->empno }}</td>
-                                        <td>{{ $emp->emp_name }}</td>
-                                        <td>{{ $emp->dept_name }}</td>
-                                        <td>{{ $emp->designation_name }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
-                                        <td>{{ $emp->provision_period }} months</td>
-                                        <td>
-                                            @if ($emp->conform_date)
-                                                {{ \Carbon\Carbon::parse($emp->conform_date)->format('d M Y') }}
-                                            @else
-                                                <span class="text-warning fw-semibold">Pending</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $emp->months_served }}</td>
-                                        <td>
-                                            <span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="text-center text-muted py-4">No probation confirmations
-                                            due this month.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+        {{-- ── MODAL: PROBATION ENDING THIS MONTH ── --}}
+        <div class="modal fade" id="modalProbation" tabindex="-1" aria-labelledby="modalProbationLabel">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header py-2 px-3" style="background:var(--hrm-primary)">
+                        <h6 class="modal-title text-white mb-0" id="modalProbationLabel">
+                            <i class="bi bi-hourglass-split me-2"></i>
+                            Probation Period Ending — {{ now()->format('F Y') }}
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                </div>
-                <div class="modal-footer py-2 px-3 no-print">
-                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($probationEnd) }} record(s)</span>
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblProbation','Probation Period Ending — {{ now()->format('F Y') }}')">
-                        <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-body p-0">
+                        <div class="table-responsive">
+                            <table class="table hrm-table" id="tblProbation">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Emp No</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Join Date</th>
+                                        <th>Probation Period</th>
+                                        <th>Confirm Date</th>
+                                        <th>Months Served</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($probationEnd as $i => $emp)
+                                        <tr>
+                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $emp->empno }}</td>
+                                            <td>{{ $emp->emp_name }}</td>
+                                            <td>{{ $emp->dept_name }}</td>
+                                            <td>{{ $emp->designation_name }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
+                                            <td>{{ $emp->provision_period }} months</td>
+                                            <td>
+                                                @if ($emp->conform_date)
+                                                    {{ \Carbon\Carbon::parse($emp->conform_date)->format('d M Y') }}
+                                                @else
+                                                    <span class="text-warning fw-semibold">Pending</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $emp->months_served }}</td>
+                                            <td>
+                                                <span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="10" class="text-center text-muted py-4">No probation
+                                                confirmations
+                                                due this month.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2 px-3 no-print">
+                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($probationEnd) }}
+                            record(s)</span>
+                        <button class="btn btn-outline-secondary btn-sm"
+                            onclick="printModal('tblProbation','Probation Period Ending — {{ now()->format('F Y') }}')">
+                            <i class="bi bi-printer me-1"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- ── MODAL: INCREMENT DUE THIS MONTH ── --}}
-    <div class="modal fade" id="modalIncrementThis" tabindex="-1" aria-labelledby="modalIncrThisLabel">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header py-2 px-3" style="background:#198754">
-                    <h6 class="modal-title text-white mb-0" id="modalIncrThisLabel">
-                        <i class="bi bi-graph-up-arrow me-2"></i>
-                        Increment Due This Month — {{ now()->format('F Y') }}
-                    </h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="table hrm-table" id="tblIncrThis">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Emp No</th>
-                                    <th>Name</th>
-                                    <th>Department</th>
-                                    <th>Designation</th>
-                                    <th>Increment Date</th>
-                                    <th>Current Gross</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($incrementThisMonth as $i => $emp)
-                                    <tr>
-                                        <td>{{ $i + 1 }}</td>
-                                        <td>{{ $emp->empno }}</td>
-                                        <td>{{ $emp->emp_name }}</td>
-                                        <td>{{ $emp->dept_name }}</td>
-                                        <td>{{ $emp->designation_name }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
-                                        <td class="fw-semibold text-success">{{ number_format($emp->gross, 2) }}</td>
-                                        <td class="no-print">
-                                            <span class="hrm-badge bg-success bg-opacity-15 text-success">Process</span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted py-4">No increments due this
-                                            month.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+        {{-- ── MODAL: INCREMENT DUE THIS MONTH ── --}}
+        <div class="modal fade" id="modalIncrementThis" tabindex="-1" aria-labelledby="modalIncrThisLabel">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header py-2 px-3" style="background:#198754">
+                        <h6 class="modal-title text-white mb-0" id="modalIncrThisLabel">
+                            <i class="bi bi-graph-up-arrow me-2"></i>
+                            Increment Due This Month — {{ now()->format('F Y') }}
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                </div>
-                <div class="modal-footer py-2 px-3 no-print">
-                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementThisMonth) }}
-                        record(s)</span>
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblIncrThis','Increment Due — {{ now()->format('F Y') }}')">
-                        <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-body p-0">
+                        <div class="table-responsive">
+                            <table class="table hrm-table" id="tblIncrThis">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Emp No</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Increment Date</th>
+                                        <th>Current Gross</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($incrementThisMonth as $i => $emp)
+                                        <tr>
+                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $emp->empno }}</td>
+                                            <td>{{ $emp->emp_name }}</td>
+                                            <td>{{ $emp->dept_name }}</td>
+                                            <td>{{ $emp->designation_name }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
+                                            <td class="fw-semibold text-success">{{ number_format($emp->gross, 2) }}</td>
+                                            <td class="no-print">
+                                                <span
+                                                    class="hrm-badge bg-success bg-opacity-15 text-success">Process</span>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">No increments due this
+                                                month.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2 px-3 no-print">
+                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementThisMonth) }}
+                            record(s)</span>
+                        <button class="btn btn-outline-secondary btn-sm"
+                            onclick="printModal('tblIncrThis','Increment Due — {{ now()->format('F Y') }}')">
+                            <i class="bi bi-printer me-1"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- ── MODAL: INCREMENT DUE NEXT MONTH ── --}}
-    <div class="modal fade" id="modalIncrementNext" tabindex="-1" aria-labelledby="modalIncrNextLabel">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header py-2 px-3" style="background:#0d6efd">
-                    <h6 class="modal-title text-white mb-0" id="modalIncrNextLabel">
-                        <i class="bi bi-calendar2-plus me-2"></i>
-                        Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}
-                    </h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="table-responsive">
-                        <table class="table hrm-table" id="tblIncrNext">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Emp No</th>
-                                    <th>Name</th>
-                                    <th>Department</th>
-                                    <th>Designation</th>
-                                    <th>Increment Date</th>
-                                    <th>Current Gross</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($incrementNextMonth as $i => $emp)
-                                    <tr>
-                                        <td>{{ $i + 1 }}</td>
-                                        <td>{{ $emp->empno }}</td>
-                                        <td>{{ $emp->emp_name }}</td>
-                                        <td>{{ $emp->dept_name }}</td>
-                                        <td>{{ $emp->designation_name }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
-                                        <td class="fw-semibold">{{ number_format($emp->gross, 2) }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">No increments due next
-                                            month.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+        {{-- ── MODAL: INCREMENT DUE NEXT MONTH ── --}}
+        <div class="modal fade" id="modalIncrementNext" tabindex="-1" aria-labelledby="modalIncrNextLabel">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header py-2 px-3" style="background:#0d6efd">
+                        <h6 class="modal-title text-white mb-0" id="modalIncrNextLabel">
+                            <i class="bi bi-calendar2-plus me-2"></i>
+                            Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}
+                        </h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                </div>
-                <div class="modal-footer py-2 px-3 no-print">
-                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementNextMonth) }}
-                        record(s)</span>
-                    <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblIncrNext','Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}')">
-                        <i class="bi bi-printer me-1"></i> Print
-                    </button>
-                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-body p-0">
+                        <div class="table-responsive">
+                            <table class="table hrm-table" id="tblIncrNext">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Emp No</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Increment Date</th>
+                                        <th>Current Gross</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($incrementNextMonth as $i => $emp)
+                                        <tr>
+                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $emp->empno }}</td>
+                                            <td>{{ $emp->emp_name }}</td>
+                                            <td>{{ $emp->dept_name }}</td>
+                                            <td>{{ $emp->designation_name }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
+                                            <td class="fw-semibold">{{ number_format($emp->gross, 2) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">No increments due next
+                                                month.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2 px-3 no-print">
+                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementNextMonth) }}
+                            record(s)</span>
+                        <button class="btn btn-outline-secondary btn-sm"
+                            onclick="printModal('tblIncrNext','Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}')">
+                            <i class="bi bi-printer me-1"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection
 
-@push('scripts')
-    {{--
+    @push('scripts')
+        {{--
     ════════════════════════════════════════════════════════════════
     DASHBOARD AUTO-REFRESH  — paste inside @push('scripts')
     in your dashboard_blade.php, AFTER the existing clock script.
@@ -901,70 +1109,70 @@
     ════════════════════════════════════════════════════════════════
 --}}
 
-    <script>
-        // ─────────────────────────────────────────────────────────────────
-        // CONFIG
-        // ─────────────────────────────────────────────────────────────────
-        const REFRESH_INTERVAL_MS = 60000; // 60 seconds — change freely
-        const LIVE_DATA_URL = '{{ route('hrm.dashboard.liveData') }}';
+        <script>
+            // ─────────────────────────────────────────────────────────────────
+            // CONFIG
+            // ─────────────────────────────────────────────────────────────────
+            const REFRESH_INTERVAL_MS = 60000; // 60 seconds — change freely
+            const LIVE_DATA_URL = '{{ route('hrm.dashboard.liveData') }}';
 
-        // ─────────────────────────────────────────────────────────────────
-        // BADGE: "Last updated" shown in the page header
-        // We inject it next to the Oracle HRM badge automatically.
-        // ─────────────────────────────────────────────────────────────────
-        function injectUpdatedBadge() {
-            if (document.getElementById('lastUpdatedBadge')) return; // already exists
+            // ─────────────────────────────────────────────────────────────────
+            // BADGE: "Last updated" shown in the page header
+            // We inject it next to the Oracle HRM badge automatically.
+            // ─────────────────────────────────────────────────────────────────
+            function injectUpdatedBadge() {
+                if (document.getElementById('lastUpdatedBadge')) return; // already exists
 
-            const badge = document.createElement('span');
-            badge.id = 'lastUpdatedBadge';
-            badge.style.cssText = `
+                const badge = document.createElement('span');
+                badge.id = 'lastUpdatedBadge';
+                badge.style.cssText = `
         display:inline-flex;align-items:center;gap:.4rem;
         font-size:.72rem;font-weight:500;color:#155724;
         background:#d4edda;border:1px solid #c3e6cb;
         border-radius:20px;padding:.28rem .85rem;
     `;
-            badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating…</span>';
+                badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating…</span>';
 
-            // Insert after the Oracle HRM badge
-            const hrmBadge = document.querySelector('.hrm-db-badge');
-            if (hrmBadge) hrmBadge.insertAdjacentElement('afterend', badge);
-        }
+                // Insert after the Oracle HRM badge
+                const hrmBadge = document.querySelector('.hrm-db-badge');
+                if (hrmBadge) hrmBadge.insertAdjacentElement('afterend', badge);
+            }
 
-        // ─────────────────────────────────────────────────────────────────
-        // KPI CARD UPDATER — animates the number change
-        // ─────────────────────────────────────────────────────────────────
-        function animateValue(el, newVal) {
-            if (!el) return;
-            const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
-            const target = parseInt(String(newVal).replace(/,/g, '')) || 0;
-            if (current === target) return;
+            // ─────────────────────────────────────────────────────────────────
+            // KPI CARD UPDATER — animates the number change
+            // ─────────────────────────────────────────────────────────────────
+            function animateValue(el, newVal) {
+                if (!el) return;
+                const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+                const target = parseInt(String(newVal).replace(/,/g, '')) || 0;
+                if (current === target) return;
 
-            const step = target > current ? 1 : -1;
-            const diff = Math.abs(target - current);
-            const duration = Math.min(600, diff * 15); // max 600ms
-            const interval = Math.max(10, duration / diff);
+                const step = target > current ? 1 : -1;
+                const diff = Math.abs(target - current);
+                const duration = Math.min(600, diff * 15); // max 600ms
+                const interval = Math.max(10, duration / diff);
 
-            let cur = current;
-            const timer = setInterval(() => {
-                cur += step;
-                el.textContent = cur.toLocaleString();
-                if (cur === target) clearInterval(timer);
-            }, interval);
-        }
+                let cur = current;
+                const timer = setInterval(() => {
+                    cur += step;
+                    el.textContent = cur.toLocaleString();
+                    if (cur === target) clearInterval(timer);
+                }, interval);
+            }
 
-        // ─────────────────────────────────────────────────────────────────
-        // DEPT BAR CHART UPDATER
-        // ─────────────────────────────────────────────────────────────────
-        const DEPT_COLORS = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545', '#6c757d', '#20c997'];
+            // ─────────────────────────────────────────────────────────────────
+            // DEPT BAR CHART UPDATER
+            // ─────────────────────────────────────────────────────────────────
+            const DEPT_COLORS = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545', '#6c757d', '#20c997'];
 
-        function updateDeptBars(deptData) {
-            const container = document.getElementById('deptBarContainer');
-            if (!container || !deptData.length) return;
+            function updateDeptBars(deptData) {
+                const container = document.getElementById('deptBarContainer');
+                if (!container || !deptData.length) return;
 
-            const maxCnt = Math.max(...deptData.map(d => d.cnt), 1);
+                const maxCnt = Math.max(...deptData.map(d => d.cnt), 1);
 
-            // Build new rows
-            const html = deptData.map((dept, i) => `
+                // Build new rows
+                const html = deptData.map((dept, i) => `
         <div class="d-flex align-items-center gap-2 mb-2">
             <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
                  title="${escHtml(dept.dept_name)}">${escHtml(dept.dept_name)}</div>
@@ -979,62 +1187,62 @@
         </div>
     `).join('');
 
-            container.innerHTML = html;
+                container.innerHTML = html;
 
-            // Animate bars in after paint
-            requestAnimationFrame(() => {
-                container.querySelectorAll('.dept-bar-fill').forEach((bar, i) => {
-                    const pct = Math.round((deptData[i].cnt / maxCnt) * 100);
-                    bar.style.width = pct + '%';
+                // Animate bars in after paint
+                requestAnimationFrame(() => {
+                    container.querySelectorAll('.dept-bar-fill').forEach((bar, i) => {
+                        const pct = Math.round((deptData[i].cnt / maxCnt) * 100);
+                        bar.style.width = pct + '%';
+                    });
                 });
-            });
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // GENDER DONUT UPDATER
-        // ─────────────────────────────────────────────────────────────────
-        function updateGenderDonut(genderData) {
-            const male = (genderData.find(g => g.sex === 'M' || g.sex === 'Male') || {}).cnt ?? 0;
-            const female = (genderData.find(g => g.sex === 'F' || g.sex === 'Female') || {}).cnt ?? 0;
-            const total = male + female || 1;
-
-            const mPct = Math.round((male / total) * 100);
-            const circum = 2 * Math.PI * 30;
-            const maleDash = Math.round((mPct / 100) * circum * 100) / 100;
-            const femDash = Math.round((circum - maleDash) * 100) / 100;
-
-            // Male arc
-            const maleCircle = document.getElementById('genderMaleArc');
-            if (maleCircle) {
-                maleCircle.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
             }
-            // Female arc
-            const femCircle = document.getElementById('genderFemaleArc');
-            if (femCircle) {
-                femCircle.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
-                femCircle.setAttribute('stroke-dashoffset', `-${maleDash}`);
+
+            // ─────────────────────────────────────────────────────────────────
+            // GENDER DONUT UPDATER
+            // ─────────────────────────────────────────────────────────────────
+            function updateGenderDonut(genderData) {
+                const male = (genderData.find(g => g.sex === 'M' || g.sex === 'Male') || {}).cnt ?? 0;
+                const female = (genderData.find(g => g.sex === 'F' || g.sex === 'Female') || {}).cnt ?? 0;
+                const total = male + female || 1;
+
+                const mPct = Math.round((male / total) * 100);
+                const circum = 2 * Math.PI * 30;
+                const maleDash = Math.round((mPct / 100) * circum * 100) / 100;
+                const femDash = Math.round((circum - maleDash) * 100) / 100;
+
+                // Male arc
+                const maleCircle = document.getElementById('genderMaleArc');
+                if (maleCircle) {
+                    maleCircle.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
+                }
+                // Female arc
+                const femCircle = document.getElementById('genderFemaleArc');
+                if (femCircle) {
+                    femCircle.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
+                    femCircle.setAttribute('stroke-dashoffset', `-${maleDash}`);
+                }
+                // Centre total
+                const totalEl = document.getElementById('genderTotal');
+                if (totalEl) totalEl.textContent = total.toLocaleString();
+
+                // Legend numbers
+                const maleCountEl = document.getElementById('genderMaleCount');
+                const femaleCountEl = document.getElementById('genderFemaleCount');
+                if (maleCountEl) maleCountEl.textContent = `${male} (${mPct}%)`;
+                if (femaleCountEl) femaleCountEl.textContent = `${female} (${100 - mPct}%)`;
             }
-            // Centre total
-            const totalEl = document.getElementById('genderTotal');
-            if (totalEl) totalEl.textContent = total.toLocaleString();
 
-            // Legend numbers
-            const maleCountEl = document.getElementById('genderMaleCount');
-            const femaleCountEl = document.getElementById('genderFemaleCount');
-            if (maleCountEl) maleCountEl.textContent = `${male} (${mPct}%)`;
-            if (femaleCountEl) femaleCountEl.textContent = `${female} (${100 - mPct}%)`;
-        }
+            // ─────────────────────────────────────────────────────────────────
+            // OT BAR CHART UPDATER
+            // ─────────────────────────────────────────────────────────────────
+            function updateOTChart(otData) {
+                const container = document.getElementById('otBarContainer');
+                if (!container || !otData.length) return;
 
-        // ─────────────────────────────────────────────────────────────────
-        // OT BAR CHART UPDATER
-        // ─────────────────────────────────────────────────────────────────
-        function updateOTChart(otData) {
-            const container = document.getElementById('otBarContainer');
-            if (!container || !otData.length) return;
+                const maxOT = Math.max(...otData.map(d => parseFloat(d.avg_ot) || 0), 1);
 
-            const maxOT = Math.max(...otData.map(d => parseFloat(d.avg_ot) || 0), 1);
-
-            container.innerHTML = otData.map(row => `
+                container.innerHTML = otData.map(row => `
         <div class="ot-bar-col">
             <div class="ot-bar-val">${row.avg_ot}</div>
             <div class="ot-bar-outer">
@@ -1044,127 +1252,127 @@
         </div>
     `).join('');
 
-            requestAnimationFrame(() => {
-                container.querySelectorAll('.ot-bar-fill').forEach((bar, i) => {
-                    const h = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75);
-                    bar.style.height = h + 'px';
+                requestAnimationFrame(() => {
+                    container.querySelectorAll('.ot-bar-fill').forEach((bar, i) => {
+                        const h = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75);
+                        bar.style.height = h + 'px';
+                    });
                 });
-            });
-        }
+            }
 
-        // ─────────────────────────────────────────────────────────────────
-        // REFRESH INDICATOR — spinner flash on card
-        // ─────────────────────────────────────────────────────────────────
-        function flashRefresh() {
-            document.querySelectorAll('.hrm-stat').forEach(card => {
-                card.style.transition = 'opacity .2s';
-                card.style.opacity = '.6';
+            // ─────────────────────────────────────────────────────────────────
+            // REFRESH INDICATOR — spinner flash on card
+            // ─────────────────────────────────────────────────────────────────
+            function flashRefresh() {
+                document.querySelectorAll('.hrm-stat').forEach(card => {
+                    card.style.transition = 'opacity .2s';
+                    card.style.opacity = '.6';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                    }, 300);
+                });
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            // HELPER — escape HTML for dynamic content
+            // ─────────────────────────────────────────────────────────────────
+            function escHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            // MAIN FETCH — gets JSON and dispatches all updaters
+            // ─────────────────────────────────────────────────────────────────
+            function fetchDashboardData() {
+                fetch(LIVE_DATA_URL, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                            'Accept': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(res => {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (!data.success) return;
+
+                        flashRefresh();
+
+                        // ── KPI stat values ──────────────────────────────────────────────
+                        animateValue(document.getElementById('statTotalEmp'), data.total_employees);
+                        animateValue(document.getElementById('statPresent'), data.present);
+                        animateValue(document.getElementById('statOnLeave'), data.on_leave);
+                        animateValue(document.getElementById('statAbsent'), data.absent);
+                        animateValue(document.getElementById('statLate'), data.late);
+
+                        // Attendance rate text
+                        const rateEl = document.getElementById('statAttendanceRate');
+                        if (rateEl) rateEl.textContent = data.attendance_rate + '% attendance rate';
+
+                        // ── Charts ───────────────────────────────────────────────────────
+                        updateDeptBars(data.deptCount);
+                        updateGenderDonut(data.genderSplit);
+                        updateOTChart(data.avg_ot);
+
+                        // ── Alert badge counts ────────────────────────────────────────────
+                        const probBadge = document.getElementById('badgeProbation');
+                        const incrThis = document.getElementById('badgeIncrThis');
+                        const incrNext = document.getElementById('badgeIncrNext');
+                        if (probBadge) probBadge.textContent = data.probationEnd.length;
+                        if (incrThis) incrThis.textContent = data.incrementThisMonth.length;
+                        if (incrNext) incrNext.textContent = data.incrementNextMonth.length;
+                        console.log(data.incrementThisMonth.length);
+                        // ── Timestamp ────────────────────────────────────────────────────
+                        const el = document.getElementById('lastUpdatedText');
+                        if (el) el.textContent = 'Updated ' + data.updated_at;
+                    })
+                    .catch(err => {
+                        console.warn('[Dashboard] Refresh failed:', err.message);
+                        const el = document.getElementById('lastUpdatedText');
+                        if (el) el.textContent = '⚠ Refresh failed — retrying…';
+                    });
+            }
+
+            // ─────────────────────────────────────────────────────────────────
+            // BOOT — run once page is ready, then poll on interval
+            // ─────────────────────────────────────────────────────────────────
+            document.addEventListener('DOMContentLoaded', () => {
+                injectUpdatedBadge();
+
+                // First refresh after 60s; initial data already rendered by Blade
                 setTimeout(() => {
-                    card.style.opacity = '1';
-                }, 300);
+                    fetchDashboardData();
+                    setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
+                }, REFRESH_INTERVAL_MS);
             });
-        }
+        </script>
+        <script>
+            function printModal(tableId, title) {
+                console.log('Print function called for table:', tableId, 'with title:', title);
+                const table = document.getElementById(tableId);
+                if (!table) {
+                    alert('Table not found: ' + tableId);
+                    return;
+                }
 
-        // ─────────────────────────────────────────────────────────────────
-        // HELPER — escape HTML for dynamic content
-        // ─────────────────────────────────────────────────────────────────
-        function escHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-        }
+                const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-        // ─────────────────────────────────────────────────────────────────
-        // MAIN FETCH — gets JSON and dispatches all updaters
-        // ─────────────────────────────────────────────────────────────────
-        function fetchDashboardData() {
-            fetch(LIVE_DATA_URL, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-                        'Accept': 'application/json'
-                    },
-                    credentials: 'same-origin'
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('HTTP ' + res.status);
-                    return res.json();
-                })
-                .then(data => {
-                    if (!data.success) return;
+                const clone = table.cloneNode(true);
+                clone.querySelectorAll('.no-print').forEach(el => el.remove());
 
-                    flashRefresh();
+                const win = window.open('', '_blank', 'width=900,height=650');
+                if (!win) {
+                    alert('Popup blocked! Allow popups.');
+                    return;
+                }
 
-                    // ── KPI stat values ──────────────────────────────────────────────
-                    animateValue(document.getElementById('statTotalEmp'), data.total_employees);
-                    animateValue(document.getElementById('statPresent'), data.present);
-                    animateValue(document.getElementById('statOnLeave'), data.on_leave);
-                    animateValue(document.getElementById('statAbsent'), data.absent);
-                    animateValue(document.getElementById('statLate'), data.late);
-
-                    // Attendance rate text
-                    const rateEl = document.getElementById('statAttendanceRate');
-                    if (rateEl) rateEl.textContent = data.attendance_rate + '% attendance rate';
-
-                    // ── Charts ───────────────────────────────────────────────────────
-                    updateDeptBars(data.deptCount);
-                    updateGenderDonut(data.genderSplit);
-                    updateOTChart(data.avg_ot);
-
-                    // ── Alert badge counts ────────────────────────────────────────────
-                    const probBadge = document.getElementById('badgeProbation');
-                    const incrThis = document.getElementById('badgeIncrThis');
-                    const incrNext = document.getElementById('badgeIncrNext');
-                    if (probBadge) probBadge.textContent = data.probationEnd.length;
-                    if (incrThis) incrThis.textContent = data.incrementThisMonth.length;
-                    if (incrNext) incrNext.textContent = data.incrementNextMonth.length;
-                    console.log(data.incrementThisMonth.length);
-                    // ── Timestamp ────────────────────────────────────────────────────
-                    const el = document.getElementById('lastUpdatedText');
-                    if (el) el.textContent = 'Updated ' + data.updated_at;
-                })
-                .catch(err => {
-                    console.warn('[Dashboard] Refresh failed:', err.message);
-                    const el = document.getElementById('lastUpdatedText');
-                    if (el) el.textContent = '⚠ Refresh failed — retrying…';
-                });
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // BOOT — run once page is ready, then poll on interval
-        // ─────────────────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            injectUpdatedBadge();
-
-            // First refresh after 60s; initial data already rendered by Blade
-            setTimeout(() => {
-                fetchDashboardData();
-                setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
-            }, REFRESH_INTERVAL_MS);
-        });
-    </script>
-    <script>
-        function printModal(tableId, title) {
-            console.log('Print function called for table:', tableId, 'with title:', title);
-            const table = document.getElementById(tableId);
-            if (!table) {
-                alert('Table not found: ' + tableId);
-                return;
-            }
-
-            const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-            const clone = table.cloneNode(true);
-            clone.querySelectorAll('.no-print').forEach(el => el.remove());
-
-            const win = window.open('', '_blank', 'width=900,height=650');
-            if (!win) {
-                alert('Popup blocked! Allow popups.');
-                return;
-            }
-
-            win.document.write(`
+                win.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
@@ -1183,42 +1391,42 @@
             </html>
         `);
 
-            win.document.close();
+                win.document.close();
 
-            // KEY FIX HERE
-            setTimeout(() => {
-                win.focus();
-                win.print();
-            }, 500);
-        }
-    </script>
-    <script>
-        function updateClock() {
-            const now = new Date();
+                // KEY FIX HERE
+                setTimeout(() => {
+                    win.focus();
+                    win.print();
+                }, 500);
+            }
+        </script>
+        <script>
+            function updateClock() {
+                const now = new Date();
 
-            const options = {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric'
-            };
+                const options = {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                };
 
-            const date = now.toLocaleDateString('en-GB', options);
+                const date = now.toLocaleDateString('en-GB', options);
 
-            const time = now.toLocaleTimeString('en-GB', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
+                const time = now.toLocaleTimeString('en-GB', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
 
-            });
+                });
 
-            document.getElementById('liveClock').innerHTML = date + ' ' + time;
-        }
+                document.getElementById('liveClock').innerHTML = date + ' ' + time;
+            }
 
-        // run immediately
-        updateClock();
+            // run immediately
+            updateClock();
 
-        // update every second
-        setInterval(updateClock, 1000);
-    </script>
-@endpush
+            // update every second
+            setInterval(updateClock, 1000);
+        </script>
+    @endpush

@@ -167,7 +167,7 @@
             $(this).serializeArray().forEach(f => fd[f.name] = f.value);
             fd.empno = fd.empno || $('#frmLoc [name="empno"]').val();
             $.ajax({
-                url: '/saveEmpLocation',
+                url: '/api/saveEmpLocation',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(fd),

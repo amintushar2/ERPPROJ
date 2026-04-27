@@ -203,6 +203,108 @@ WHERE eo.COMPANY_ID = :cid
 ORDER BY eo.INCREMENT_DATE
 ", ['cid' => $companyId]);
 
+
+
+
+
+// ── 7. ATTENDANCE HEATMAP — daily present % for current month ────────────
+//
+//  att_date  : stored as DATE or VARCHAR 'YYYY-MM-DD'
+//  status    : your present flag (adjust 'P' to match your column value)
+//  Adjust table/column names to match your schema.
+//
+$attendanceHeatmap = DB::select("
+    SELECT
+        TO_NUMBER(TO_CHAR(att_date, 'DD'))          AS day,
+        ROUND(
+            SUM(CASE WHEN status2 = 'P' THEN 1 ELSE 0 END)
+            / NULLIF(COUNT(*), 0) * 100
+        , 1)                                         AS pct
+    FROM ATTENDANCE_DETAILS
+    WHERE
+        att_date >= TRUNC(SYSDATE, 'MM')
+        AND att_date <  LAST_DAY(SYSDATE) + 1
+    GROUP BY TO_NUMBER(TO_CHAR(att_date, 'DD'))
+    ORDER BY day
+");
+// Result shape: [ {day:1, pct:92.5}, {day:2, pct:88.0}, ... ]
+ 
+ 
+// ── 8. DEPT ATTENDANCE RATE TODAY — sorted best → worst ──────────────────
+//
+//  Joins your dept master to today's attendance.
+//  Adjust 'hr_attendance', 'hr_employees', 'hr_departments' as needed.
+//
+$deptAttToday = DB::select("
+    SELECT
+        d.dept_name,
+        SUM(CASE WHEN a.status2 = 'P' THEN 1 ELSE 0 END)  AS present,
+        COUNT(e.empno)                                         AS total,
+        ROUND(
+            SUM(CASE WHEN a.status2 = 'P' THEN 1 ELSE 0 END)
+            / NULLIF(COUNT(e.empno), 0) * 100
+        , 1)                                                   AS pct
+    FROM HRM.EMP_OFFICIAL e
+    JOIN HRM.DEPT d  ON d.DEPT_NO = e.DEPT_NO
+        JOIN HRM.EMP_PERSONAL pp  ON pp.EMPNO = e.EMPNO
+    LEFT JOIN ATTENDANCE_DETAILS a
+        ON  a.EMPNO    = e.EMPNO
+        AND a.ATT_DATE = TRUNC(SYSDATE)
+    WHERE pp.STATUS = 'Active'
+    GROUP BY d.dept_name
+    ORDER BY pct DESC NULLS LAST
+");
+// Result shape: [ {dept_name, present, total, pct}, ... ]
+ 
+ 
+// ── 9. LATE ARRIVAL TREND — count per day for last 7 days ────────────────
+//
+//  'L' = Late flag in att_status; adjust to your schema.
+//  If you track late separately (e.g. att_late = 'Y'), change the CASE.
+//
+$lateTrend = DB::select("
+    SELECT
+        att_date,
+        SUM(CASE WHEN LATE > 0 THEN 1 ELSE 0 END) AS late_count
+    FROM ATTENDANCE_DETAILS
+    WHERE att_date >= TRUNC(SYSDATE) - 6
+      AND att_date <= TRUNC(SYSDATE)
+    GROUP BY att_date
+    ORDER BY att_date
+");
+// Result shape: [ {att_date:'2025-04-21', late_count:3}, ... ]
+ 
+ 
+// ── 10. OT COST ESTIMATE BY DEPT — current month ─────────────────────────
+//
+//  Assumes:
+//    hr_overtime  : empno, ot_date, ot_hours
+//    hr_employees : empno, dept_code, gross  (monthly gross salary)
+//    hr_departments: dept_code, dept_name
+//
+//  Hourly rate  = gross / 208  (26 working days × 8 hrs — adjust divisor)
+//  Estimated OT = total_ot_hrs × avg_hourly_rate
+//
+$otCostByDept = DB::select("
+    SELECT
+        d.dept_name,
+        ROUND(SUM(o.othour), 2)                               AS total_ot_hrs,
+        ROUND(AVG(e.gross / 208), 2)                            AS avg_hourly_rate,
+        ROUND(SUM(o.othour) * AVG(e.gross / 208), 2)         AS estimated_cost
+    FROM ATTENDANCE_DETAILS o
+    JOIN HRM.EMP_OFFICIAL   e ON e.EMPNO     = o.EMPNO
+    JOIN HRM.EMP_personal   PP ON e.EMPNO     = PP.EMPNO
+    JOIN HRM.DEPT d ON d.DEPT_no = e.DEPT_NO
+    WHERE
+        o.ATT_DATE >= TRUNC(SYSDATE, 'MM')
+        AND o.ATT_DATE < LAST_DAY(SYSDATE) + 1
+        AND PP.STATUS = 'Active'
+    GROUP BY d.DEPT_NAME
+    ORDER BY estimated_cost DESC
+");
+// Result shape: [ {dept_name, total_ot_hrs, avg_hourly_rate, estimated_cost}, ... ]
+ 
+ 
         return view('dashboard', compact(
             'totalEmployees',
             'todayAtt',
@@ -215,7 +317,11 @@ ORDER BY eo.INCREMENT_DATE
             'incrementNextMonth',
             'recentJoiners',
             'today',
-            'effectiveDate'
+            'effectiveDate',
+                'attendanceHeatmap',
+     'deptAttToday',
+      'lateTrend',
+     'otCostByDept'
         ));
     }
 }

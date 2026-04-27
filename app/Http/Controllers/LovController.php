@@ -20,7 +20,7 @@ class LovController extends Controller
         $rows = DB::table('COMPANY_PROFILE as cp')
             ->join('COMPANY_PERMISSION as perm', 'cp.COMPANY_ID', '=', 'perm.COMPANY_ID')
             ->select('cp.COMPANY_ID as id', DB::raw("cp.COMPANY_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('cp.COMPANY_NAME', 'like', '%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(cp.COMPANY_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('cp.COMPANY_NAME')
             ->limit(50)
             ->distinct()
@@ -32,7 +32,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('DEPT')
             ->select('DEPT_NO as id', DB::raw("DEPT_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('DEPT_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(DEPT_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('DEPT_NO')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -42,7 +42,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('SECTION')
             ->select('SECTION_NO as id', DB::raw("SECTION_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('SECTION_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(SECTION_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('SECTION_NO')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -52,7 +52,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('FLOOR')
             ->select('FLOOR_ID as id', DB::raw("FLOOR_DESC as text"))
-            ->when($request->q, fn($q) => $q->where('FLOOR_DESC','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(FLOOR_DESC)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('FLOOR_ID')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -63,7 +63,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('EMP_TYPE')
             ->select('EMP_TYPE as id', DB::raw("EMP_TYPE as text"))
-            ->when($request->q, fn($q) => $q->where('EMP_TYPE','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(EMP_TYPE)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('EMP_TYPE')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -72,7 +72,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('LINE_INFO')
             ->select('LINE_NO as id', DB::raw("LINE as text"))
-            ->when($request->q, fn($q) => $q->where('LINE','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(LINE)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('LINE')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -82,7 +82,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('DESIGNATION_DETAILS')
             ->select('DES_ID as id', DB::raw("DESIGNATION_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('DESIGNATION_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(DESIGNATION_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('DESIGNATION_NAME')->limit(200)->get();
         return response()->json(['results' => $rows]);
     }
@@ -92,7 +92,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('HRM.GRADE')
             ->select('GRADE_ID as id', DB::raw("GRADE_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('GRADE_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(GRADE_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('GRADE_NAME')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -102,7 +102,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('HRM.SHIFT_INFO')
             ->select('SHIFT_CODE as id', DB::raw("SHIFT_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('SHIFT_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(SHIFT_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('SHIFT_NAME')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -113,7 +113,7 @@ class LovController extends Controller
         $rows = DB::table('HRM.CALENDER_MASTER')
             ->select('CAL_CODE as id', DB::raw("CAL_CODE as text"))
             ->where('IS_CLOSE','N')
-            ->when($request->q, fn($q) => $q->where('CAL_CODE','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(CAL_CODE)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('CAL_CODE')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -133,7 +133,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('BANK')
             ->select('BANK_NAME as id', DB::raw("BANK_NAME as text"))
-            ->when($request->q, fn($q) => $q->where('BANK_NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(BANK_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('BANK_NAME')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -143,7 +143,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('LV_CAT_MASTER')
             ->select('LV_CAT_ID as id', DB::raw("LV_CAT_ID as text"))
-            ->when($request->q, fn($q) => $q->where('LV_CAT_ID','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(LV_CAT_ID)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('LV_CAT_ID')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -153,7 +153,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('ALLW_CAT_MASTER')
             ->select('ALLW_CAT_ID as id', DB::raw("ALLW_CAT_ID as text"))
-            ->when($request->q, fn($q) => $q->where('ALLW_CAT_ID','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(ALLW_CAT_ID)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('ALLW_CAT_ID')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -163,7 +163,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('HRM.UPAZILAS')
             ->select('NAME as id', DB::raw("NAME as text"))
-            ->when($request->q, fn($q) => $q->where('NAME','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(NAME)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('NAME')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }
@@ -173,7 +173,7 @@ class LovController extends Controller
         $this->auth();
         $rows = DB::table('HRM.DISTRICT')
             ->select('DISTRICT as id', DB::raw("DISTRICT as text"))
-            ->when($request->q, fn($q) => $q->where('DISTRICT','like','%'.$request->q.'%'))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(DISTRICT)'), 'like', '%'.strtoupper($request->q).'%'))
             ->orderBy('DISTRICT')->limit(50)->get();
         return response()->json(['results' => $rows]);
     }

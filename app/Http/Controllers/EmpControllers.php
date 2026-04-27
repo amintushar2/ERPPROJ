@@ -526,6 +526,14 @@ private function parseDate($val)
                 'proximity_card_no' => $request->input('proximity_card_no'),
                 'ot_cat'          => $request->input('ot_cat'),
                 'attn_eff_date'   => $this->parseDate($request->input('attn_eff_date')),
+
+                // ─── Entitlement Information ──────────────────────────
+                'work_ent'        => $request->input('work_ent'),
+                'ot_ent'          => $request->input('ot_ent'),
+                'res_ent'         => $request->input('res_ent'),
+                'tran_ent'        => $request->input('tran_ent'),
+                'pf_ent'          => $request->input('pf_ent'),
+                'tax_ent'         => $request->input('tax_ent'),
                 
                 // ─── Leave Information (LOV) ──────────────────────────
                 'lv_cat_id'       => $request->input('lv_cat_id'),
@@ -574,11 +582,7 @@ private function parseDate($val)
                 return response()->json([
                     'success' => true, 
                     'message' => 'Official information updated successfully',
-                    'data' => [
-                        'empno' => $empno,
-                        'dept_name' => $data['dept_name'] ?? null,
-                        'des_name' => $data['des_name'] ?? null,
-                    ]
+                   
                 ], 200);
             }
             
@@ -598,11 +602,7 @@ private function parseDate($val)
             return response()->json([
                 'success' => true, 
                 'message' => 'Official information saved successfully',
-                'data' => [
-                    'empno' => $empno,
-                    'dept_name' => $data['dept_name'] ?? null,
-                    'des_name' => $data['des_name'] ?? null,
-                ]
+                
             ], 201);
             
         } catch(\Illuminate\Database\QueryException $e) {
@@ -676,7 +676,7 @@ public function saveEmpLocation(Request $request)
 
             $empno = $request->input('empno');
             $empLocation = EmpLocation::where('empno', $empno)->first();
-
+//dd($request->all());
             $locationData = [
                 'empno' => $empno,
                 'p_address' => $request->input('p_address'),
@@ -688,7 +688,7 @@ public function saveEmpLocation(Request $request)
                 'p_cperson' => $request->input('p_cperson'),
                 'p_village' => $request->input('p_village'),
                 'p_post_off' => $request->input('p_post_off'),
-                'p_police_station' => $request->input('p_police_station'),
+                'p_police_station' => $request->input('p_police_station11'),
                 'r_address' => $request->input('r_address'),
                 'r_city' => $request->input('r_city'),
                 'r_district' => $request->input('r_district'),
@@ -701,6 +701,7 @@ public function saveEmpLocation(Request $request)
             ];
 
             if ($empLocation) {
+                //dd($locationData);
                 $empLocation->update($locationData);
                 $message = 'Employee location information updated successfully';
                 $statusCode = 200;
@@ -1037,7 +1038,9 @@ public function saveEmpLocation(Request $request)
                 'empno' => $request->input('empno'),
                 'depd_no' => $request->input('depd_no'),
                 'depd_name' => $request->input('depd_name'),
+                'depent_name_bangla' => $request->input('depent_name_bangla'),
                 'relationship' => $request->input('relationship'),
+                'relation_bn' => $request->input('relation_bn'),
                 'd_dob' => $this->parseDate($request->input('d_dob')),
                 'd_age' => $request->input('d_age'),
                 'd_sex' => $request->input('d_sex'),
@@ -1090,9 +1093,12 @@ public function saveEmpLocation(Request $request)
 
             $family = Emp_familyModel::findOrFail($id);
             $family->update([
+               'empno' => $request->input('empno'),
                 'depd_no' => $request->input('depd_no'),
                 'depd_name' => $request->input('depd_name'),
+                'depent_name_bangla' => $request->input('depent_name_bangla'),
                 'relationship' => $request->input('relationship'),
+                'relation_bn' => $request->input('relation_bn'),
                 'd_dob' => $this->parseDate($request->input('d_dob')),
                 'd_age' => $request->input('d_age'),
                 'd_sex' => $request->input('d_sex'),

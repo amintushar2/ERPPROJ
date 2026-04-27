@@ -254,6 +254,71 @@
         </div>
     </div>
 
+    {{-- ── Entitlement Information ────────────────────────── --}}
+    <div class="sec-card">
+        <div class="sec-card-head"><i class="bi bi-award"></i> Entitlement Information</div>
+        <div class="sec-card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">Work Entitle:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="work_ent" id="of_work_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->work_ent }}" data-txt="{{ $off->work_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">Overtime:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="ot_ent" id="of_ot_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->ot_ent }}" data-txt="{{ $off->ot_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">Residence:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="res_ent" id="of_res_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->res_ent }}" data-txt="{{ $off->res_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">Transport:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="tran_ent" id="of_tran_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->tran_ent }}" data-txt="{{ $off->tran_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">PF Facility:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="pf_ent" id="of_pf_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->pf_ent }}" data-txt="{{ $off->pf_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row p-1"><label class="col-sm-5 col-form-label">Tax:</label>
+                        <div class="col-sm-7">
+                            <select class="form-select lov" name="tax_ent" id="of_tax_ent" data-lov="/lov/yesno"
+                                data-val="{{ $off->tax_ent }}" data-txt="{{ $off->tax_ent ?? '' }}"
+                                data-ph="Select…"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ── Leave Information ──────────────────────────────── --}}
     <div class="sec-card">
         <div class="sec-card-head"><i class="bi bi-calendar-x"></i> Leave Information</div>
@@ -456,7 +521,7 @@
 
             // ─── Submit via AJAX ───────────────────────────────────────
             $.ajax({
-                url: '/saveEmpOfficial',
+                url: '/api/saveEmpOfficial',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(formData),
