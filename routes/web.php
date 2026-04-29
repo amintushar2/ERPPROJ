@@ -35,7 +35,15 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserMenuPermissionController;
 use App\Http\Controllers\TempEmpPersonalController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Setup\DepartmentController;
+use App\Http\Controllers\Setup\SectionController;
+use App\Http\Controllers\Setup\DesignationController;
+use App\Http\Controllers\Setup\FloorController;
+use App\Http\Controllers\Setup\LineController;
+use App\Http\Controllers\Setup\ShiftController;
+use App\Http\Controllers\Setup\ReligionController;
+use App\Http\Controllers\Setup\EmpTypeController;
+use App\Http\Controllers\Setup\EntrySystemController;
 
 
 
@@ -148,7 +156,7 @@ Route::get('/auth/logout',[LoginController::class, 'logout'])->name('auth.logout
 
 
 
-
+//HRM Setup routes are defined in setup.php to keep web.php cleaner.
 
 Route::middleware(['web','auth'])->group(function () {
 
@@ -206,11 +214,11 @@ Route::middleware(['web','auth'])->group(function () {
 
 
 //report
-Route::get('/hrm/report',[ReportController::class, 'hrmreport'])->name('report.hrm')->middleware(['auth']);
-Route::get('getReportPera/{id}',[ReportController::class, 'getReportId'])->name('report.hrm');
-Route::get('getReportFile/{id}',[ReportController::class, 'getReportFile'])->name('report.hrm');
-Route::get('getReportName/{id}',[ReportController::class, 'getReportName'])->name('report.hrm');
-Route::get('hrm/pdfReport',[ReportController::class, 'pdfview']);
+// Route::get('/hrm/report',[ReportController::class, 'hrmreport'])->name('report.hrm')->middleware(['auth']);
+// Route::get('getReportPera/{id}',[ReportController::class, 'getReportId'])->name('report.hrm');
+// Route::get('getReportFile/{id}',[ReportController::class, 'getReportFile'])->name('report.hrm');
+// Route::get('getReportName/{id}',[ReportController::class, 'getReportName'])->name('report.hrm');
+// Route::get('hrm/pdfReport',[ReportController::class, 'pdfview']);
 
 
 
@@ -222,94 +230,73 @@ Route::get('/common/gatepass',[GpController::class, 'gatepass'])->name('common.g
 
 //emp_controller 
 // Route::get('/empnewentryfind',[EmpControllers::class,'empnewentryfind']);
-Route::get('/empsearch',[EmpControllers::class,'empsearch'])->middleware(['auth']);
+// Route::get('/empsearch',[EmpControllers::class,'empsearch'])->middleware(['auth']);
 
-Route::get('/index',[EmpControllers::class,'index']);
-Route::post('/emppersonalsave',[EmpControllers::class,'employeePersonalInsert'])->name('employeePersonalInsert')->middleware(['auth']);
-Route::post('/empoffcsave',[EmpControllers::class,'employeeOfficialInsert'])->name('employeeOfficalInsert')->middleware(['auth']);
-Route::post('/empaddcsave',[EmpControllers::class,'empaddressSave'])->name('empaddressSave')->middleware(['auth']);
-Route::post('/empEducsave',[EmpControllers::class,'empeduSave'])->name('empEducsave')->middleware(['auth']);
-Route::post('/empShortSave',[EmpControllers::class,'empShortSave'])->name('empEducsave')->middleware(['auth']);
-Route::post('/empNomineeSave',[EmpControllers::class,'empNomineeSave'])->name('empEducsave')->middleware(['auth']);
-Route::post('/empHistory',[EmpControllers::class,'empHistory'])->name('empHistory')->middleware(['auth']);
-Route::post('/empTraining',[EmpControllers::class,'empTraining'])->middleware(['auth']);
-Route::post('/empExp',[EmpControllers::class,'empExp'])->middleware(['auth']);
-Route::get('/empPerUpdate',[EmpControllers::class,'employeePersonalUpdate'])->middleware(['auth']);
-Route::get('/leave',[EmpControllers::class,'leaveentry'])->middleware(['auth']);
-Route::get('/getLeaveDetails/{empno}/{year}',[EmpControllers::class,'getLeaveDetails'])->middleware(['auth']);
-Route::get('/getPrebal/{empno}/{year}/{lv}',[EmpControllers::class,'getLeavePrebal'])->middleware(['auth']);
-Route::get('/getLeavBal/{lv}',[EmpControllers::class,'getLeavBal'])->middleware(['auth']);
-Route::get('/LeaveEntry',[EmpControllers::class,'leaveEntryIns'])->middleware(['auth']);
-Route::get('/LeaveEntryDet',[EmpControllers::class,'leaveEntryDet'])->middleware(['auth']);
-Route::get('/deleteLeave/{empno}/{year}/{lvsl}',[EmpControllers::class,'deleteLeave'])->middleware(['auth']);
-Route::get('/empSearchExist',[EmpControllers::class,'empSearchExist'])->middleware(['auth']);
+// Route::get('/index',[EmpControllers::class,'index']);
+// Route::post('/emppersonalsave',[EmpControllers::class,'employeePersonalInsert'])->name('employeePersonalInsert')->middleware(['auth']);
+// Route::post('/empoffcsave',[EmpControllers::class,'employeeOfficialInsert'])->name('employeeOfficalInsert')->middleware(['auth']);
+// Route::post('/empaddcsave',[EmpControllers::class,'empaddressSave'])->name('empaddressSave')->middleware(['auth']);
+// Route::post('/empEducsave',[EmpControllers::class,'empeduSave'])->name('empEducsave')->middleware(['auth']);
+// Route::post('/empShortSave',[EmpControllers::class,'empShortSave'])->name('empEducsave')->middleware(['auth']);
+// Route::post('/empNomineeSave',[EmpControllers::class,'empNomineeSave'])->name('empEducsave')->middleware(['auth']);
+// Route::post('/empHistory',[EmpControllers::class,'empHistory'])->name('empHistory')->middleware(['auth']);
+// Route::post('/empTraining',[EmpControllers::class,'empTraining'])->middleware(['auth']);
+// Route::post('/empExp',[EmpControllers::class,'empExp'])->middleware(['auth']);
+// Route::get('/empPerUpdate',[EmpControllers::class,'employeePersonalUpdate'])->middleware(['auth']);
+// Route::get('/leave',[EmpControllers::class,'leaveentry'])->middleware(['auth']);
+// Route::get('/getLeaveDetails/{empno}/{year}',[EmpControllers::class,'getLeaveDetails'])->middleware(['auth']);
+// Route::get('/getPrebal/{empno}/{year}/{lv}',[EmpControllers::class,'getLeavePrebal'])->middleware(['auth']);
+// Route::get('/getLeavBal/{lv}',[EmpControllers::class,'getLeavBal'])->middleware(['auth']);
+// Route::get('/LeaveEntry',[EmpControllers::class,'leaveEntryIns'])->middleware(['auth']);
+// Route::get('/LeaveEntryDet',[EmpControllers::class,'leaveEntryDet'])->middleware(['auth']);
+// Route::get('/deleteLeave/{empno}/{year}/{lvsl}',[EmpControllers::class,'deleteLeave'])->middleware(['auth']);
+// Route::get('/empSearchExist',[EmpControllers::class,'empSearchExist'])->middleware(['auth']);
 
 
 
 //emp List Route
 
-Route::get('/getDept/{id}',[EmpEntListController::class,'deptList'])->middleware(['auth']);
-Route::get('/floorList/{id}',[EmpEntListController::class,'floorList'])->middleware(['auth']);
-Route::get('/city',[EmpEntListController::class,'city'])->middleware(['auth']);
+// Route::get('/getDept/{id}',[EmpEntListController::class,'deptList'])->middleware(['auth']);
+// Route::get('/floorList/{id}',[EmpEntListController::class,'floorList'])->middleware(['auth']);
+// Route::get('/city',[EmpEntListController::class,'city'])->middleware(['auth']);
 
 
 
-Route::get('/getEmp',[EmpEntListController::class,'getEmp'])->middleware(['auth']);
-Route::get('/demo',[EmpEntListController::class,'demo'])->middleware(['auth']);
-Route::get('/getEdu/{id}',[EmpEntListController::class,'getEdu'])->middleware(['auth']);
-Route::get('/getCourse/{id}',[EmpEntListController::class,'getCourse'])->middleware(['auth']);
-Route::get('/getNome/{id}',[EmpEntListController::class,'getNome'])->middleware(['auth']);
-Route::get('/getJob/{id}',[EmpEntListController::class,'getJob'])->middleware(['auth']);
-Route::get('/getTrain/{id}',[EmpEntListController::class,'getTrain'])->middleware(['auth']);
-Route::get('/empExper/{id}',[EmpEntListController::class,'empExper'])->middleware(['auth']);
+// Route::get('/getEmp',[EmpEntListController::class,'getEmp'])->middleware(['auth']);
+// Route::get('/demo',[EmpEntListController::class,'demo'])->middleware(['auth']);
+// Route::get('/getEdu/{id}',[EmpEntListController::class,'getEdu'])->middleware(['auth']);
+// Route::get('/getCourse/{id}',[EmpEntListController::class,'getCourse'])->middleware(['auth']);
+// Route::get('/getNome/{id}',[EmpEntListController::class,'getNome'])->middleware(['auth']);
+// Route::get('/getJob/{id}',[EmpEntListController::class,'getJob'])->middleware(['auth']);
+// Route::get('/getTrain/{id}',[EmpEntListController::class,'getTrain'])->middleware(['auth']);
+// Route::get('/empExper/{id}',[EmpEntListController::class,'empExper'])->middleware(['auth']);
 
 
-Route::get('/loan',[LoanController::class,'loan'])->middleware(['auth']);
-Route::get('/loandt',[LoanController::class,'loandt'])->middleware(['auth']);
-
-
-
-
-Route::post('/loansave',[LoanController::class,'storeer'])->middleware(['auth']);
-Route::get('/loandtsave',[LoanController::class,'storeerdetails'])->middleware(['auth']);
-
-
-Route::get('/getemp/{comid}',[LoanController::class,'getEmpNO'])->middleware(['auth']);
-Route::get('/getempdet',[LoanController::class,'getEMPdetails'])->middleware(['auth']);
-Route::get('/getinEmp',[EmpControllers::class,'getEmpDet'])->middleware(['auth']);
-Route::get('/getprevgross',[EmpControllers::class,'getPrevGross'])->middleware(['auth']);
+// Route::get('/loan',[LoanController::class,'loan'])->middleware(['auth']);
+// Route::get('/loandt',[LoanController::class,'loandt'])->middleware(['auth']);
 
 
 
 
+// Route::post('/loansave',[LoanController::class,'storeer'])->middleware(['auth']);
+// Route::get('/loandtsave',[LoanController::class,'storeerdetails'])->middleware(['auth']);
 
 
-
-
-
-
-
-
-
-
-
-
-
+// Route::get('/getemp/{comid}',[LoanController::class,'getEmpNO'])->middleware(['auth']);
+// Route::get('/getempdet',[LoanController::class,'getEMPdetails'])->middleware(['auth']);
+// Route::get('/getinEmp',[EmpControllers::class,'getEmpDet'])->middleware(['auth']);
+// Route::get('/getprevgross',[EmpControllers::class,'getPrevGross'])->middleware(['auth']);
 
 
 //ADMIN LIST
 
-Route::get('/menudetails',[AdminController::class,'getAllMenu'])->middleware(['auth']);
-Route::get('/getEMPDT',[EmpEntListController::class,'getEMPDT'])->middleware(['auth']);
+// Route::get('/menudetails',[AdminController::class,'getAllMenu'])->middleware(['auth']);
+// Route::get('/getEMPDT',[EmpEntListController::class,'getEMPDT'])->middleware(['auth']);
 
-Route::get('/increment',[EmpControllers::class,'increment_details'])->middleware(['auth']);
-Route::get('/incrementEntry',[EmpControllers::class,'increment_Entry'])->middleware(['auth']);
-Route::get('/getEmpData', [EmpControllers::class,'empData'])->name('emp.data')->middleware(['auth']);
-Route::get('/tableData/{empId}', [EmpControllers::class,'tableData'])->name('t.data')->middleware(['auth']);
-
-
-
-//hrm setup
+// Route::get('/increment',[EmpControllers::class,'increment_details'])->middleware(['auth']);
+// Route::get('/incrementEntry',[EmpControllers::class,'increment_Entry'])->middleware(['auth']);
+// Route::get('/getEmpData', [EmpControllers::class,'empData'])->name('emp.data')->middleware(['auth']);
+// Route::get('/tableData/{empId}', [EmpControllers::class,'tableData'])->name('t.data')->middleware(['auth']);
 
 //Designation
 Route::get('/des',[HrmSetupController::class,'designation'])->name('des')->middleware(['auth']);
@@ -574,12 +561,6 @@ Route::get('/ajax/list', [VoucherController::class, 'ajaxList'])
 
 
 
-
-
-
-// Dashboard
-Route::get('/AdminDashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
 // Menu Hierarchy  →  ALL_MENU_HIERARCHY
 Route::prefix('menus')->name('menus.')->group(function () {
     Route::get('/',          [MenuController::class, 'index'])->name('index');
@@ -620,6 +601,7 @@ Route::prefix('permissions')->name('permissions.')->group(function () {
 
 // Users  →  ALL_USER_INFO
 Route::prefix('users')->name('users.')->group(function () {
+    Route::get('/AdminDashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/',          [UserController::class, 'index'])->name('index');
     Route::post('/',         [UserController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
@@ -741,3 +723,4 @@ Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
     // DELETE /temp-emp/{empno} → Delete (cascades to emp_official)
     Route::delete('/{empno}',         [TempEmpController::class, 'destroy'])->name('destroy');
 });
+

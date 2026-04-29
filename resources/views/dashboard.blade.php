@@ -789,7 +789,7 @@
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="hrm-avatar"
-                                                    style="background:{{ $emp->sex == 'Male' || $emp->sex == 'M' ? '#dbeafe' : '#fce7f3' }};color:{{ $emp->sex == 'Male' || $emp->sex == 'M' ? '#1e40af' : '#9d174d' }}">
+                                                    style="background:{{ $emp->sex == 'Male' || $emp->sex == 'Male' ? '#dbeafe' : '#fce7f3' }};color:{{ $emp->sex == 'Male' || $emp->sex == 'Male' ? '#1e40af' : '#9d174d' }}">
                                                     {{ strtoupper(substr($emp->emp_name, 0, 2)) }}
                                                 </div>
                                                 {{ $emp->emp_name }}
@@ -800,7 +800,7 @@
                                         <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
                                         <td>
                                             <span
-                                                class="hrm-badge {{ in_array($emp->sex, ['Male', 'M']) ? 'bg-primary bg-opacity-10 text-primary' : 'bg-pink text-danger' }}">
+                                                class="hrm-badge {{ in_array($emp->sex, ['Male', 'Male']) ? 'bg-primary bg-opacity-10 text-primary' : 'bg-pink text-danger' }}">
                                                 {{ $emp->sex }} </span>
                                         </td>
                                     </tr>
@@ -887,214 +887,486 @@
 
     <div class="row g-3 mb-3">
 
+        {{-- ── 7. ATTENDANCE HEATMAP ── --}}
+        <div class="col-md-7">
+            <div class="hrm-card h-100">
+                <div class="hrm-card-header">
+                    <span class="hrm-card-title">Attendance Heatmap</span>
+                    <span class="text-muted" style="font-size:.68rem">{{ now()->format('F Y') }} — daily present %</span>
+                </div>
+                <div class="hrm-card-body">
+                    @php
+                        $today = now()->day;
+                        $firstDay = now()->startOfMonth()->dayOfWeek; // 0=Sun
+                        $daysInMonth = now()->daysInMonth;
+
+                        // Build a keyed array: day => pct  from controller data
+                        // $attendanceHeatmap = [ ['day'=>1,'pct'=>92], ... ]
+                        $heatByDay = collect($attendanceHeatmap ?? [])->keyBy('day');
+
+                        function heatClass(float $pct): string
+                        {
+                            if ($pct >= 90) {
+                                return 'hm-90';
+                            }
+                            if ($pct >= 75) {
+                                return 'hm-75';
+                            }
+                            if ($pct >= 50) {
+                                return 'hm-50';
+                            }
+                            if ($pct >= 25) {
+                                return 'hm-25';
+                            }
+                            return 'hm-0';
+                        }
+                    @endphp
+
+                    <div class="heatmap-grid">
+                        {{-- Day headers (Sun–Sat) --}}
+                        @foreach (['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as $d)
+                            <div class="heatmap-day-label">{{ $d }}</div>
+                        @endforeach
+
+                        {{-- Empty cells before month starts --}}
+                        @for ($e = 0; $e < $firstDay; $e++)
+                            <div class="heatmap-cell empty"></div>
+                        @endfor
+
+                        {{-- Day cells --}}
+                        @for ($day = 1; $day <= $daysInMonth; $day++)
+                            @php
+                                $row = $heatByDay->get($day);
+                                $pct = $row ? (float) $row->pct : null;
+                            @endphp
+                            @if ($day > $today)
+                                <div class="heatmap-cell future" title="Day {{ $day }}">{{ $day }}
+                                </div>
+                            @elseif($pct !== null)
+                                <div class="heatmap-cell {{ heatClass($pct) }}"
+                                    title="Day {{ $day }}: {{ $pct }}% present">
+                                    {{ $day }}
+                                </div>
+                            @else
+                                <div class="heatmap-cell hm-0" title="Day {{ $day }}: No data">
+                                    {{ $day }}</div>
+                            @endif
+                        @endfor
+                    </div>
+
+                    {{-- Legend --}}
+                    <div class="hm-legend">
+                        <span style="font-size:.6rem;color:var(--hrm-muted);font-weight:600">Present %:</span>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot hm-0"></div>&lt;25%
+                        </div>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot hm-25"></div>25–50%
+                        </div>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot hm-50"></div>50–75%
+                        </div>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot hm-75"></div>75–90%
+                        </div>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot hm-90"></div>90%+
+                        </div>
+                        <div class="hm-legend-item">
+                            <div class="hm-legend-dot" style="background:#f0f0f0;border:1px solid #ddd"></div>Future
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── 8. DEPT ATTENDANCE RATE TODAY ── --}}
+        <div class="col-md-5">
+            <div class="hrm-card h-100">
+                <div class="hrm-card-header">
+                    <span class="hrm-card-title">Dept Attendance Today</span>
+                    <span class="text-muted" style="font-size:.68rem">Best → Worst</span>
+                </div>
+                <div class="hrm-card-body">
+                    @php
+                        // $deptAttToday = [ {dept_name, present, total, pct}, ... ] sorted desc by pct
+                        $maxPct = collect($deptAttToday ?? [])->max('pct') ?: 100;
+                        $attColors = ['#4ade80', '#86efac', '#fde68a', '#fca5a5', '#f87171', '#ef4444'];
+                    @endphp
+                    @forelse($deptAttToday ?? [] as $i => $dept)
+                        @php
+                            $pct = round($dept->pct, 1);
+                            $color =
+                                $pct >= 90
+                                    ? '#22c55e'
+                                    : ($pct >= 75
+                                        ? '#84cc16'
+                                        : ($pct >= 50
+                                            ? '#f59e0b'
+                                            : '#ef4444'));
+                        @endphp
+                        <div class="dept-att-row">
+                            <div class="dept-att-name" title="{{ $dept->dept_name }}">
+                                {{ $dept->dept_name }}
+                            </div>
+                            <div class="dept-att-bar-wrap">
+                                <div class="dept-att-bar-fill"
+                                    style="width:{{ $pct }}%;background:{{ $color }}">
+                                </div>
+                            </div>
+                            <div class="dept-att-pct" style="color:{{ $color }}">{{ $pct }}%</div>
+                            <div style="font-size:.6rem;color:var(--hrm-muted);min-width:48px;text-align:right">
+                                {{ $dept->present }}/{{ $dept->total }}
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-muted" style="font-size:.75rem">No attendance data for today.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══ ROW 5 — LATE TREND + OT COST ════════════════════════════════════ --}}
+    <div class="row g-3 mb-3">
+
+        {{-- ── 9. LATE ARRIVAL TREND (last 7 days) ── --}}
+        <div class="col-md-5">
+            <div class="hrm-card h-100">
+                <div class="hrm-card-header">
+                    <span class="hrm-card-title">Late Arrival Trend</span>
+                    <span class="text-muted" style="font-size:.68rem">Last 7 days</span>
+                </div>
+                <div class="hrm-card-body">
+                    @php
+                        // $lateTrend = [ {att_date, late_count}, ... ] last 7 days
+                        $maxLate = collect($lateTrend ?? [])->max('late_count') ?: 1;
+                    @endphp
+                    <div class="d-flex align-items-flex-end gap-2" style="height:90px">
+                        @forelse($lateTrend ?? [] as $row)
+                            <div class="late-bar-col">
+                                <div class="late-bar-val">{{ $row->late_count }}</div>
+                                <div class="late-bar-outer">
+                                    <div class="late-bar-fill"
+                                        style="height:{{ $maxLate > 0 ? round(($row->late_count / $maxLate) * 65) : 0 }}px">
+                                    </div>
+                                </div>
+                                <div class="late-bar-label">
+                                    {{ \Carbon\Carbon::parse($row->att_date)->format('D') }}<br>
+                                    <span
+                                        style="color:#94a3b8">{{ \Carbon\Carbon::parse($row->att_date)->format('d') }}</span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-muted" style="font-size:.75rem">No late arrival data.</div>
+                        @endforelse
+                    </div>
+
+                    {{-- Total summary line --}}
+                    @if (!empty($lateTrend))
+                        <div class="mt-2 pt-2 border-top d-flex gap-3" style="font-size:.7rem">
+                            <span style="color:var(--hrm-muted)">7-day total:
+                                <strong style="color:#c2410c">
+                                    {{ collect($lateTrend)->sum('late_count') }}
+                                </strong> late arrivals
+                            </span>
+                            <span style="color:var(--hrm-muted)">Daily avg:
+                                <strong style="color:#c2410c">
+                                    {{ round(collect($lateTrend)->avg('late_count'), 1) }}
+                                </strong>
+                            </span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- ── 10. OT COST ESTIMATE BY DEPT ── --}}
+        <div class="col-md-7">
+            <div class="hrm-card h-100">
+                <div class="hrm-card-header">
+                    <span class="hrm-card-title">OT Cost Estimate — {{ now()->format('F Y') }}</span>
+                    <span class="text-muted" style="font-size:.68rem">OT hrs × hourly rate by dept</span>
+                </div>
+                <div class="hrm-card-body p-0">
+                    @php
+                        // $otCostByDept = [ {dept_name, total_ot_hrs, avg_hourly_rate, estimated_cost}, ... ]
+                        $maxCost = collect($otCostByDept ?? [])->max('estimated_cost') ?: 1;
+                        $grandTotal = collect($otCostByDept ?? [])->sum('estimated_cost');
+                    @endphp
+                    <div class="table-responsive">
+                        <table class="table hrm-table ot-cost-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Department</th>
+                                    <th class="text-end">OT Hrs</th>
+                                    <th class="text-end">Avg Rate</th>
+                                    <th class="text-end">Est. Cost</th>
+                                    <th>Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($otCostByDept ?? [] as $i => $row)
+                                    @php
+                                        $sharePct =
+                                            $grandTotal > 0 ? round(($row->estimated_cost / $grandTotal) * 100, 1) : 0;
+                                        $barPct = $maxCost > 0 ? round(($row->estimated_cost / $maxCost) * 100) : 0;
+                                    @endphp
+                                    <tr>
+                                        <td class="text-muted">{{ $i + 1 }}</td>
+                                        <td>{{ $row->dept_name }}</td>
+                                        <td class="text-end fw-semibold">{{ number_format($row->total_ot_hrs, 1) }}</td>
+                                        <td class="text-end text-muted">{{ number_format($row->avg_hourly_rate, 2) }}</td>
+                                        <td class="text-end fw-bold text-primary">
+                                            {{ number_format($row->estimated_cost, 0) }}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <div class="ot-cost-bar-wrap">
+                                                    <div class="ot-cost-bar-fill" style="width:{{ $barPct }}%">
+                                                    </div>
+                                                </div>
+                                                <span
+                                                    style="font-size:.63rem;color:var(--hrm-muted)">{{ $sharePct }}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3" style="font-size:.78rem">
+                                            No OT cost data for this month.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if (!empty($otCostByDept))
+                                <tfoot>
+                                    <tr style="background:var(--hrm-surface)">
+                                        <td colspan="2" class="fw-bold" style="font-size:.72rem">TOTAL</td>
+                                        <td class="text-end fw-bold" style="font-size:.72rem">
+                                            {{ number_format(collect($otCostByDept)->sum('total_ot_hrs'), 1) }}
+                                        </td>
+                                        <td></td>
+                                        <td class="text-end fw-bold text-primary" style="font-size:.72rem">
+                                            {{ number_format($grandTotal, 0) }}
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
 
 
 
-        {{-- ══════════════════════════════════════════════════════════════════════════
+    {{-- ══════════════════════════════════════════════════════════════════════════
      MODALS
 ════════════════════════════════════════════════════════════════════════════ --}}
 
-        {{-- ── MODAL: PROBATION ENDING THIS MONTH ── --}}
-        <div class="modal fade" id="modalProbation" tabindex="-1" aria-labelledby="modalProbationLabel">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header py-2 px-3" style="background:var(--hrm-primary)">
-                        <h6 class="modal-title text-white mb-0" id="modalProbationLabel">
-                            <i class="bi bi-hourglass-split me-2"></i>
-                            Probation Period Ending — {{ now()->format('F Y') }}
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-0">
-                        <div class="table-responsive">
-                            <table class="table hrm-table" id="tblProbation">
-                                <thead>
+    {{-- ── MODAL: PROBATION ENDING THIS MONTH ── --}}
+    <div class="modal fade" id="modalProbation" tabindex="-1" aria-labelledby="modalProbationLabel">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2 px-3" style="background:var(--hrm-primary)">
+                    <h6 class="modal-title text-white mb-0" id="modalProbationLabel">
+                        <i class="bi bi-hourglass-split me-2"></i>
+                        Probation Period Ending — {{ now()->format('F Y') }}
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table hrm-table" id="tblProbation">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Emp No</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Join Date</th>
+                                    <th>Probation Period</th>
+                                    <th>Confirm Date</th>
+                                    <th>Months Served</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($probationEnd as $i => $emp)
                                     <tr>
-                                        <th>#</th>
-                                        <th>Emp No</th>
-                                        <th>Name</th>
-                                        <th>Department</th>
-                                        <th>Designation</th>
-                                        <th>Join Date</th>
-                                        <th>Probation Period</th>
-                                        <th>Confirm Date</th>
-                                        <th>Months Served</th>
-                                        <th>Status</th>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td>{{ $emp->empno }}</td>
+                                        <td>{{ $emp->emp_name }}</td>
+                                        <td>{{ $emp->dept_name }}</td>
+                                        <td>{{ $emp->designation_name }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
+                                        <td>{{ $emp->provision_period }} months</td>
+                                        <td>
+                                            @if ($emp->conform_date)
+                                                {{ \Carbon\Carbon::parse($emp->conform_date)->format('d M Y') }}
+                                            @else
+                                                <span class="text-warning fw-semibold">Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $emp->months_served }}</td>
+                                        <td>
+                                            <span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($probationEnd as $i => $emp)
-                                        <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $emp->empno }}</td>
-                                            <td>{{ $emp->emp_name }}</td>
-                                            <td>{{ $emp->dept_name }}</td>
-                                            <td>{{ $emp->designation_name }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
-                                            <td>{{ $emp->provision_period }} months</td>
-                                            <td>
-                                                @if ($emp->conform_date)
-                                                    {{ \Carbon\Carbon::parse($emp->conform_date)->format('d M Y') }}
-                                                @else
-                                                    <span class="text-warning fw-semibold">Pending</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ $emp->months_served }}</td>
-                                            <td>
-                                                <span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="10" class="text-center text-muted py-4">No probation
-                                                confirmations
-                                                due this month.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted py-4">No probation confirmations
+                                            due this month.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="modal-footer py-2 px-3 no-print">
-                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($probationEnd) }}
-                            record(s)</span>
-                        <button class="btn btn-outline-secondary btn-sm"
-                            onclick="printModal('tblProbation','Probation Period Ending — {{ now()->format('F Y') }}')">
-                            <i class="bi bi-printer me-1"></i> Print
-                        </button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3 no-print">
+                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($probationEnd) }} record(s)</span>
+                    <button class="btn btn-outline-secondary btn-sm"
+                        onclick="printModal('tblProbation','Probation Period Ending — {{ now()->format('F Y') }}')">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- ── MODAL: INCREMENT DUE THIS MONTH ── --}}
-        <div class="modal fade" id="modalIncrementThis" tabindex="-1" aria-labelledby="modalIncrThisLabel">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header py-2 px-3" style="background:#198754">
-                        <h6 class="modal-title text-white mb-0" id="modalIncrThisLabel">
-                            <i class="bi bi-graph-up-arrow me-2"></i>
-                            Increment Due This Month — {{ now()->format('F Y') }}
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-0">
-                        <div class="table-responsive">
-                            <table class="table hrm-table" id="tblIncrThis">
-                                <thead>
+    {{-- ── MODAL: INCREMENT DUE THIS MONTH ── --}}
+    <div class="modal fade" id="modalIncrementThis" tabindex="-1" aria-labelledby="modalIncrThisLabel">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2 px-3" style="background:#198754">
+                    <h6 class="modal-title text-white mb-0" id="modalIncrThisLabel">
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+                        Increment Due This Month — {{ now()->format('F Y') }}
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table hrm-table" id="tblIncrThis">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Emp No</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Increment Date</th>
+                                    <th>Current Gross</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($incrementThisMonth as $i => $emp)
                                     <tr>
-                                        <th>#</th>
-                                        <th>Emp No</th>
-                                        <th>Name</th>
-                                        <th>Department</th>
-                                        <th>Designation</th>
-                                        <th>Increment Date</th>
-                                        <th>Current Gross</th>
-                                        <th>Action</th>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td>{{ $emp->empno }}</td>
+                                        <td>{{ $emp->emp_name }}</td>
+                                        <td>{{ $emp->dept_name }}</td>
+                                        <td>{{ $emp->designation_name }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
+                                        <td class="fw-semibold text-success">{{ number_format($emp->gross, 2) }}</td>
+                                        <td class="no-print">
+                                            <span class="hrm-badge bg-success bg-opacity-15 text-success">Process</span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($incrementThisMonth as $i => $emp)
-                                        <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $emp->empno }}</td>
-                                            <td>{{ $emp->emp_name }}</td>
-                                            <td>{{ $emp->dept_name }}</td>
-                                            <td>{{ $emp->designation_name }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
-                                            <td class="fw-semibold text-success">{{ number_format($emp->gross, 2) }}</td>
-                                            <td class="no-print">
-                                                <span
-                                                    class="hrm-badge bg-success bg-opacity-15 text-success">Process</span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center text-muted py-4">No increments due this
-                                                month.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">No increments due this
+                                            month.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="modal-footer py-2 px-3 no-print">
-                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementThisMonth) }}
-                            record(s)</span>
-                        <button class="btn btn-outline-secondary btn-sm"
-                            onclick="printModal('tblIncrThis','Increment Due — {{ now()->format('F Y') }}')">
-                            <i class="bi bi-printer me-1"></i> Print
-                        </button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3 no-print">
+                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementThisMonth) }}
+                        record(s)</span>
+                    <button class="btn btn-outline-secondary btn-sm"
+                        onclick="printModal('tblIncrThis','Increment Due — {{ now()->format('F Y') }}')">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- ── MODAL: INCREMENT DUE NEXT MONTH ── --}}
-        <div class="modal fade" id="modalIncrementNext" tabindex="-1" aria-labelledby="modalIncrNextLabel">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header py-2 px-3" style="background:#0d6efd">
-                        <h6 class="modal-title text-white mb-0" id="modalIncrNextLabel">
-                            <i class="bi bi-calendar2-plus me-2"></i>
-                            Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body p-0">
-                        <div class="table-responsive">
-                            <table class="table hrm-table" id="tblIncrNext">
-                                <thead>
+    {{-- ── MODAL: INCREMENT DUE NEXT MONTH ── --}}
+    <div class="modal fade" id="modalIncrementNext" tabindex="-1" aria-labelledby="modalIncrNextLabel">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2 px-3" style="background:#0d6efd">
+                    <h6 class="modal-title text-white mb-0" id="modalIncrNextLabel">
+                        <i class="bi bi-calendar2-plus me-2"></i>
+                        Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive">
+                        <table class="table hrm-table" id="tblIncrNext">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Emp No</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Increment Date</th>
+                                    <th>Current Gross</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($incrementNextMonth as $i => $emp)
                                     <tr>
-                                        <th>#</th>
-                                        <th>Emp No</th>
-                                        <th>Name</th>
-                                        <th>Department</th>
-                                        <th>Designation</th>
-                                        <th>Increment Date</th>
-                                        <th>Current Gross</th>
+                                        <td>{{ $i + 1 }}</td>
+                                        <td>{{ $emp->empno }}</td>
+                                        <td>{{ $emp->emp_name }}</td>
+                                        <td>{{ $emp->dept_name }}</td>
+                                        <td>{{ $emp->designation_name }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
+                                        <td class="fw-semibold">{{ number_format($emp->gross, 2) }}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($incrementNextMonth as $i => $emp)
-                                        <tr>
-                                            <td>{{ $i + 1 }}</td>
-                                            <td>{{ $emp->empno }}</td>
-                                            <td>{{ $emp->emp_name }}</td>
-                                            <td>{{ $emp->dept_name }}</td>
-                                            <td>{{ $emp->designation_name }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($emp->increment_date)->format('d M Y') }}</td>
-                                            <td class="fw-semibold">{{ number_format($emp->gross, 2) }}</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">No increments due next
-                                                month.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">No increments due next
+                                            month.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="modal-footer py-2 px-3 no-print">
-                        <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementNextMonth) }}
-                            record(s)</span>
-                        <button class="btn btn-outline-secondary btn-sm"
-                            onclick="printModal('tblIncrNext','Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}')">
-                            <i class="bi bi-printer me-1"></i> Print
-                        </button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                </div>
+                <div class="modal-footer py-2 px-3 no-print">
+                    <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementNextMonth) }}
+                        record(s)</span>
+                    <button class="btn btn-outline-secondary btn-sm"
+                        onclick="printModal('tblIncrNext','Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}')">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @push('scripts')
-        {{--
+@push('scripts')
+    {{--
     ════════════════════════════════════════════════════════════════
     DASHBOARD AUTO-REFRESH  — paste inside @push('scripts')
     in your dashboard_blade.php, AFTER the existing clock script.
@@ -1109,70 +1381,70 @@
     ════════════════════════════════════════════════════════════════
 --}}
 
-        <script>
-            // ─────────────────────────────────────────────────────────────────
-            // CONFIG
-            // ─────────────────────────────────────────────────────────────────
-            const REFRESH_INTERVAL_MS = 60000; // 60 seconds — change freely
-            const LIVE_DATA_URL = '{{ route('hrm.dashboard.liveData') }}';
+    <script>
+        // ─────────────────────────────────────────────────────────────────
+        // CONFIG
+        // ─────────────────────────────────────────────────────────────────
+        const REFRESH_INTERVAL_MS = 60000; // 60 seconds — change freely
+        const LIVE_DATA_URL = '{{ route('hrm.dashboard.liveData') }}';
 
-            // ─────────────────────────────────────────────────────────────────
-            // BADGE: "Last updated" shown in the page header
-            // We inject it next to the Oracle HRM badge automatically.
-            // ─────────────────────────────────────────────────────────────────
-            function injectUpdatedBadge() {
-                if (document.getElementById('lastUpdatedBadge')) return; // already exists
+        // ─────────────────────────────────────────────────────────────────
+        // BADGE: "Last updated" shown in the page header
+        // We inject it next to the Oracle HRM badge automatically.
+        // ─────────────────────────────────────────────────────────────────
+        function injectUpdatedBadge() {
+            if (document.getElementById('lastUpdatedBadge')) return; // already exists
 
-                const badge = document.createElement('span');
-                badge.id = 'lastUpdatedBadge';
-                badge.style.cssText = `
+            const badge = document.createElement('span');
+            badge.id = 'lastUpdatedBadge';
+            badge.style.cssText = `
         display:inline-flex;align-items:center;gap:.4rem;
         font-size:.72rem;font-weight:500;color:#155724;
         background:#d4edda;border:1px solid #c3e6cb;
         border-radius:20px;padding:.28rem .85rem;
     `;
-                badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating…</span>';
+            badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating…</span>';
 
-                // Insert after the Oracle HRM badge
-                const hrmBadge = document.querySelector('.hrm-db-badge');
-                if (hrmBadge) hrmBadge.insertAdjacentElement('afterend', badge);
-            }
+            // Insert after the Oracle HRM badge
+            const hrmBadge = document.querySelector('.hrm-db-badge');
+            if (hrmBadge) hrmBadge.insertAdjacentElement('afterend', badge);
+        }
 
-            // ─────────────────────────────────────────────────────────────────
-            // KPI CARD UPDATER — animates the number change
-            // ─────────────────────────────────────────────────────────────────
-            function animateValue(el, newVal) {
-                if (!el) return;
-                const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
-                const target = parseInt(String(newVal).replace(/,/g, '')) || 0;
-                if (current === target) return;
+        // ─────────────────────────────────────────────────────────────────
+        // KPI CARD UPDATER — animates the number change
+        // ─────────────────────────────────────────────────────────────────
+        function animateValue(el, newVal) {
+            if (!el) return;
+            const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+            const target = parseInt(String(newVal).replace(/,/g, '')) || 0;
+            if (current === target) return;
 
-                const step = target > current ? 1 : -1;
-                const diff = Math.abs(target - current);
-                const duration = Math.min(600, diff * 15); // max 600ms
-                const interval = Math.max(10, duration / diff);
+            const step = target > current ? 1 : -1;
+            const diff = Math.abs(target - current);
+            const duration = Math.min(600, diff * 15); // max 600ms
+            const interval = Math.max(10, duration / diff);
 
-                let cur = current;
-                const timer = setInterval(() => {
-                    cur += step;
-                    el.textContent = cur.toLocaleString();
-                    if (cur === target) clearInterval(timer);
-                }, interval);
-            }
+            let cur = current;
+            const timer = setInterval(() => {
+                cur += step;
+                el.textContent = cur.toLocaleString();
+                if (cur === target) clearInterval(timer);
+            }, interval);
+        }
 
-            // ─────────────────────────────────────────────────────────────────
-            // DEPT BAR CHART UPDATER
-            // ─────────────────────────────────────────────────────────────────
-            const DEPT_COLORS = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545', '#6c757d', '#20c997'];
+        // ─────────────────────────────────────────────────────────────────
+        // DEPT BAR CHART UPDATER
+        // ─────────────────────────────────────────────────────────────────
+        const DEPT_COLORS = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545', '#6c757d', '#20c997'];
 
-            function updateDeptBars(deptData) {
-                const container = document.getElementById('deptBarContainer');
-                if (!container || !deptData.length) return;
+        function updateDeptBars(deptData) {
+            const container = document.getElementById('deptBarContainer');
+            if (!container || !deptData.length) return;
 
-                const maxCnt = Math.max(...deptData.map(d => d.cnt), 1);
+            const maxCnt = Math.max(...deptData.map(d => d.cnt), 1);
 
-                // Build new rows
-                const html = deptData.map((dept, i) => `
+            // Build new rows
+            const html = deptData.map((dept, i) => `
         <div class="d-flex align-items-center gap-2 mb-2">
             <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
                  title="${escHtml(dept.dept_name)}">${escHtml(dept.dept_name)}</div>
@@ -1187,62 +1459,63 @@
         </div>
     `).join('');
 
-                container.innerHTML = html;
+            container.innerHTML = html;
 
-                // Animate bars in after paint
-                requestAnimationFrame(() => {
-                    container.querySelectorAll('.dept-bar-fill').forEach((bar, i) => {
-                        const pct = Math.round((deptData[i].cnt / maxCnt) * 100);
-                        bar.style.width = pct + '%';
-                    });
+            // Animate bars in after paint
+            requestAnimationFrame(() => {
+                container.querySelectorAll('.dept-bar-fill').forEach((bar, i) => {
+                    const pct = Math.round((deptData[i].cnt / maxCnt) * 100);
+                    bar.style.width = pct + '%';
                 });
+            });
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // GENDER DONUT UPDATER
+        // ─────────────────────────────────────────────────────────────────
+        function updateGenderDonut(genderData) {
+            const male = Number((genderData.find(g => ['male', 'male'].includes(g.sex?.toLowerCase())) || {}).cnt) || 0;
+            const female = Number((genderData.find(g => ['female', 'female'].includes(g.sex?.toLowerCase())) || {}).cnt) ||
+                0;
+            const total = male + female || 1;
+
+            const mPct = Math.round((male / total) * 100);
+            const circum = 2 * Math.PI * 30;
+            const maleDash = Math.round((mPct / 100) * circum * 100) / 100;
+            const femDash = Math.round((circum - maleDash) * 100) / 100;
+
+            // Male arc
+            const maleCircle = document.getElementById('genderMaleArc');
+            if (maleCircle) {
+                maleCircle.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
             }
-
-            // ─────────────────────────────────────────────────────────────────
-            // GENDER DONUT UPDATER
-            // ─────────────────────────────────────────────────────────────────
-            function updateGenderDonut(genderData) {
-                const male = (genderData.find(g => g.sex === 'M' || g.sex === 'Male') || {}).cnt ?? 0;
-                const female = (genderData.find(g => g.sex === 'F' || g.sex === 'Female') || {}).cnt ?? 0;
-                const total = male + female || 1;
-
-                const mPct = Math.round((male / total) * 100);
-                const circum = 2 * Math.PI * 30;
-                const maleDash = Math.round((mPct / 100) * circum * 100) / 100;
-                const femDash = Math.round((circum - maleDash) * 100) / 100;
-
-                // Male arc
-                const maleCircle = document.getElementById('genderMaleArc');
-                if (maleCircle) {
-                    maleCircle.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
-                }
-                // Female arc
-                const femCircle = document.getElementById('genderFemaleArc');
-                if (femCircle) {
-                    femCircle.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
-                    femCircle.setAttribute('stroke-dashoffset', `-${maleDash}`);
-                }
-                // Centre total
-                const totalEl = document.getElementById('genderTotal');
-                if (totalEl) totalEl.textContent = total.toLocaleString();
-
-                // Legend numbers
-                const maleCountEl = document.getElementById('genderMaleCount');
-                const femaleCountEl = document.getElementById('genderFemaleCount');
-                if (maleCountEl) maleCountEl.textContent = `${male} (${mPct}%)`;
-                if (femaleCountEl) femaleCountEl.textContent = `${female} (${100 - mPct}%)`;
+            // Female arc
+            const femCircle = document.getElementById('genderFemaleArc');
+            if (femCircle) {
+                femCircle.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
+                femCircle.setAttribute('stroke-dashoffset', `-${maleDash}`);
             }
+            // Centre total
+            const totalEl = document.getElementById('genderTotal');
+            if (totalEl) totalEl.textContent = total.toLocaleString();
 
-            // ─────────────────────────────────────────────────────────────────
-            // OT BAR CHART UPDATER
-            // ─────────────────────────────────────────────────────────────────
-            function updateOTChart(otData) {
-                const container = document.getElementById('otBarContainer');
-                if (!container || !otData.length) return;
+            // Legend numbers
+            const maleCountEl = document.getElementById('genderMaleCount');
+            const femaleCountEl = document.getElementById('genderFemaleCount');
+            if (maleCountEl) maleCountEl.textContent = `${male} (${mPct}%)`;
+            if (femaleCountEl) femaleCountEl.textContent = `${female} (${100 - mPct}%)`;
+        }
 
-                const maxOT = Math.max(...otData.map(d => parseFloat(d.avg_ot) || 0), 1);
+        // ─────────────────────────────────────────────────────────────────
+        // OT BAR CHART UPDATER
+        // ─────────────────────────────────────────────────────────────────
+        function updateOTChart(otData) {
+            const container = document.getElementById('otBarContainer');
+            if (!container || !otData.length) return;
 
-                container.innerHTML = otData.map(row => `
+            const maxOT = Math.max(...otData.map(d => parseFloat(d.avg_ot) || 0), 1);
+
+            container.innerHTML = otData.map(row => `
         <div class="ot-bar-col">
             <div class="ot-bar-val">${row.avg_ot}</div>
             <div class="ot-bar-outer">
@@ -1252,127 +1525,127 @@
         </div>
     `).join('');
 
-                requestAnimationFrame(() => {
-                    container.querySelectorAll('.ot-bar-fill').forEach((bar, i) => {
-                        const h = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75);
-                        bar.style.height = h + 'px';
-                    });
+            requestAnimationFrame(() => {
+                container.querySelectorAll('.ot-bar-fill').forEach((bar, i) => {
+                    const h = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75);
+                    bar.style.height = h + 'px';
                 });
-            }
-
-            // ─────────────────────────────────────────────────────────────────
-            // REFRESH INDICATOR — spinner flash on card
-            // ─────────────────────────────────────────────────────────────────
-            function flashRefresh() {
-                document.querySelectorAll('.hrm-stat').forEach(card => {
-                    card.style.transition = 'opacity .2s';
-                    card.style.opacity = '.6';
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                    }, 300);
-                });
-            }
-
-            // ─────────────────────────────────────────────────────────────────
-            // HELPER — escape HTML for dynamic content
-            // ─────────────────────────────────────────────────────────────────
-            function escHtml(str) {
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-            }
-
-            // ─────────────────────────────────────────────────────────────────
-            // MAIN FETCH — gets JSON and dispatches all updaters
-            // ─────────────────────────────────────────────────────────────────
-            function fetchDashboardData() {
-                fetch(LIVE_DATA_URL, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-                            'Accept': 'application/json'
-                        },
-                        credentials: 'same-origin'
-                    })
-                    .then(res => {
-                        if (!res.ok) throw new Error('HTTP ' + res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (!data.success) return;
-
-                        flashRefresh();
-
-                        // ── KPI stat values ──────────────────────────────────────────────
-                        animateValue(document.getElementById('statTotalEmp'), data.total_employees);
-                        animateValue(document.getElementById('statPresent'), data.present);
-                        animateValue(document.getElementById('statOnLeave'), data.on_leave);
-                        animateValue(document.getElementById('statAbsent'), data.absent);
-                        animateValue(document.getElementById('statLate'), data.late);
-
-                        // Attendance rate text
-                        const rateEl = document.getElementById('statAttendanceRate');
-                        if (rateEl) rateEl.textContent = data.attendance_rate + '% attendance rate';
-
-                        // ── Charts ───────────────────────────────────────────────────────
-                        updateDeptBars(data.deptCount);
-                        updateGenderDonut(data.genderSplit);
-                        updateOTChart(data.avg_ot);
-
-                        // ── Alert badge counts ────────────────────────────────────────────
-                        const probBadge = document.getElementById('badgeProbation');
-                        const incrThis = document.getElementById('badgeIncrThis');
-                        const incrNext = document.getElementById('badgeIncrNext');
-                        if (probBadge) probBadge.textContent = data.probationEnd.length;
-                        if (incrThis) incrThis.textContent = data.incrementThisMonth.length;
-                        if (incrNext) incrNext.textContent = data.incrementNextMonth.length;
-                        console.log(data.incrementThisMonth.length);
-                        // ── Timestamp ────────────────────────────────────────────────────
-                        const el = document.getElementById('lastUpdatedText');
-                        if (el) el.textContent = 'Updated ' + data.updated_at;
-                    })
-                    .catch(err => {
-                        console.warn('[Dashboard] Refresh failed:', err.message);
-                        const el = document.getElementById('lastUpdatedText');
-                        if (el) el.textContent = '⚠ Refresh failed — retrying…';
-                    });
-            }
-
-            // ─────────────────────────────────────────────────────────────────
-            // BOOT — run once page is ready, then poll on interval
-            // ─────────────────────────────────────────────────────────────────
-            document.addEventListener('DOMContentLoaded', () => {
-                injectUpdatedBadge();
-
-                // First refresh after 60s; initial data already rendered by Blade
-                setTimeout(() => {
-                    fetchDashboardData();
-                    setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
-                }, REFRESH_INTERVAL_MS);
             });
-        </script>
-        <script>
-            function printModal(tableId, title) {
-                console.log('Print function called for table:', tableId, 'with title:', title);
-                const table = document.getElementById(tableId);
-                if (!table) {
-                    alert('Table not found: ' + tableId);
-                    return;
-                }
+        }
 
-                const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        // ─────────────────────────────────────────────────────────────────
+        // REFRESH INDICATOR — spinner flash on card
+        // ─────────────────────────────────────────────────────────────────
+        function flashRefresh() {
+            document.querySelectorAll('.hrm-stat').forEach(card => {
+                card.style.transition = 'opacity .2s';
+                card.style.opacity = '.6';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                }, 300);
+            });
+        }
 
-                const clone = table.cloneNode(true);
-                clone.querySelectorAll('.no-print').forEach(el => el.remove());
+        // ─────────────────────────────────────────────────────────────────
+        // HELPER — escape HTML for dynamic content
+        // ─────────────────────────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
 
-                const win = window.open('', '_blank', 'width=900,height=650');
-                if (!win) {
-                    alert('Popup blocked! Allow popups.');
-                    return;
-                }
+        // ─────────────────────────────────────────────────────────────────
+        // MAIN FETCH — gets JSON and dispatches all updaters
+        // ─────────────────────────────────────────────────────────────────
+        function fetchDashboardData() {
+            fetch(LIVE_DATA_URL, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data.success) return;
 
-                win.document.write(`
+                    flashRefresh();
+
+                    // ── KPI stat values ──────────────────────────────────────────────
+                    animateValue(document.getElementById('statTotalEmp'), data.total_employees);
+                    animateValue(document.getElementById('statPresent'), data.present);
+                    animateValue(document.getElementById('statOnLeave'), data.on_leave);
+                    animateValue(document.getElementById('statAbsent'), data.absent);
+                    animateValue(document.getElementById('statLate'), data.late);
+
+                    // Attendance rate text
+                    const rateEl = document.getElementById('statAttendanceRate');
+                    if (rateEl) rateEl.textContent = data.attendance_rate + '% attendance rate';
+
+                    // ── Charts ───────────────────────────────────────────────────────
+                    updateDeptBars(data.deptCount);
+                    updateGenderDonut(data.genderSplit);
+                    updateOTChart(data.avg_ot);
+
+                    // ── Alert badge counts ────────────────────────────────────────────
+                    const probBadge = document.getElementById('badgeProbation');
+                    const incrThis = document.getElementById('badgeIncrThis');
+                    const incrNext = document.getElementById('badgeIncrNext');
+                    if (probBadge) probBadge.textContent = data.probationEnd.length;
+                    if (incrThis) incrThis.textContent = data.incrementThisMonth.length;
+                    if (incrNext) incrNext.textContent = data.incrementNextMonth.length;
+                    console.log(data.incrementThisMonth.length);
+                    // ── Timestamp ────────────────────────────────────────────────────
+                    const el = document.getElementById('lastUpdatedText');
+                    if (el) el.textContent = 'Updated ' + data.updated_at;
+                })
+                .catch(err => {
+                    console.warn('[Dashboard] Refresh failed:', err.message);
+                    const el = document.getElementById('lastUpdatedText');
+                    if (el) el.textContent = '⚠ Refresh failed — retrying…';
+                });
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // BOOT — run once page is ready, then poll on interval
+        // ─────────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            injectUpdatedBadge();
+
+            // First refresh after 60s; initial data already rendered by Blade
+            setTimeout(() => {
+                fetchDashboardData();
+                setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
+            }, REFRESH_INTERVAL_MS);
+        });
+    </script>
+    <script>
+        function printModal(tableId, title) {
+            console.log('Print function called for table:', tableId, 'with title:', title);
+            const table = document.getElementById(tableId);
+            if (!table) {
+                alert('Table not found: ' + tableId);
+                return;
+            }
+
+            const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            const clone = table.cloneNode(true);
+            clone.querySelectorAll('.no-print').forEach(el => el.remove());
+
+            const win = window.open('', '_blank', 'width=900,height=650');
+            if (!win) {
+                alert('Popup blocked! Allow popups.');
+                return;
+            }
+
+            win.document.write(`
             <!DOCTYPE html>
             <html>
             <head>
@@ -1391,42 +1664,42 @@
             </html>
         `);
 
-                win.document.close();
+            win.document.close();
 
-                // KEY FIX HERE
-                setTimeout(() => {
-                    win.focus();
-                    win.print();
-                }, 500);
-            }
-        </script>
-        <script>
-            function updateClock() {
-                const now = new Date();
+            // KEY FIX HERE
+            setTimeout(() => {
+                win.focus();
+                win.print();
+            }, 500);
+        }
+    </script>
+    <script>
+        function updateClock() {
+            const now = new Date();
 
-                const options = {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                };
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            };
 
-                const date = now.toLocaleDateString('en-GB', options);
+            const date = now.toLocaleDateString('en-GB', options);
 
-                const time = now.toLocaleTimeString('en-GB', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: true
+            const time = now.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
 
-                });
+            });
 
-                document.getElementById('liveClock').innerHTML = date + ' ' + time;
-            }
+            document.getElementById('liveClock').innerHTML = date + ' ' + time;
+        }
 
-            // run immediately
-            updateClock();
+        // run immediately
+        updateClock();
 
-            // update every second
-            setInterval(updateClock, 1000);
-        </script>
-    @endpush
+        // update every second
+        setInterval(updateClock, 1000);
+    </script>
+@endpush

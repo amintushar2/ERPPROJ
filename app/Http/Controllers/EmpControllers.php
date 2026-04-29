@@ -65,14 +65,14 @@ class EmpControllers extends BaseController
     public function empListSearch(Request $request) {
         if (!session('LoggedUser')) return response()->json(['message' => 'Unauthorized'], 401);
         $q = DB::table('EMP_PERSONAL AS EP')
-            ->leftJoin('EMP_OFFICIAL AS EO', 'EO.EMPNO', '=', 'EP.EMPNO')
+            ->join('EMP_OFFICIAL AS EO', 'EO.EMPNO', '=', 'EP.EMPNO')
             ->select(
                 'EP.EMPNO', 'EP.NEW_EMPNO',
                 DB::raw("TRIM(EP.FIRST_NAME)||' '||TRIM(NVL(EP.MIDDLE_NAME,''))||' '||TRIM(NVL(EP.LAST_NAME,'')) AS EMPNAME"),
                 'EP.FATHER_NAME', 'EP.MOTHER_NAME', 'EP.EMP_MOBILE_NO',
                 'EP.SEX', 'EP.STATUS', 'EO.COMPANY_ID'
             );
-
+//dd($request->all());
         // Status — empty = All, 'Active' = default first load
         $status = $request->input('status', 'Active');
 $q->when(!empty($status), function ($query) use ($status) {

@@ -191,8 +191,7 @@ class LoginController extends BaseController
     }
 
 
-
-    
+   
 public function liveData(Request $request)
 {
     if (!session('LoggedUser')) {
@@ -200,13 +199,18 @@ public function liveData(Request $request)
     }
  
     try {
+        $companyId = session('company_id', '100');
+
         // ── KPI: Total Active Employees ──────────────────────────────────────
-        $totalEmployees = DB::table('emp_personal')
-            ->where('status', 'Active')
-            ->count();
+        $totalEmployees =DB::table('HRM.EMP_OFFICIAL as eo')
+    ->join('HRM.EMP_PERSONAL as ep', 'ep.EMPNO', '=', 'eo.EMPNO')
+    ->where('eo.COMPANY_ID', $companyId)
+    ->whereNull('eo.TERMINATION_DATE')
+    ->whereNull('eo.RESIGNED_DATE')
+    ->where('ep.STATUS', 'Active')
+    ->count();
  
         // ── KPI: Today's Attendance Summary ─────────────────────────────────
-$companyId = session('company_id', '100');
 
         // ── UI DATE (for display) ──
         $today = Carbon::today();
@@ -256,10 +260,12 @@ $companyId = session('company_id', '100');
             ->get();
  
         // ── Gender Split ─────────────────────────────────────────────────────
-        $genderSplit = DB::table('emp_personal')
+        $genderSplit = DB::table('emp_personal as ep')
+        ->join('emp_official as eo', 'ep.empno', '=', 'eo.empno')
             ->select('sex', DB::raw('COUNT(*) as cnt'))
             ->where('status', 'Active')
             ->whereNotNull('sex')
+            ->where('ep.company_id','100')
             ->groupBy('sex')
             ->get();
  
@@ -322,6 +328,9 @@ WHERE eo.COMPANY_ID = :cid
   AND EXTRACT(MONTH FROM NVL(eo.INCREMENT_DATE, eo.JOINING_DATE)) = EXTRACT(MONTH FROM SYSDATE)
 ORDER BY eo.INCREMENT_DATE
         ", ['cid' => $companyId]);
+       
+       
+       
         $incrementNextMonth = DB::select("
     SELECT eo.EMPNO,
        ep.FIRST_NAME || ' ' || ep.LAST_NAME AS EMP_NAME,
@@ -338,7 +347,10 @@ WHERE eo.COMPANY_ID = :cid
   AND EXTRACT(MONTH FROM NVL(eo.INCREMENT_DATE, eo.JOINING_DATE))=EXTRACT(MONTH FROM ADD_MONTHS(SYSDATE,1))
 ORDER BY eo.INCREMENT_DATE
 ", ['cid' => $companyId]);
- 
+ $formatted = DB::selectOne("
+    SELECT TO_CHAR(SYSDATE, 'DD Mon YYYY, HH:MI:SS AM') AS formatted_time
+    FROM dual
+")->formatted_time;
         // ── Attendance rate % ─────────────────────────────────────────────────
         $attendanceRate = $totalEmployees > 0
             ? round((($todayAtt->present ?? 0) / $totalEmployees) * 100, 1)
@@ -346,7 +358,7 @@ ORDER BY eo.INCREMENT_DATE
  
         return response()->json([
             'success'            => true,
-            'updated_at'         => now()->format('d M Y, h:i:s A'),
+            'updated_at'         => $formatted,
             // KPI cards
             'total_employees'    => number_format($totalEmployees),
             'present'            => $todayAtt->present ?? 0,
@@ -369,7 +381,6 @@ ORDER BY eo.INCREMENT_DATE
         return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
     }
 }
-
 
 
 }
