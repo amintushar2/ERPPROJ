@@ -11,6 +11,8 @@ class CompanyProfile extends Model
     protected $table='COMPANY';
     public $timestamps = false;
     public $incrementing = false;
+            protected $primaryKey = 'company_id'; // ⭐ FIX
+
     use HasFactory;
 
     protected $fillable =[

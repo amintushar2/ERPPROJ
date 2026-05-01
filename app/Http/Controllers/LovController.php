@@ -27,6 +27,18 @@ class LovController extends Controller
             ->get();
         return response()->json(['results' => $rows]);
     }
+     public function companyHrm(Request $request) {
+        $this->auth();
+        $rows = DB::table('COMPANY as cp')
+            ->join('COMPANY_PERMISSION as perm', 'cp.COMPANY_ID', '=', 'perm.COMPANY_ID')
+            ->select('cp.COMPANY_ID as id', DB::raw("cp.COMPANY_NAME as text"))
+            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(cp.COMPANY_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
+            ->orderBy('cp.COMPANY_NAME')
+            ->limit(50)
+            ->distinct()
+            ->get();
+        return response()->json(['results' => $rows]);
+    }
     // Department  GET /lov/dept
     public function dept(Request $request) {
         $this->auth();
@@ -181,8 +193,8 @@ class LovController extends Controller
     // Y/N options (work_ent, ot_ent, res_ent, tran_ent, pf_ent, tax_ent)
     public function yesno() {
         return response()->json(['results' => [
-            ['id'=>'Y','text'=>'Yes'],
-            ['id'=>'N','text'=>'No'],
+            ['id'=>'Yes','text'=>'Yes'],
+            ['id'=>'No','text'=>'No'],
         ]]);
     }
 }

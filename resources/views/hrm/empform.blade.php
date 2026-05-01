@@ -1415,44 +1415,29 @@
                 // ── PERSONAL SAVE / UPDATE ──
                 $('#frmPersonal').on('submit', function(e) {
                     e.preventDefault();
+
                     if (!IS_EDIT) {
-                        const v = $('#empnoInput').val().trim().toUpperCase();
+                        const v = $('#empnoInput').val();
                         if (!v) {
-                            Swal.fire('Required', 'Enter Employee ID', 'warning');
+                            Swal.fire('Required', 'Please select an Employee', 'warning');
                             return;
                         }
-                        EMPNO = v;
+                        EMPNO = v.trim().toUpperCase();
                         $('#empno').val(EMPNO);
                     }
+
+                    // ── grab all fields + all Select2 names automatically ──
+                    const formData = lovFormObjectWithNames('#frmPersonal');
+                    formData.empno = EMPNO; // ensure empno is always correct
+
                     $.ajax({
                         url: '/api/saveEmpPersonal',
                         method: 'POST',
-                        processData: false,
-                        contentType: false,
-                        data: new FormData(this),
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData),
                         dataType: 'json',
                         success: res => {
                             swalOk(res.message);
-                            // ── Update photo preview after save (Y: drive) ──
-                            if (res.photo_url) {
-                                $('#photoPreview').attr('src', res.photo_url + '&v=' + Date.now())
-                                    .show();
-                                $('#photoPlaceholder').hide();
-                                $('#removePhoto').show();
-                                // Extract filename from URL for hint
-                                const pFile = res.photo_url.split('/').pop().split('?')[0];
-                                $('#photoFilename').html('📁 ' + pFile);
-                            }
-                            // ── Update signature preview after save (Z: drive) ──
-                            if (res.sign_url) {
-                                $('#signPreview').attr('src', res.sign_url + '&v=' + Date.now())
-                                    .show();
-                                $('#signPlaceholder').hide();
-                                $('#removeSign').show();
-                                const sFile = res.sign_url.split('/').pop().split('?')[0];
-                                $('#signFilename').html('📁 ' + sFile);
-                            }
-                            if (!IS_EDIT) Object.keys(tabLoaded).forEach(k => tabLoaded[k] = false);
                         },
                         error: swalErr
                     });

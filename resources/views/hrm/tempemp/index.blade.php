@@ -808,7 +808,7 @@
                             <label class="lbl">Company Name</label>
                             {{-- Stores COMPANY_ID, hidden company_name --}}
                             <select id="company_bot" name="official[company_id]" class="select2-ajax"
-                                data-url="{{ route('lov.company') }}" data-placeholder="Search company…">
+                                data-url="{{ route('lov.companyHrm') }}" data-placeholder="Search company…">
                                 <option value="">Search company…</option>
                             </select>
                             <input type="hidden" id="official_company_name" name="official[company_name]">

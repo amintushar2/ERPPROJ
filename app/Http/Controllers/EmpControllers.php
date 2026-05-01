@@ -14,6 +14,7 @@ use App\Models\Emp_historyModel;
 use App\Models\Emp_trainingModel;
 use App\Models\Emp_work_expModel;
 use App\Models\Emp_leaveModel;
+use App\Models\CompanyProfile;
 use Illuminate\Support\Facades\Validator;
 use DB;
 use Illuminate\Http\Request;
@@ -192,6 +193,7 @@ public function saveEmpPersonal(Request $request)
     $empno  = trim($request->input('empno'));
     $record = EmpPersonal::where('empno', $empno)->first();
 
+
     $validator = Validator::make($request->all(), [
         'empno'         => 'required|string',
         'first_name'    => 'required|string|max:100',
@@ -207,10 +209,18 @@ public function saveEmpPersonal(Request $request)
     }
 
     try {
+            $companyName = $request->input('company_id_name')
+            ?? optional(\App\Models\CompanyProfile::find($request->input('company_id')))->company_name
+            ?? null;
+
+        // ── Resolve religion name: prefer Select2 companion, else look up from DB ──
+        $religionName = $request->input('religion_id_name')
+            ?? optional(\App\Models\Religion::find($request->input('religion_id')))->religion_name
+            ?? null;
         $data = array_merge($request->only([
             'first_name', 'middle_name', 'last_name', 'b_name', 'father_name',
-            'mother_name', 'husband_name', 'gurdian_name', 'sex', 'marial_status',
-            'religion_id', 'blood_group', 'national_id_no', 'id_mark', 'company_id',
+            'mother_name', 'husband_name', 'gurdian_name', 'sex', 'marial_status','religion',
+            'religion_id', 'blood_group', 'national_id_no', 'id_mark', 'company_id', 'company_name',
             'passport_no', 'place_of_issue', 'birthday_id',
             'emp_mobile_no', 'sms_mobile_no', 'office_food', 'status', 'hbs_test',
             'nationality_desc', 'last_education',
@@ -218,6 +228,8 @@ public function saveEmpPersonal(Request $request)
              'empno'     => $empno,
                 'card_no'   => $empno,
                 'new_empno' => $empno,
+'company_name' => $companyName,
+            'religion_name'     => $religionName,
 
 
             'dob'           => $this->parseDate($request->input('dob')),

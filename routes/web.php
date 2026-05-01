@@ -644,6 +644,7 @@ Route::prefix('lov')->name('lov.')->group(function () {
      |         WHERE COMPANY_ID IN (SELECT COMPANY_ID FROM COMPANY_PERMISSION)
     */
     Route::get('/company',     [LovController::class, 'company'])->name('company');
+    Route::get('/companyHrm',  [LovController::class, 'companyHrm'])->name('companyHrm');
 
     /*
      | GET /lov/dept?q=
