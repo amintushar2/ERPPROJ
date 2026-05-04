@@ -21,8 +21,8 @@ class TempEmpRequest extends FormRequest
             'company_name'           => 'required|string|max:100',
             'card_no'                => 'nullable|string|max:50',
             'dob'                    => 'nullable|date',
-            'sex'                    => 'nullable|in:M,F',
-            'status'                 => 'nullable|in:Active,Resigned,Terminated,Retired',
+            'sex'                    => 'nullable|in:Male,Female',
+            'status'                 => 'nullable|in:Active,Inactive',
             'permanent_empno'        => 'nullable|string|max:20',
 
             /* ── EMP_OFFICIAL (nested) ── */
@@ -31,7 +31,7 @@ class TempEmpRequest extends FormRequest
             'official.section_name'  => 'nullable|string|max:100',
             'official.emp_type'      => 'nullable|string|max:50',
             'official.floor_name'    => 'nullable|string|max:100',
-            'official.ot_ent'        => 'nullable|in:Y,N',
+            'official.ot_ent'        => 'nullable|in:Yes,No',
             'official.gross'         => 'nullable|numeric|min:0',
             'official.joining_date'  => 'nullable|date',
             'official.des_name'      => 'nullable|string|max:100',

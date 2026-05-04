@@ -280,7 +280,6 @@ class UserMenuPermissionController extends Controller
                     ->whereRaw('TRIM(SUB_MENU_ID)   = ?', [$routeId])
                     ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
                     ->exists();
-
                 if (!$routeEnabled) {
                     // Toggle OFF → DELETE if row exists
                     if ($routeRowExists) {
@@ -296,40 +295,75 @@ class UserMenuPermissionController extends Controller
                 }
 
                 // Toggle ON
-                if ($routeRowExists) {
-                    // Row exists → UPDATE enabled flag
-                    DB::table('F_STORE.ALL_USER_SUB_DETAILS')
-                        ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
-                        ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
-                        ->whereRaw('TRIM(SUB_MENU_ID)   = ?', [$routeId])
-                        ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
-                        ->update([
-                            'ENABLED'     => 'Y',
-                            'UPDATE_BY'   => auth()->id() ?? 'USER',
-                            'UPDATE_DATE' => now(),
-                        ]);
-                } elseif (!$userHasSubDetails) {
-                    // No sub-detail rows yet for this user+menu → fresh INSERT
-                    $route = DB::table('F_STORE.ALL_ROUTE_DETAILS')
-                        ->whereRaw('TRIM(ROUTE_ID) = ?', [$routeId])
-                        ->select(
-                            DB::raw('TRIM(ROUTE_PATH) AS route_path'),
-                            DB::raw('TRIM(COMPONENT)  AS component')
-                        )
-                        ->first();
+                // if ($routeRowExists) {
+                //     // Row exists → UPDATE enabled flag
+                //     DB::table('F_STORE.ALL_USER_SUB_DETAILS')
+                //         ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
+                //         ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
+                //         ->whereRaw('TRIM(SUB_MENU_ID)   = ?', [$routeId])
+                //         ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
+                //         ->update([
+                //             'ENABLED'     => 'Y',
+                //             'UPDATE_BY'   => auth()->id() ?? 'USER',
+                //             'UPDATE_DATE' => now(),
+                //         ]);
+                // } elseif (!$userHasSubDetails) {
+                //     // No sub-detail rows yet for this user+menu → fresh INSERT
+                //     $route = DB::table('F_STORE.ALL_ROUTE_DETAILS')
+                //         ->whereRaw('TRIM(ROUTE_ID) = ?', [$routeId])
+                //         ->select(
+                //             DB::raw('TRIM(ROUTE_PATH) AS route_path'),
+                //             DB::raw('TRIM(COMPONENT)  AS component')
+                //         )
+                //         ->first();
 
-                    DB::table('F_STORE.ALL_USER_SUB_DETAILS')->insert([
-                        'USER_GROUP_ID' => $groupId,
-                        'SUB_MENU_ID'   => $routeId,
-                        'USER_ID'       => $userId,
-                        'MENU_ITEM_ID'  => $menuId,
-                        'SUB_MENU_NAME' => $route?->component ?? $routeId,
-                        'ROUTE'         => $route?->route_path ?? '',
-                        'ENABLED'       => 'Y',
-                        'INSERT_DATE'   => now(),
-                        'INSERT_BY'     => auth()->id() ?? 'USER',
-                    ]);
-                }
+                //     DB::table('F_STORE.ALL_USER_SUB_DETAILS')->insert([
+                //         'USER_GROUP_ID' => $groupId,
+                //         'SUB_MENU_ID'   => $routeId,
+                //         'USER_ID'       => $userId,
+                //         'MENU_ITEM_ID'  => $menuId,
+                //         'SUB_MENU_NAME' => $route?->component ?? $routeId,
+                //         'ROUTE'         => $route?->route_path ?? '',
+                //         'ENABLED'       => 'Y',
+                //         'INSERT_DATE'   => now(),
+                //         'INSERT_BY'     => auth()->id() ?? 'USER',
+                //     ]);
+                // }
+                if ($routeRowExists) {
+    // UPDATE
+    DB::table('F_STORE.ALL_USER_SUB_DETAILS')
+        ->whereRaw('TRIM(USER_ID)       = ?', [$userId])
+        ->whereRaw('TRIM(USER_GROUP_ID) = ?', [$groupId])
+        ->whereRaw('TRIM(SUB_MENU_ID)   = ?', [$routeId])
+        ->whereRaw('TRIM(MENU_ITEM_ID)  = ?', [$menuId])
+        ->update([
+            'ENABLED'     => 'Y',
+            'UPDATE_BY'   => auth()->id() ?? 'USER',
+            'UPDATE_DATE' => now(),
+        ]);
+
+} else {
+    // INSERT (no need for !$userHasSubDetails)
+    $route = DB::table('F_STORE.ALL_ROUTE_DETAILS')
+        ->whereRaw('TRIM(ROUTE_ID) = ?', [$routeId])
+        ->select(
+            DB::raw('TRIM(ROUTE_PATH) AS route_path'),
+            DB::raw('TRIM(COMPONENT)  AS component')
+        )
+        ->first();
+
+    DB::table('F_STORE.ALL_USER_SUB_DETAILS')->insert([
+        'USER_GROUP_ID' => $groupId,
+        'SUB_MENU_ID'   => $routeId,
+        'USER_ID'       => $userId,
+        'MENU_ITEM_ID'  => $menuId,
+        'SUB_MENU_NAME' => $route?->component ?? $routeId,
+        'ROUTE'         => $route?->route_path ?? '',
+        'ENABLED'       => 'Y',
+        'INSERT_DATE'   => now(),
+        'INSERT_BY'     => auth()->id() ?? 'USER',
+    ]);
+}
                 // else: user has sub-detail rows but not this route → skip
             }
         }

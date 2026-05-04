@@ -11,6 +11,7 @@ class DepartmentModel extends Model
     protected $table='DEPT';
     public $timestamps = false;
     public $incrementing = false;
+            protected $primaryKey = 'dept_no'; // ⭐ FIX
 
     protected $fillable =[
         'dept_no',

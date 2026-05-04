@@ -262,7 +262,7 @@
                 <div class="col-md-4">
                     <div class="row p-1"><label class="col-sm-5 col-form-label">Work Entitle:</label>
                         <div class="col-sm-7">
-                            <select class="form-select lov" name="work_ent" id="of_work_ent" data-lov="/lov/yesno"
+                            <select class="form-select lov" name="work_ent" id="of_work_ent" data-lov="/lov/workEnt"
                                 data-val="{{ $off->work_ent }}" data-txt="{{ $off->work_ent ?? '' }}"
                                 data-ph="Select…"></select>
                         </div>

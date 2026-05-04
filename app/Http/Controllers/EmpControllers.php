@@ -41,6 +41,7 @@ class EmpControllers extends BaseController
         return [
             'companyList' => DB::table('COMPANY_PROFILE')->get(),
             'religion'    => DB::table('RELIGION')->get(),
+               'lastedu'    => DB::table('PASSED_EXAM')->get(),
         ];
     }
 

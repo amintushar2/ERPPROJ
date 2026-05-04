@@ -197,4 +197,11 @@ class LovController extends Controller
             ['id'=>'No','text'=>'No'],
         ]]);
     }
+       public function workEnt() {
+        return response()->json(['results' => [
+            ['id'=>'Officer','text'=>'Officer'],
+            ['id'=>'Worker','text'=>'Worker'],
+            ['id'=>'Staff','text'=>'Staff'],
+        ]]);
+    }
 }

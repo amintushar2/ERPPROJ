@@ -201,6 +201,7 @@ Route::middleware(['web','auth'])->group(function () {
     Route::get('/lov/thana',       [LovController::class,'thana']);
     Route::get('/lov/district',    [LovController::class,'district']);
     Route::get('/lov/yesno',       [LovController::class,'yesno']);
+    Route::get('/lov/workEnt',     [LovController::class,'workEnt']);
 
     // Leave
     Route::get('/hrm/getLeaveDetails/{empno}/{year}',     [EmpControllers::class,'getLeaveDetails']);
@@ -694,6 +695,7 @@ Route::prefix('lov')->name('lov.')->group(function () {
      | Static: Y=Yes / N=No  (used for OT field)
     */
     Route::get('/yesno',       [LovController::class, 'yesno'])->name('yesno');
+    Route::get('/workEnt',     [LovController::class, 'workEnt'])->name('workEnt');
 });
 Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
 
@@ -725,3 +727,4 @@ Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
     Route::delete('/{empno}',         [TempEmpController::class, 'destroy'])->name('destroy');
 });
 
+require base_path('routes/setup.php');

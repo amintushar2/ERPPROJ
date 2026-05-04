@@ -236,8 +236,8 @@ class TempEmpController extends Controller
                 'weekly_off'   => $off['weekly_off']   ?? null,
                 'work_ent'     => $off['work_ent']     ?? null,
                 /* line: id=line_no, name=line */
-                'line_no'      => $off['line_no']      ?? null,
-                'line'         => $off['line']         ?? null,
+                 'line'      => $off['line_no']      ?? null,
+                'line_info'         => $off['line_name']         ?? null,
                 'insert_by'    => auth()->id(),
                 'insert_date'  => now(),
             ]));

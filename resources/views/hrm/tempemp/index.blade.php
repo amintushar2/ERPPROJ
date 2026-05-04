@@ -1649,7 +1649,7 @@
         ══════════════════════════════════════════ */
         function validateForm() {
             let ok = true;
-            ['first_name', 'last_name'].forEach(id => {
+            ['first_name'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('is-invalid');
                 if (!el.value.trim()) {

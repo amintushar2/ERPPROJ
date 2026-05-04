@@ -927,8 +927,16 @@
                                     <div class="col-md-3">
                                         <div class="row p-1">
                                             <label class="col-sm-5 col-form-label">Last Education</label>
-                                            <div class="col-sm-7"><input type="text" class="form-control"
-                                                    name="last_education" value="{{ $emp->last_education ?? '' }}">
+                                            <div class="col-sm-7">
+                                                <select class="form-select" name="last_education">
+                                                    <option value="">— Choose —</option>
+                                                    @foreach ($lastedu as $passedExm)
+                                                        <option value="{{ $passedExm->passed_exam }}"
+                                                            {{ isset($emp) && $emp->passed_exam == $passedExm->passed_exam ? 'selected' : '' }}>
+                                                            {{ $passedExm->passed_exam }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                     </div>

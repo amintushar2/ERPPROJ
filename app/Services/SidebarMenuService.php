@@ -41,7 +41,7 @@ class SidebarMenuService
 
         $menu = $this->enabledMenus($data->user_group_id, $data->user_id);
         $allSubmenus = $this->enabledRoutes($data->user_group_id, $data->user_id);
-
+//dd($allSubmenus->filter(fn ($row) => ltrim((string) $row->route, '/') === $uri)->values());
         return [
             'data' => $data,
             'menu' => $menu,
