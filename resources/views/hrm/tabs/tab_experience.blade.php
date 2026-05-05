@@ -1,6 +1,7 @@
 {{-- resources/views/hrm/tabs/tab_experience.blade.php --}}
 <div class="page-heading"><i class="bi bi-buildings-fill"></i> Experience</div>
-<form id="frmExp">@csrf<input type="hidden" name="empno" value="{{ $empno }}">
+<form id="frmExp">@csrf<input type="hidden" name="empno" value="{{ $empno }}"><input type="hidden"
+        name="work_exp_id" value="">
     <div class="sec-card">
         <div class="sec-card-head"><i class="bi bi-briefcase-fill"></i> Add Experience Record</div>
         <div class="sec-card-body">
@@ -107,19 +108,32 @@
             $(this).serializeArray().forEach(f => fd[f.name] = f.value);
             fd.empno = fd.empno || $('#frmExp [name="empno"]').val();
 
-            $.ajax({
-                url: '/api/saveEmpWorkExp',
-                method: 'POST',
+            const workExpId = $('#frmExp [name="work_exp_id"]').val();
+            const ajaxOptions = {
+                url: workExpId ? `/api/updateEmpWorkExp/${workExpId}` : '/api/saveEmpWorkExp',
+                method: workExpId ? 'PUT' : 'POST',
                 contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: JSON.stringify(fd),
                 dataType: 'json',
                 success: res => {
                     swalOk(res.message);
                     loadExpRows();
-                    $('#frmExp')[0].reset();
+                    resetExpForm();
                 },
                 error: swalErr
-            });
+            };
+
+            $.ajax(ajaxOptions);
+        });
+
+        $('#frmExp').on('reset', function() {
+            resetExpForm();
+            setTimeout(function() {
+                if (window.initDatePick) initDatePick(document);
+            }, 50);
         });
     });
 
@@ -127,14 +141,102 @@
         const empno = $('#frmExp [name="empno"]').val();
         if (!empno) return;
 
-        $.get("{{ URL::to('empExper') }}" + '/' + empno, function(d) {
-            $('#tbl_exp').html(d);
-        });
+        $.get("{{ URL::to('api/getEmpWorkExperience') }}" + '/' + empno, function(res) {
+            const rows = (res.success && Array.isArray(res.data) ? res.data : []).map(function(item) {
+                const recordId = item.id || item.slno || item.SLNO || '';
+                return '<tr>' +
+                    '<td>' + (item.empno || '') + '</td>' +
+                    '<td>' + (item.organization || '') + '</td>' +
+                    '<td>' + (item.designation || '') + '</td>' +
+                    '<td>' + (item.d_from || '') + '</td>' +
+                    '<td>' + (item.d_to || '') + '</td>' +
+                    '<td>' + (item.total_days || '') + '</td>' +
+                    '<td>' + (item.last_sal_drawn || '') + '</td>' +
+                    '<td class="text-center">' +
+                    '<button type="button" class="btn btn-sm btn-secondary btn-edit-exp me-1" data-item="' +
+                    encodeURIComponent(JSON.stringify(item)) +
+                    '" title="Edit"><i class="bi bi-pencil-fill"></i></button>' +
+                    '<button type="button" class="btn btn-sm btn-danger btn-delete-exp" data-id="' +
+                    recordId + '" title="Delete"><i class="bi bi-trash-fill"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $('#tbl_exp').html(rows ||
+                '<tr><td colspan="8" class="text-center">No experience records found.</td></tr>');
+        }, 'json');
 
         setTimeout(function() {
             if (window.initDatePick) initDatePick(document);
         }, 50);
     }
+
+    function fillExpForm(item) {
+        $('#frmExp [name="work_exp_id"]').val(item.id || item.slno || item.SLNO || '');
+        $('#frmExp [name="organization"]').val(item.organization || '');
+        $('#frmExp [name="prv_emp_no"]').val(item.prv_emp_no || '');
+        $('#frmExp [name="designation"]').val(item.designation || '');
+        $('#frmExp [name="org_address"]').val(item.org_address || '');
+        $('#frmExp [name="org_tel"]').val(item.org_tel || '');
+        $('#frmExp [name="last_sal_drawn"]').val(item.last_sal_drawn || '');
+        $('#frmExp [name="d_from"]').val(item.d_from || '');
+        $('#frmExp [name="d_to"]').val(item.d_to || '');
+        $('#frmExp [name="total_years"]').val(item.total_days || '');
+        $('#frmExp [name="leave_reason"]').val(item.leave_reason || '');
+        $('#frmExp button[type="submit"]').html('<i class="bi bi-pencil-square me-1"></i> Update');
+    }
+
+    function resetExpForm() {
+        $('#frmExp')[0].reset();
+        $('#frmExp [name="work_exp_id"]').val('');
+        $('#frmExp button[type="submit"]').html('<i class="bi bi-plus-circle me-1"></i> Add');
+    }
+
+    $(document).on('click', '.btn-edit-exp', function() {
+        const item = JSON.parse(decodeURIComponent($(this).attr('data-item')) || '{}');
+        if (!item) return;
+        fillExpForm(item);
+    });
+
+    $(document).on('click', '.btn-delete-exp', function() {
+        const id = $(this).data('id');
+        if (!id) return;
+
+        Swal.fire({
+            title: 'Delete experience?',
+            text: 'This work experience record will be removed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: `/api/deleteEmpWorkExp/${id}`,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.fire('Deleted!', response.message, 'success');
+                    loadExpRows();
+                    if ($('#frmExp [name="work_exp_id"]').val() === String(id)) {
+                        resetExpForm();
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'An error occurred.',
+                        'error');
+                }
+            });
+        });
+    });
+
+    setTimeout(function() {
+        if (window.initDatePick) initDatePick(document);
+    }, 50);
 
     /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
     (function() {

@@ -785,7 +785,7 @@
                         <div class="f">
                             <label class="lbl">Bangla Name <span class="req">*</span></label>
                             <input type="text" class="bangla-text" id="b_name" name="b_name"
-                                placeholder="বাংলা নাম" oninput="updateTopName()">
+                                placeholder="বাংলা নাম">
                         </div>
                         <div class="f">
                             <label class="lbl">Permanent Emp No</label>

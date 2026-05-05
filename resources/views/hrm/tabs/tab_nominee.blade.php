@@ -1,6 +1,7 @@
 {{-- resources/views/hrm/tabs/tab_nominee.blade.php --}}
 <div class="page-heading"><i class="bi bi-people-fill"></i> Nominee / Family</div>
-<form id="frmNominee">@csrf<input type="hidden" name="empno" value="{{ $empno }}">
+<form id="frmNominee">@csrf<input type="hidden" name="empno" value="{{ $empno }}"><input type="hidden"
+        name="family_id" value=""><input type="hidden" name="depd_no" value="">
     <div class="sec-card">
         <div class="sec-card-head"><i class="bi bi-person-plus"></i> Add Nominee Record</div>
         <div class="sec-card-body">
@@ -123,19 +124,22 @@
             fd.d_sex = $('input[name="d_sex"]:checked').val();
             fd.empno = fd.empno || $('#frmNominee [name="empno"]').val();
 
-            $.ajax({
-                url: '/api/saveEmpFamily',
-                method: 'POST',
+            const familyId = fd.family_id;
+            const ajaxOptions = {
+                url: familyId ? `/api/updateEmpFamily/${familyId}` : '/api/saveEmpFamily',
+                method: familyId ? 'PUT' : 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(fd),
                 dataType: 'json',
                 success: res => {
                     swalOk(res.message);
                     loadNomRows();
-                    $('#frmNominee')[0].reset();
+                    resetNomineeForm();
                 },
                 error: swalErr
-            });
+            };
+
+            $.ajax(ajaxOptions);
         });
     });
 
@@ -143,14 +147,107 @@
         const empno = $('#frmNominee [name="empno"]').val();
         if (!empno) return;
 
-        $.get("{{ URL::to('getNome') }}" + '/' + empno, function(d) {
-            $('#tbl_nom').html(d);
-        });
+        $.get("{{ URL::to('api/getEmpFamily') }}" + '/' + empno, function(res) {
+            const rows = (res.success && Array.isArray(res.data) ? res.data : []).map(function(item) {
+                const recordId = item.id || item.depd_no || item.DEPD_NO || '';
+                return '<tr>' +
+                    '<td>' + (item.empno || '') + '</td>' +
+                    '<td>' + (item.depd_name || '') + '</td>' +
+                    '<td>' + (item.depent_name_bangla || '') + '</td>' +
+                    '<td>' + (item.relationship || '') + '</td>' +
+                    '<td>' + (item.d_dob || '') + '</td>' +
+                    '<td>' + (item.d_age || '') + '</td>' +
+                    '<td>' + (item.d_sex || '') + '</td>' +
+                    '<td>' + (item.percentage || '') + '</td>' +
+                    '<td>' + (item.address || '') + '</td>' +
+                    '<td class="text-center">' +
+                    '<button type="button" class="btn btn-sm btn-secondary btn-edit-nom me-1" data-item="' +
+                    encodeURIComponent(JSON.stringify(item)) +
+                    '" title="Edit"><i class="bi bi-pencil-fill"></i></button>' +
+                    '<button type="button" class="btn btn-sm btn-danger btn-delete-nom" data-id="' +
+                    recordId + '" title="Delete"><i class="bi bi-trash-fill"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $('#tbl_nom').html(rows ||
+                '<tr><td colspan="10" class="text-center">No nominee records found.</td></tr>');
+        }, 'json');
 
         setTimeout(function() {
             if (window.initDatePick) initDatePick(document);
         }, 50);
     }
+
+    function fillNomineeForm(item) {
+        $('#frmNominee [name="family_id"]').val(item.id || item.depd_no || item.DEPD_NO || '');
+        $('#frmNominee [name="depd_no"]').val(item.depd_no || item.DEPD_NO || '');
+        $('#frmNominee [name="depd_name"]').val(item.depd_name || '');
+        $('#frmNominee [name="depent_name_bangla"]').val(item.depent_name_bangla || '');
+        $('#frmNominee [name="relationship"]').val(item.relationship || '');
+        $('#frmNominee [name="relation_bn"]').val(item.relation_bn || '');
+        $('#frmNominee [name="d_dob"]').val(item.d_dob || '');
+        $('#frmNominee [name="d_age"]').val(item.d_age || '');
+        $('input[name="d_sex"]').prop('checked', false);
+        if (item.d_sex) {
+            $('input[name="d_sex"][value="' + item.d_sex + '"]')
+                .prop('checked', true);
+        }
+        $('#frmNominee [name="d_as_on"]').val(item.d_as_on || '');
+        $('#frmNominee [name="percentage"]').val(item.percentage || '');
+        $('#frmNominee [name="address"]').val(item.address || '');
+        $('#frmNominee [name="address_bn"]').val(item.address_bn || '');
+        $('#frmNominee button[type="submit"]').html('<i class="bi bi-pencil-square me-1"></i> Update');
+    }
+
+    function resetNomineeForm() {
+        $('#frmNominee')[0].reset();
+        $('#frmNominee [name="family_id"]').val('');
+        $('#frmNominee [name="depd_no"]').val('');
+        $('#frmNominee button[type="submit"]').html('<i class="bi bi-plus-circle me-1"></i> Add');
+    }
+
+    $(document).on('click', '.btn-edit-nom', function() {
+        const item = JSON.parse(decodeURIComponent($(this).attr('data-item')) || '{}');
+        if (!item) return;
+        fillNomineeForm(item);
+    });
+
+    $(document).on('click', '.btn-delete-nom', function() {
+        const id = $(this).data('id');
+        if (!id) return;
+
+        Swal.fire({
+            title: 'Delete nominee?',
+            text: 'This nominee record will be removed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: `/api/deleteEmpFamily/${id}`,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.fire('Deleted!', response.message, 'success');
+                    loadNomRows();
+                    if ($('#frmNominee [name="family_id"]').val() === String(id)) {
+                        resetNomineeForm();
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'An error occurred.',
+                        'error');
+                }
+            });
+        });
+    });
 
     /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
     (function() {

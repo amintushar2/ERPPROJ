@@ -1080,6 +1080,23 @@ public function saveEmpLocation(Request $request)
         }
     }
 
+    public function getEmpFamily($empno)
+    {
+        try {
+            $family = Emp_familyModel::where('empno', $empno)->get();
+            return response()->json([
+                'success' => true,
+                'data' => $family
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching family records',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Update Family Member (UPDATE)
      * PUT: /api/updateEmpFamily/{id}
@@ -1463,6 +1480,28 @@ public function saveEmpLocation(Request $request)
     }
 
     /**
+     * Get Work Experience (READ)
+     * GET: /api/getEmpWorkExperience/{empno}
+     */
+    public function getEmpWorkExperience($empno)
+    {
+        try {
+            $workExperiences = Emp_work_expModel::where('empno', $empno)->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $workExperiences
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching work experience records',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Update Work Experience (UPDATE)
      * PUT: /api/updateEmpWorkExp/{id}
      */
@@ -1500,7 +1539,7 @@ public function saveEmpLocation(Request $request)
                 'org_address' => $request->input('org_address'),
                 'org_tel' => $request->input('org_tel'),
                 'last_sal_drawn' => $request->input('last_sal_drawn'),
-                'total_years' => $request->input('total_years'),
+                'total_days' => $request->input('total_years'),
                 'designation' => $request->input('designation'),
             ]);
 

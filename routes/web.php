@@ -84,6 +84,8 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     
     // ──── EDUCATION/QUALIFICATION ────
     Route::post('/saveEmpQualification', [EmpControllers::class, 'saveEmpQualification'])->name('saveEmpQualification');
+    Route::put('/updateEmpQualification/{id}', [EmpControllers::class, 'updateEmpQualification'])->name('updateEmpQualification');
+    Route::delete('/deleteEmpQualification/{id}', [EmpControllers::class, 'deleteEmpQualification'])->name('deleteEmpQualification');
     Route::get('/getEmpQualifications/{empno}', [EmpControllers::class, 'getEmpQualifications'])->name('getEmpQualifications');
     Route::get('/getPassedExams', [EmpControllers::class, 'getPassedExams'])->name('getPassedExams');
     
@@ -93,6 +95,8 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     
     // ──── FAMILY INFORMATION ────
     Route::post('/saveEmpFamily', [EmpControllers::class, 'saveEmpFamily']);
+    Route::put('/updateEmpFamily/{id}', [EmpControllers::class, 'updateEmpFamily'])->name('updateEmpFamily');
+    Route::delete('/deleteEmpFamily/{id}', [EmpControllers::class, 'deleteEmpFamily'])->name('deleteEmpFamily');
     Route::get('/getEmpFamily/{empno}', [EmpControllers::class, 'getEmpFamily'])->name('getEmpFamily');
     
     // ──── JOB HISTORY ────
@@ -105,6 +109,8 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     
     // ──── WORK EXPERIENCE ────
     Route::post('/saveEmpWorkExp', [EmpControllers::class, 'saveEmpWorkExp']);
+    Route::put('/updateEmpWorkExp/{id}', [EmpControllers::class, 'updateEmpWorkExp']);
+    Route::delete('/deleteEmpWorkExp/{id}', [EmpControllers::class, 'deleteEmpWorkExp']);
     Route::get('/getEmpWorkExperience/{empno}', [EmpControllers::class, 'getEmpWorkExperience']);
     
     // ──── GET ALL EMPLOYEE DETAILS ────

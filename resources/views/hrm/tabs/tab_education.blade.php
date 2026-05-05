@@ -3,7 +3,8 @@
 ═══════════════════════════════════════════════════════ --}}
 
 <div class="page-heading"><i class="bi bi-mortarboard-fill"></i> Education</div>
-<form id="frmEdu">@csrf<input type="hidden" name="empno" value="{{ $empno }}">
+<form id="frmEdu">@csrf<input type="hidden" name="empno" value="{{ $empno }}"><input type="hidden"
+        name="qualification_id" value="">
     <div class="sec-card">
         <div class="sec-card-head"><i class="bi bi-journal-text"></i> Add Education Record</div>
         <div class="sec-card-body">
@@ -117,6 +118,7 @@
             return;
         }
 
+        const qualificationId = $(this).find('[name="qualification_id"]').val();
         const fd = {
             empno: empno,
             name_of_ins: $(this).find('[name="name_of_ins"]').val(),
@@ -128,9 +130,10 @@
             subject: $(this).find('[name="subject"]').val(),
         };
 
-        $.ajax({
-            url: '/api/saveEmpQualification',
-            method: 'POST',
+        const ajaxOptions = {
+            url: qualificationId ? `/api/updateEmpQualification/${qualificationId}` :
+                '/api/saveEmpQualification',
+            method: qualificationId ? 'PUT' : 'POST',
             contentType: 'application/json',
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -140,8 +143,7 @@
             success: function(res) {
                 Swal.fire('Success!', res.message, 'success');
                 loadEduRows();
-                $('#frmEdu')[0].reset();
-                $('#passed_exam').val(null).trigger('change');
+                resetEduForm();
             },
             error: function(xhr) {
                 const msg = xhr.responseJSON?.errors ?
@@ -149,20 +151,105 @@
                     (xhr.responseJSON?.message || 'An error occurred.');
                 Swal.fire('Error', msg, 'error');
             }
-        });
+        };
+
+        $.ajax(ajaxOptions);
     });
 
     function loadEduRows() {
         const empno = $('#frmEdu [name="empno"]').val();
         if (!empno) return;
-        $.get("{{ URL::to('getEdu') }}/" + empno, function(d) {
-            $('#tbl_edu').html(d);
-        });
 
-        setTimeout(function() {
-            if (window.initDatePick) initDatePick(document);
-        }, 50);
+        $.get("{{ URL::to('api/getEmpQualifications') }}/" + empno, function(res) {
+            const rows = (res.success && Array.isArray(res.data) ? res.data : []).map(function(item) {
+                return '<tr>' +
+                    '<td>' + (item.empno || '') + '</td>' +
+                    '<td>' + (item.name_of_ins || '') + '</td>' +
+                    '<td>' + (item.passed_exam || '') + '</td>' +
+                    '<td>' + (item.year || '') + '</td>' +
+                    '<td>' + (item.board || '') + '</td>' +
+                    '<td>' + (item.marks || '') + '</td>' +
+                    '<td>' + (item.subject || '') + '</td>' +
+                    '<td class="text-center">' +
+                    '<button type="button" class="btn btn-sm btn-secondary btn-edit-edu me-1" data-item="' +
+                    encodeURIComponent(JSON.stringify(item)) +
+                    '" title="Edit"><i class="bi bi-pencil-fill"></i></button>' +
+                    '<button type="button" class="btn btn-sm btn-danger btn-delete-edu" data-id="' + (
+                        item.id || item.slno || item.SLNO || '') +
+                    '" title="Delete"><i class="bi bi-trash-fill"></i></button>' +
+                    '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $('#tbl_edu').html(rows ||
+                '<tr><td colspan="8" class="text-center">No education records found.</td></tr>');
+        }, 'json');
     }
+
+    function fillEduForm(item) {
+        $('#frmEdu [name="qualification_id"]').val(item.id || item.slno || item.SLNO || '');
+        $('#frmEdu [name="name_of_ins"]').val(item.name_of_ins || '');
+        $('#passed_exam').val(item.passed_exam || '').trigger('change');
+        $('#frmEdu [name="division"]').val(item.division || '');
+        $('#frmEdu [name="year"]').val(item.year || '');
+        $('#frmEdu [name="board"]').val(item.board || '');
+        $('#frmEdu [name="marks"]').val(item.marks || '');
+        $('#frmEdu [name="subject"]').val(item.subject || '');
+        $('#frmEdu button[type="submit"]').html('<i class="bi bi-pencil-square me-1"></i> Update');
+    }
+
+    function resetEduForm() {
+        $('#frmEdu')[0].reset();
+        $('#passed_exam').val(null).trigger('change');
+        $('#frmEdu [name="qualification_id"]').val('');
+        $('#frmEdu button[type="submit"]').html('<i class="bi bi-plus-circle me-1"></i> Add');
+    }
+
+    $(document).on('click', '.btn-edit-edu', function() {
+        const item = JSON.parse(decodeURIComponent($(this).attr('data-item')) || '{}');
+        if (!item) return;
+        fillEduForm(item);
+    });
+
+    $(document).on('click', '.btn-delete-edu', function() {
+        const id = $(this).data('id');
+        if (!id) return;
+
+        Swal.fire({
+            title: 'Delete record?',
+            text: 'This qualification record will be removed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it'
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
+            $.ajax({
+                url: `/api/deleteEmpQualification/${id}`,
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.fire('Deleted!', response.message, 'success');
+                    loadEduRows();
+                    if ($('#frmEdu [name="qualification_id"]').val() === String(id)) {
+                        resetEduForm();
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'An error occurred.',
+                        'error');
+                }
+            });
+        });
+    });
+
+    setTimeout(function() {
+        if (window.initDatePick) initDatePick(document);
+    }, 50);
 
 
     /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
