@@ -23,6 +23,35 @@
     </style>
 
     @stack('styles')
+    <style>
+        @font-face {
+            font-family: 'SutonnyMJ';
+            src: url('{{ asset('fonts/SutonnyMJ.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SuttonyMJ';
+            src: url('{{ asset('fonts/SutonnyMJ.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'SuttonyMj';
+            src: url('{{ asset('fonts/SutonnyMJ.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        .bangla-text {
+            font-family: 'SutonnyMJ', 'SuttonyMJ', 'SuttonyMj', Arial, sans-serif !important;
+        }
+    </style>
 </head>
 
 <body class="sidebar-mini layout-fixed sidebar-collapse">

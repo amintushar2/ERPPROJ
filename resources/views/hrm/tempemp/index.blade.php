@@ -21,6 +21,14 @@
         href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'SutonnyMJ';
+            src: url('{{ asset('fonts/SutonnyMJ.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --navy: #1B3A5E;
             --navy2: #162F4D;
@@ -52,6 +60,15 @@
             font-size: 13px;
             margin: 0;
             padding: 0
+        }
+
+
+
+        .bangla-text {
+            font-family: 'SutonnyMJ', Arial, sans-serif;
+            font-size: 18px !important;
+            line-height: 1.1;
+            font-weight: bold !important;
         }
 
         /* TOP BAR */
@@ -590,6 +607,24 @@
             color: var(--blue2) !important
         }
 
+        .btn-back {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .3);
+            border-radius: 4px;
+            padding: 4px 14px;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, .25);
+            color: #fff;
+        }
+
         .select2-container {
             width: 100% !important
         }
@@ -632,6 +667,15 @@
         <span class="mode-tag" id="modeTag"></span>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
             <button class="btn-ghost" onclick="cmdClear()">Clear</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <a href="{{ route('empnewentry') }}" class="btn-back">← Employee Entry</a>
+                <a href="{{ route('emplist') }}" class="btn-back">← Back to List</a>
+                @if (isset($emp))
+                    <button type="button" class="btn btn-del btn-sm" id="deleteEmpBtn" data-empno="{{ $emp->empno }}">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                    </button>
+                @endif
+            </div>
             <button class="btn-del" id="btnDelete" onclick="confirmDelete()" disabled>
                 <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
                     style="margin-right:4px">
@@ -662,6 +706,7 @@
             Save
         </button>
         <div class="t-sep"></div>
+
         <button class="btn-cancel" id="btnCancel" onclick="cmdCancel()" disabled>Cancel</button>
         <div class="t-sep"></div>
         <button class="btn-migrate" id="btnMigrate" onclick="cmdMigrate()" disabled
@@ -686,8 +731,8 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show mt-2">{{ session('success') }}<button type="button"
-                    class="btn-close" data-bs-dismiss="alert"></button></div>
+            <div class="alert alert-success alert-dismissible fade show mt-2">{{ session('success') }}<button
+                    type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         @endif
         @if (session('error'))
             <div class="alert alert-danger alert-dismissible fade show mt-2">{{ session('error') }}<button type="button"
@@ -738,6 +783,11 @@
                                 oninput="updateTopName()">
                         </div>
                         <div class="f">
+                            <label class="lbl">Bangla Name <span class="req">*</span></label>
+                            <input type="text" class="bangla-text" id="b_name" name="b_name"
+                                placeholder="বাংলা নাম" oninput="updateTopName()">
+                        </div>
+                        <div class="f">
                             <label class="lbl">Permanent Emp No</label>
                             <input type="text" id="perm_emp_no" name="permanent_empno" class="hi"
                                 placeholder="Assign on confirmation">
@@ -782,9 +832,7 @@
                                 <select id="status" name="status">
                                     <option value="">— Select —</option>
                                     <option value="Active">Active</option>
-                                    <option value="Resigned">Resigned</option>
-                                    <option value="Terminated">Terminated</option>
-                                    <option value="Retired">Retired</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
                         </div>
@@ -1473,7 +1521,8 @@
             }
             document.getElementById('migrateEmpId').textContent = _curId;
             document.getElementById('migratePermNo').textContent = permNo;
-            document.getElementById('migrateName').textContent = [gi('first_name'), gi('middle_name'), gi('last_name')]
+            document.getElementById('migrateName').textContent = [gi('first_name'), gi('middle_name'), gi('last_name'), gi(
+                    'b_name')]
                 .filter(Boolean).join(' ');
             new bootstrap.Modal(document.getElementById('migrateModal')).show();
         }
@@ -1529,6 +1578,7 @@
                 first_name: gi('first_name'),
                 middle_name: gi('middle_name'),
                 last_name: gi('last_name'),
+                b_name: gi('b_name'),
                 /* company: id from select, name from hidden */
                 company_id: $('#company_top').val() || '',
                 company_name: gi('company_name'),
@@ -1581,6 +1631,7 @@
             si('gender', r.sex || '');
             si('status', r.status || '');
             si('perm_emp_no', r.permanent_empno || '');
+            si('b_name', r.b_name || '');
 
             /* Company top: id=company_id, text=company_name, hidden=company_name */
             const topCompanyName = r.company_name || COMPANIES.find(c => c.id == r.company_id)?.text || '';
@@ -1732,8 +1783,10 @@
         function updateTopName() {
             const fn = gi('first_name'),
                 mn = gi('middle_name'),
-                ln = gi('last_name');
-            document.getElementById('tbEmpName').textContent = [fn, mn, ln].filter(Boolean).join(' ') || '— New Record —';
+                ln = gi('last_name'),
+                bn = gi('b_name');
+            document.getElementById('tbEmpName').textContent = [fn, mn, ln, bn].filter(Boolean).join(' ') ||
+                '— New Record —';
         }
 
         /* ══════════════════════════════════════════
