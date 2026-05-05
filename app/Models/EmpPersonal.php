@@ -107,5 +107,10 @@ class EmpPersonal extends Model
         return $this->hasMany(Emp_work_expModel::class, 'empno', 'empno');
     }
 
+    public function locationBangla()
+    {
+        return $this->hasOne(EmpLocationBangla::class, 'empno', 'empno');
+    }
+
 }
 

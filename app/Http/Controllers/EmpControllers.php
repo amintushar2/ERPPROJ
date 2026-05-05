@@ -15,6 +15,8 @@ use App\Models\Emp_trainingModel;
 use App\Models\Emp_work_expModel;
 use App\Models\Emp_leaveModel;
 use App\Models\CompanyProfile;
+use App\Models\EmpLocationBangla;
+
 use Illuminate\Support\Facades\Validator;
 use DB;
 use Illuminate\Http\Request;
@@ -153,7 +155,8 @@ public function empEditEntry($empno) {
     // ─────────────────────────────────────────────────────
     public function tabLocation($empno) {
         if(!session('LoggedUser')) abort(401);
-        $emp = EmpPersonal::where('empno',$empno)->with('getemploc')->first();
+        $emp = EmpPersonal::where('empno',$empno)->with('getemploc', 'locationBangla')->first();
+        //dd($emp);
         return view('hrm.tabs.tab_location', ['emp'=>$emp,'empno'=>$empno]);
     }
 
@@ -1684,5 +1687,222 @@ public function saveEmpLocation(Request $request)
     public function logout() { 
         session()->pull('LoggedUser'); 
         return redirect('login'); 
+    }
+
+    public function saveEmpLocationBangla(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'empno' => 'required|string',
+                'father_name' => 'nullable|string|max:100',
+                'mother_name' => 'nullable|string|max:100',
+                'present_village' => 'nullable|string|max:100',
+                'present_psot' => 'nullable|string|max:100',
+                'present_thana' => 'nullable|string|max:100',
+                'present_dist' => 'nullable|string|max:100',
+                'permanent_village' => 'nullable|string|max:100',
+                'parmaent_post' => 'nullable|string|max:100',
+                'permanent_thana' => 'nullable|string|max:100',
+                'permanent_dist' => 'nullable|string|max:100',
+                'sopuse_name' => 'nullable|string|max:100',
+                'worker_class' => 'nullable|string|max:100',
+                'working_type' => 'nullable|string|max:100',
+                'new_empno' => 'nullable|string|max:30',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $empno = $request->input('empno');
+            $locationBangla = EmpLocationBangla::where('empno', $empno)->first();
+
+            $banglaData = [
+                'empno' => $empno,
+                'father_name' => $request->input('father_name'),
+                'mother_name' => $request->input('mother_name'),
+                'present_village' => $request->input('present_village'),
+                'present_psot' => $request->input('present_psot'),
+                'present_thana' => $request->input('present_thana'),
+                'present_dist' => $request->input('present_dist'),
+                'permanent_village' => $request->input('permanent_village'),
+                'parmaent_post' => $request->input('parmaent_post'),
+                'permanent_thana' => $request->input('permanent_thana'),
+                'permanent_dist' => $request->input('permanent_dist'),
+                'sopuse_name' => $request->input('sopuse_name'),
+                'worker_class' => $request->input('worker_class'),
+                'working_type' => $request->input('working_type'),
+                'new_empno' => $empno,
+            ];
+
+            if ($locationBangla) {
+                $locationBangla->update($banglaData);
+                $message = 'Bangla location information updated successfully';
+                $statusCode = 200;
+            } else {
+                $locationBangla = EmpLocationBangla::create($banglaData);
+                $message = 'Bangla location information saved successfully';
+                $statusCode = 201;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => $locationBangla
+            ], $statusCode);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing Bangla location information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get Bangla Location by empno
+     * GET: /api/getEmpLocationBangla/{empno}
+     */
+    public function getEmpLocationBangla($empno)
+    {
+        try {
+            $locationBangla = EmpLocationBangla::where('empno', $empno)->first();
+
+            if (!$locationBangla) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bangla location record not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $locationBangla
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching Bangla location information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update Bangla Location
+     * PUT: /api/updateEmpLocationBangla/{empno}
+     */
+    public function updateEmpLocationBangla($empno, Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'father_name' => 'nullable|string|max:100',
+                'mother_name' => 'nullable|string|max:100',
+                'present_village' => 'nullable|string|max:100',
+                'present_psot' => 'nullable|string|max:100',
+                'present_thana' => 'nullable|string|max:100',
+                'present_dist' => 'nullable|string|max:100',
+                'permanent_village' => 'nullable|string|max:100',
+                'parmaent_post' => 'nullable|string|max:100',
+                'permanent_thana' => 'nullable|string|max:100',
+                'permanent_dist' => 'nullable|string|max:100',
+                'sopuse_name' => 'nullable|string|max:100',
+                'worker_class' => 'nullable|string|max:100',
+                'working_type' => 'nullable|string|max:100',
+                'new_empno' => 'nullable|string|max:30',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $locationBangla = EmpLocationBangla::where('empno', $empno)->firstOrFail();
+            $locationBangla->update($request->only([
+                'father_name', 'mother_name', 'present_village', 'present_psot',
+                'present_thana', 'present_dist', 'permanent_village', 'parmaent_post',
+                'permanent_thana', 'permanent_dist', 'sopuse_name', 'worker_class',
+                'working_type', 'new_empno'
+            ]));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bangla location updated successfully',
+                'data' => $locationBangla
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating Bangla location',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete Bangla Location
+     * DELETE: /api/deleteEmpLocationBangla/{empno}
+     */
+    public function deleteEmpLocationBangla($empno)
+    {
+        try {
+            $locationBangla = EmpLocationBangla::where('empno', $empno)->firstOrFail();
+            $locationBangla->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bangla location deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting Bangla location',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ════════════════════════════════════════════════════════════════════
+     * COMBINED - GET BOTH ENGLISH AND BANGLA LOCATION
+     * ════════════════════════════════════════════════════════════════════
+     */
+
+    /**
+     * Get Both English and Bangla Location
+     * GET: /api/getEmpLocationCombined/{empno}
+     */
+    public function getEmpLocationCombined($empno)
+    {
+        try {
+            $locationEnglish = EmpLocation::where('empno', $empno)->first();
+            $locationBangla = EmpLocationBangla::where('empno', $empno)->first();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'english' => $locationEnglish,
+                    'bangla' => $locationBangla
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching location information',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

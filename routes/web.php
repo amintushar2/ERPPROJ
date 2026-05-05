@@ -112,6 +112,37 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     
     // ──── DELETE RECORDS ────
     Route::delete('/deleteEmpRecord/{id}', [EmpControllers::class, 'deleteEmpRecord']);
+
+
+    Route::post('/saveEmpLocationBangla', [EmpControllers::class, 'saveEmpLocationBangla']);
+    
+    /**
+     * Get Bangla Location
+     * GET: /api/getEmpLocationBangla/{empno}
+     */
+    Route::get('/getEmpLocationBangla/{empno}', [EmpControllers::class, 'getEmpLocationBangla']);
+    
+    /**
+     * Update Bangla Location
+     * PUT: /api/updateEmpLocationBangla/{empno}
+     */
+    Route::put('/updateEmpLocationBangla/{empno}', [EmpControllers::class, 'updateEmpLocationBangla']);
+    
+    /**
+     * Delete Bangla Location
+     * DELETE: /api/deleteEmpLocationBangla/{empno}
+     */
+    Route::delete('/deleteEmpLocationBangla/{empno}', [EmpControllers::class, 'deleteEmpLocationBangla']);
+    
+    // ══════════════════════════════════════════════════════════════════
+    // COMBINED - GET BOTH ENGLISH AND BANGLA
+    // ══════════════════════════════════════════════════════════════════
+    
+    /**
+     * Get Both English and Bangla Location
+     * GET: /api/getEmpLocationCombined/{empno}
+     */
+    Route::get('/getEmpLocationCombined/{empno}', [EmpControllers::class, 'getEmpLocationCombined']);
 });
 
 
