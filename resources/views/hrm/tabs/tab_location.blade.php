@@ -1,7 +1,7 @@
 {{-- resources/views/hrm/tabs/tab_location.blade.php --}}
 @php
     $loc = optional(optional($emp)->getemploc?->first());
-    $locBn = optional(optional($emp)->locationBangla?->first());
+    $locBn = optional(optional($emp)->locationBangla);
 @endphp
 
 <!-- Font Setup for Bangla -->
