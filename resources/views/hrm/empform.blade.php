@@ -31,6 +31,8 @@
 
             #b_name {
                 font-family: SutonnyMJ, sans-serif !important;
+                font-size: 18px !important;
+                line-height: 1.1;
             }
 
             .select2.select2-container {

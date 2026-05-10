@@ -2,7 +2,9 @@
 
 <style>
     .bn-font {
-        font-family: SutonnyMJ, sans-serif;
+        font-family: SutonnyMJ, sans-serif !important;
+        font-size: 18px !important;
+        line-height: 1.1;
     }
 </style>
 
@@ -425,8 +427,7 @@
             const ajaxOptions = {
 
                 url: familyId ?
-                    `/api/updateEmpFamily` :
-                    '/api/saveEmpFamily',
+                    `/api/updateEmpFamily` : '/api/saveEmpFamily',
 
                 method: familyId ? 'PUT' : 'POST',
 
@@ -463,8 +464,7 @@
         $.get("{{ URL::to('api/getEmpFamily') }}/" + empno, function(res) {
 
             const rows = (res.success && Array.isArray(res.data) ?
-                res.data :
-                []).map(function(item) {
+                res.data : []).map(function(item) {
 
                 return '<tr>' +
 
