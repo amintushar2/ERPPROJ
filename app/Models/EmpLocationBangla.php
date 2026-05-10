@@ -13,7 +13,7 @@ class EmpLocationBangla extends Model
     public $timestamps = false;
     public $incrementing = false;
     protected $primaryKey = 'empno';
-
+protected $keyType = 'string';
     protected $fillable = [
         'empno',
         'father_name',

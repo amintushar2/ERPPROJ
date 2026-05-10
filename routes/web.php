@@ -234,7 +234,7 @@ Route::middleware(['web','auth'])->group(function () {
     Route::get('/lov/calendar',    [LovController::class,'calendar']);
     Route::get('/lov/weeklyoff',   [LovController::class,'weeklyoff']);
     Route::get('/lov/bank',        [LovController::class,'bank']);
-    Route::get('/lov/leavecat',    [LovController::class,'leavecat']);
+    Route::get('/lov/leavecategory',    [LovController::class,'leavecat']);
     Route::get('/lov/allwcat',     [LovController::class,'allwcat']);
     Route::get('/lov/thana',       [LovController::class,'thana']);
     Route::get('/lov/district',    [LovController::class,'district']);

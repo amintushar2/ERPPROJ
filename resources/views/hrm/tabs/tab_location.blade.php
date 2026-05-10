@@ -1,10 +1,11 @@
 {{-- resources/views/hrm/tabs/tab_location.blade.php --}}
 @php
-    $loc = optional(optional($emp)->getemploc?->first());
-    $locBn = optional(optional($emp)->locationBangla);
+    $loc = optional($emp)->getemploc?->first();
+    $locBn = optional($emp)->locationBangla;
+    $locExists = $loc ? true : false;
+    $locBnExists = $locBn ? true : false;
 @endphp
 
-<!-- Font Setup for Bangla -->
 <style>
     @font-face {
         font-family: 'SutonnyMJ';
@@ -22,7 +23,6 @@
         font-size: 20px !important;
         line-height: 1.4;
         font-weight: bold;
-
     }
 
     .bangla-heading {
@@ -44,7 +44,6 @@
         font-size: 20px !important;
         font-weight: bold;
         color: #000000;
-
     }
 
     .bangla-table {
@@ -91,6 +90,27 @@
         padding: 12px 15px !important;
         font-size: 20px !important;
     }
+
+    /* Record status badges */
+    .record-badge {
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    .badge-exists {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .badge-missing {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
 </style>
 
 <!-- Tabs Navigation -->
@@ -99,12 +119,22 @@
         <button class="nav-link active" id="english-tab" data-bs-toggle="tab" data-bs-target="#englishLocation"
             type="button" role="tab">
             📍 English Location
+            @if ($locExists)
+                <span class="record-badge badge-exists">✔ Saved</span>
+            @else
+                <span class="record-badge badge-missing">✘ No Record</span>
+            @endif
         </button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link  bangla-text" id="bangla-tab" data-bs-toggle="tab" data-bs-target="#banglaLocation"
+        <button class="nav-link bangla-text" id="bangla-tab" data-bs-toggle="tab" data-bs-target="#banglaLocation"
             type="button" role="tab">
             📍 বাংলা অবস্থান
+            @if ($locBnExists)
+                <span class="record-badge badge-exists">✔ সংরক্ষিত</span>
+            @else
+                <span class="record-badge badge-missing">✘ নেই</span>
+            @endif
         </button>
     </li>
 </ul>
@@ -112,42 +142,54 @@
 <!-- Tab Content -->
 <div class="tab-content">
 
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- ENGLISH LOCATION TAB -->
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    {{-- ═══════════════════════════════════════════════════════════════════ --}}
+    {{-- ENGLISH LOCATION TAB                                               --}}
+    {{-- ═══════════════════════════════════════════════════════════════════ --}}
     <div class="tab-pane fade show active" id="englishLocation" role="tabpanel">
         <form id="frmLocation">
             @csrf
-            <input type="hidden" name="empno" value="{{ $empno }}">
+            <input type="hidden" name="empno" id="eng_empno" value="{{ $empno }}">
+            <input type="hidden" id="english_record_exists" value="{{ $locExists ? '1' : '0' }}">
+
             <div class="page-heading"><i class="bi bi-geo-alt-fill"></i> Location Information</div>
 
+            {{-- Permanent Address --}}
             <div class="sec-card">
                 <div class="sec-card-head"><i class="bi bi-house"></i> Permanent Address</div>
                 <div class="sec-card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Address:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_address"
-                                        id="p_address1" value="{{ $loc->p_address ?? '' }}" placeholder="Street / Area">
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Address:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_address" id="p_address1"
+                                        value="{{ $loc->p_address ?? '' }}" placeholder="Street / Area">
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Village:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_village"
-                                        id="p_village" value="{{ $loc->p_village ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Village:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_village" id="p_village"
+                                        value="{{ $loc->p_village ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Post Office:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_post_office"
-                                        id="p_post_off" value="{{ $loc->p_post_off ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Post Office:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_post_office" id="p_post_off"
+                                        value="{{ $loc->p_post_off ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Thana/P.S:</label>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Thana/P.S:</label>
                                 <div class="col-sm-8">
                                     <input type="text" class="form-control" name="p_police_station"
                                         id="p_police_station11" value="{{ $loc->p_police_station ?? '' }}"
@@ -156,13 +198,17 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">City:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_city"
-                                        id="p_city" value="{{ $loc->p_city ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">City:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_city" id="p_city"
+                                        value="{{ $loc->p_city ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">District:</label>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">District:</label>
                                 <div class="col-sm-8">
                                     <input type="text" class="form-control" name="p_district" id="p_district2"
                                         value="{{ $loc->p_district ?? '' }}" placeholder="District">
@@ -172,53 +218,73 @@
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Phone:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="p_phone"
-                                        id="p_phone" value="{{ $loc->p_phone ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Phone:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="p_phone" id="p_phone"
+                                        value="{{ $loc->p_phone ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Fax:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="p_fax"
-                                        id="p_fax" value="{{ $loc->p_fax ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Fax:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="p_fax" id="p_fax"
+                                        value="{{ $loc->p_fax ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">PIN Code:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_pin_code"
-                                        id="p_postcode" value="{{ $loc->p_pin_code ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">PIN Code:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_pin_code" id="p_postcode"
+                                        value="{{ $loc->p_pin_code ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Contact Person:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="p_cperson"
-                                        id="p_cperson" value="{{ $loc->p_cperson ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Contact Person:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="p_cperson" id="p_cperson"
+                                        value="{{ $loc->p_cperson ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {{-- Present / Residential Address --}}
             <div class="sec-card">
                 <div class="sec-card-head"><i class="bi bi-building"></i> Present / Residential Address</div>
                 <div class="sec-card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Address:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="r_address"
-                                        id="r_address1" value="{{ $loc->r_address ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Address:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="r_address" id="r_address1"
+                                        value="{{ $loc->r_address ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">City:</label>
-                                <div class="col-sm-8"><input type="text" class="form-control" name="r_city"
-                                        id="r_city" value="{{ $loc->r_city ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">City:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" name="r_city" id="r_city"
+                                        value="{{ $loc->r_city ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">District:</label>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">District:</label>
                                 <div class="col-sm-8">
                                     <input type="text" class="form-control" name="r_district" id="r_district"
                                         value="{{ $loc->r_district ?? '' }}" placeholder="District">
@@ -228,35 +294,50 @@
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Phone:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="r_phone"
-                                        id="r_phone" value="{{ $loc->r_phone ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Phone:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="r_phone" id="r_phone"
+                                        value="{{ $loc->r_phone ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Mobile:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="r_mobile"
-                                        id="r_mobile" value="{{ $loc->r_mobile ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Mobile:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="r_mobile" id="r_mobile"
+                                        value="{{ $loc->r_mobile ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Fax:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="r_fax"
-                                        id="r_fax" value="{{ $loc->r_fax ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Fax:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="r_fax" id="r_fax"
+                                        value="{{ $loc->r_fax ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Email:</label>
-                                <div class="col-sm-8"><input type="email" class="form-control" name="r_email"
-                                        id="r_email" value="{{ $loc->r_email ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Email:</label>
+                                <div class="col-sm-8">
+                                    <input type="email" class="form-control" name="r_email" id="r_email"
+                                        value="{{ $loc->r_email ?? '' }}">
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="row p-1"><label class="col-sm-4 col-form-label">Contact:</label>
-                                <div class="col-sm-8"><input type="tel" class="form-control" name="r_cperson"
-                                        id="r_cperson" value="{{ $loc->r_cperson ?? '' }}"></div>
+                            <div class="row p-1">
+                                <label class="col-sm-4 col-form-label">Contact:</label>
+                                <div class="col-sm-8">
+                                    <input type="tel" class="form-control" name="r_cperson" id="r_cperson"
+                                        value="{{ $loc->r_cperson ?? '' }}">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -264,26 +345,35 @@
             </div>
 
             <div class="action-bar">
-                <button class="btn btn-upd" id="saveEnglishBtn" type="button"><i
-                        class="bi bi-check-circle me-1"></i> Save Location</button>
-                <button class="btn btn-clr" type="reset"><i class="bi bi-x-circle me-1"></i> Reset</button>
+                <button class="btn btn-upd" id="saveEnglishBtn" type="button">
+                    <i class="bi bi-check-circle me-1"></i> Save Location
+                </button>
+                <button class="btn btn-danger" id="deleteEnglishBtn" type="button"
+                    {{ $locExists ? '' : 'disabled' }}>
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+                <button class="btn btn-clr" type="reset">
+                    <i class="bi bi-x-circle me-1"></i> Reset
+                </button>
             </div>
         </form>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
-    <!-- BANGLA LOCATION TAB -->
-    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    {{-- ═══════════════════════════════════════════════════════════════════ --}}
+    {{-- BANGLA LOCATION TAB                                                --}}
+    {{-- ═══════════════════════════════════════════════════════════════════ --}}
     <div class="tab-pane fade" id="banglaLocation" role="tabpanel">
         <form id="frmLocationBangla">
             @csrf
-            <input type="hidden" name="empno" value="{{ $empno }}">
+            <input type="hidden" name="empno" id="bn_empno" value="{{ $empno }}">
+            <input type="hidden" id="bangla_record_exists" value="{{ $locBnExists ? '1' : '0' }}">
 
             <div class="page-heading"><i class="bi bi-geo-alt-fill"></i> ঠিকানা</div>
 
-            <!-- Family Information Section -->
+            {{-- Family Information --}}
             <div class="sec-card">
-                <div class="sec-card-head bangla-heading bangla-text"><i class="bi bi-people-fill"></i> পারিবারিক তথ্য
+                <div class="sec-card-head bangla-heading bangla-text">
+                    <i class="bi bi-people-fill"></i> পারিবারিক তথ্য
                 </div>
                 <div class="sec-card-body">
                     <div class="row">
@@ -353,10 +443,11 @@
                 </div>
             </div>
 
-            <!-- Present Address Section -->
+            {{-- Present Address --}}
             <div class="sec-card">
-                <div class="sec-card-head bangla-heading bangla-text"><i class="bi bi-geo-alt-fill"></i> বর্তমান
-                    ঠিকানা</div>
+                <div class="sec-card-head bangla-heading bangla-text">
+                    <i class="bi bi-geo-alt-fill"></i> বর্তমান ঠিকানা
+                </div>
                 <div class="sec-card-body">
                     <div class="row">
                         <div class="col-md-4">
@@ -403,10 +494,11 @@
                 </div>
             </div>
 
-            <!-- Permanent Address Section -->
+            {{-- Permanent Address --}}
             <div class="sec-card">
-                <div class="sec-card-head bangla-heading bangla-text"><i class="bi bi-geo-alt-fill"></i> স্থায়ী
-                    ঠিকানা</div>
+                <div class="sec-card-head bangla-heading bangla-text">
+                    <i class="bi bi-geo-alt-fill"></i> স্থায়ী ঠিকানা
+                </div>
                 <div class="sec-card-body">
                     <div class="row">
                         <div class="col-md-4">
@@ -454,13 +546,19 @@
             </div>
 
             <div class="action-bar">
-                <input type="hidden" id="bangla_record_exists" value="{{ $locBn ? '1' : '0' }}">
-                <button class="btn btn-upd" id="saveBanglaBtn" type="button"><i
-                        class="bi bi-check-circle me-1"></i> <span class="bangla-text">সংরক্ষণ করুন</span></button>
-                <button class="btn btn-danger" id="deleteBanglaBtn" type="button"><i class="bi bi-trash me-1"></i>
-                    <span class="bangla-text">মুছুন</span></button>
-                <button class="btn btn-clr" type="reset"><i class="bi bi-x-circle me-1"></i> <span
-                        class="bangla-text">পরিষ্কার করুন</span></button>
+                <button class="btn btn-upd" id="saveBanglaBtn" type="button">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span class="bangla-text">সংরক্ষণ করুন</span>
+                </button>
+                <button class="btn btn-danger" id="deleteBanglaBtn" type="button"
+                    {{ $locBnExists ? '' : 'disabled' }}>
+                    <i class="bi bi-trash me-1"></i>
+                    <span class="bangla-text">মুছুন</span>
+                </button>
+                <button class="btn btn-clr" type="reset">
+                    <i class="bi bi-x-circle me-1"></i>
+                    <span class="bangla-text">পরিষ্কার করুন</span>
+                </button>
             </div>
         </form>
     </div>
@@ -470,33 +568,59 @@
 <script>
     $(function() {
         const CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-        const empno = $('#empno').val() || '{{ $empno }}';
+        const empno = '{{ $empno }}';
 
-        // ═══════════════════════════════════════════════════════════════════
-        // ENGLISH LOCATION - SAVE
-        // ═══════════════════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════════
+        // HELPER — update tab badge after save/delete
+        // ═══════════════════════════════════════════════════════════════════════
+        function setEnglishBadge(exists) {
+            const badge = $('#english-tab .record-badge');
+            if (exists) {
+                badge.removeClass('badge-missing').addClass('badge-exists').text('✔ Saved');
+                $('#deleteEnglishBtn').prop('disabled', false);
+            } else {
+                badge.removeClass('badge-exists').addClass('badge-missing').text('✘ No Record');
+                $('#deleteEnglishBtn').prop('disabled', true);
+            }
+            $('#english_record_exists').val(exists ? '1' : '0');
+        }
+
+        function setBanglaBadge(exists) {
+            const badge = $('#bangla-tab .record-badge');
+            if (exists) {
+                badge.removeClass('badge-missing').addClass('badge-exists').text('✔ সংরক্ষিত');
+                $('#deleteBanglaBtn').prop('disabled', false);
+            } else {
+                badge.removeClass('badge-exists').addClass('badge-missing').text('✘ নেই');
+                $('#deleteBanglaBtn').prop('disabled', true);
+            }
+            $('#bangla_record_exists').val(exists ? '1' : '0');
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // ENGLISH LOCATION — SAVE / UPDATE
+        // ═══════════════════════════════════════════════════════════════════════
         $('#saveEnglishBtn').on('click', function(e) {
             e.preventDefault();
 
             const englishData = {
                 empno: empno,
                 p_address: $('#p_address1').val(),
-                p_city: $('#p_city').val(),
-                p_district: $('#p_district2').val(),
-                p_pin_code: $('#p_postcode').val(),
-                p_phone: $('#p_phone').val(),
-                p_fax: $('#p_fax').val(),
-                p_cperson: $('#p_cperson').val(),
                 p_village: $('#p_village').val(),
                 p_post_off: $('#p_post_off').val(),
                 p_police_station: $('#p_police_station11').val(),
+                p_city: $('#p_city').val(),
+                p_district: $('#p_district2').val(),
+                p_phone: $('#p_phone').val(),
+                p_fax: $('#p_fax').val(),
+                p_pin_code: $('#p_postcode').val(),
+                p_cperson: $('#p_cperson').val(),
                 r_address: $('#r_address1').val(),
                 r_city: $('#r_city').val(),
                 r_district: $('#r_district').val(),
-                r_pin_cod: $('#r_postcode').val(),
                 r_phone: $('#r_phone').val(),
-                r_fax: $('#r_fax').val(),
                 r_mobile: $('#r_mobile').val(),
+                r_fax: $('#r_fax').val(),
                 r_email: $('#r_email').val(),
                 r_cperson: $('#r_cperson').val()
             };
@@ -510,6 +634,7 @@
                 },
                 data: JSON.stringify(englishData),
                 success: function(response) {
+                    setEnglishBadge(true);
                     Swal.fire('Success!', response.message, 'success');
                 },
                 error: function(xhr) {
@@ -519,9 +644,51 @@
             });
         });
 
-        // ═══════════════════════════════════════════════════════════════════
-        // BANGLA LOCATION - SAVE / UPDATE
-        // ═══════════════════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════════
+        // ENGLISH LOCATION — DELETE
+        // ═══════════════════════════════════════════════════════════════════════
+        $('#deleteEnglishBtn').on('click', function(e) {
+            e.preventDefault();
+
+            if ($('#english_record_exists').val() !== '1') {
+                Swal.fire('Warning!', 'No record found to delete.', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Delete English location information?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#c0392b',
+                cancelButtonColor: '#7f8c8d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/api/deleteEmpLocation/${empno}`,
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': CSRF_TOKEN
+                        },
+                        success: function(response) {
+                            setEnglishBadge(false);
+                            $('#frmLocation')[0].reset();
+                            Swal.fire('Deleted!', response.message, 'success');
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error!', xhr.responseJSON?.message ||
+                                'An error occurred', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // BANGLA LOCATION — SAVE / UPDATE
+        // ═══════════════════════════════════════════════════════════════════════
         $('#saveBanglaBtn').on('click', function(e) {
             e.preventDefault();
 
@@ -543,34 +710,35 @@
                 new_empno: $('#new_empno_bn').val()
             };
 
-            const isUpdate = $('#bangla_record_exists').val() === '1';
-            const ajaxOptions = {
-                url: isUpdate ? `/api/updateEmpLocationBangla/${empno}` :
-                    '/api/saveEmpLocationBangla',
-                method: isUpdate ? 'PUT' : 'POST',
+            $.ajax({
+                url: '/api/saveEmpLocationBangla',
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': CSRF_TOKEN,
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify(banglaData),
                 success: function(response) {
-                    $('#bangla_record_exists').val('1');
-                    Swal.fire(isUpdate ? 'আপডেট!' : 'সফল!', response.message, 'success');
+                    setBanglaBadge(true);
+                    Swal.fire('সফল!', response.message, 'success');
                 },
                 error: function(xhr) {
                     Swal.fire('ত্রুটি!', xhr.responseJSON?.message || 'একটি ত্রুটি ঘটেছে',
                         'error');
                 }
-            };
-
-            $.ajax(ajaxOptions);
+            });
         });
 
-        // ═══════════════════════════════════════════════════════════════════
-        // BANGLA LOCATION - DELETE
-        // ═══════════════════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════════
+        // BANGLA LOCATION — DELETE
+        // ═══════════════════════════════════════════════════════════════════════
         $('#deleteBanglaBtn').on('click', function(e) {
             e.preventDefault();
+
+            if ($('#bangla_record_exists').val() !== '1') {
+                Swal.fire('সতর্কতা!', 'মুছার জন্য কোনো রেকর্ড নেই।', 'warning');
+                return;
+            }
 
             Swal.fire({
                 title: 'নিশ্চিত করুন',
@@ -579,7 +747,8 @@
                 showCancelButton: true,
                 confirmButtonColor: '#c0392b',
                 cancelButtonColor: '#7f8c8d',
-                confirmButtonText: 'হ্যাঁ, মুছুন'
+                confirmButtonText: 'হ্যাঁ, মুছুন',
+                cancelButtonText: 'বাতিল'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -589,9 +758,9 @@
                             'X-CSRF-TOKEN': CSRF_TOKEN
                         },
                         success: function(response) {
-                            Swal.fire('মুছা হয়েছে!', response.message, 'success');
+                            setBanglaBadge(false);
                             $('#frmLocationBangla')[0].reset();
-                            $('#bangla_record_exists').val('0');
+                            Swal.fire('মুছা হয়েছে!', response.message, 'success');
                         },
                         error: function(xhr) {
                             Swal.fire('ত্রুটি!', xhr.responseJSON?.message ||

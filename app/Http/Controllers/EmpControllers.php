@@ -201,7 +201,7 @@ public function saveEmpPersonal(Request $request)
     $validator = Validator::make($request->all(), [
         'empno'         => 'required|string',
         'first_name'    => 'required|string|max:100',
-        'last_name'     => 'required|string|max:100',
+        'last_name'     => 'nullable|string|max:100',
         'company_id'    => 'required|integer',
         'emp_mobile_no' => 'nullable|string|max:20',
         'photo'         => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
@@ -704,7 +704,7 @@ public function saveEmpLocation(Request $request)
                 'p_cperson' => $request->input('p_cperson'),
                 'p_village' => $request->input('p_village'),
                 'p_post_off' => $request->input('p_post_off'),
-                'p_police_station' => $request->input('p_police_station11'),
+                'p_police_station' => $request->input('p_police_station'),
                 'r_address' => $request->input('r_address'),
                 'r_city' => $request->input('r_city'),
                 'r_district' => $request->input('r_district'),
@@ -1790,80 +1790,99 @@ public function saveEmpLocation(Request $request)
         return redirect('login'); 
     }
 
-    public function saveEmpLocationBangla(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'empno' => 'required|string',
-                'father_name' => 'nullable|string|max:100',
-                'mother_name' => 'nullable|string|max:100',
-                'present_village' => 'nullable|string|max:100',
-                'present_psot' => 'nullable|string|max:100',
-                'present_thana' => 'nullable|string|max:100',
-                'present_dist' => 'nullable|string|max:100',
-                'permanent_village' => 'nullable|string|max:100',
-                'parmaent_post' => 'nullable|string|max:100',
-                'permanent_thana' => 'nullable|string|max:100',
-                'permanent_dist' => 'nullable|string|max:100',
-                'sopuse_name' => 'nullable|string|max:100',
-                'worker_class' => 'nullable|string|max:100',
-                'working_type' => 'nullable|string|max:100',
-                'new_empno' => 'nullable|string|max:30',
-            ]);
+   public function saveEmpLocationBangla(Request $request)
+{
+    try {
+        // ── 1. Validate ───────────────────────────────────────────────────
+        $validator = Validator::make($request->all(), [
+            'empno'            => 'required|string|max:30',
+            'father_name'      => 'nullable|string|max:100',
+            'mother_name'      => 'nullable|string|max:100',
+            'present_village'  => 'nullable|string|max:100',
+            'present_psot'     => 'nullable|string|max:100',
+            'present_thana'    => 'nullable|string|max:100',
+            'present_dist'     => 'nullable|string|max:100',
+            'permanent_village'=> 'nullable|string|max:100',
+            'parmaent_post'    => 'nullable|string|max:100',
+            'permanent_thana'  => 'nullable|string|max:100',
+            'permanent_dist'   => 'nullable|string|max:100',
+            'sopuse_name'      => 'nullable|string|max:100',
+            'worker_class'     => 'nullable|string|max:100',
+            'working_type'     => 'nullable|string|max:100',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            $empno = $request->input('empno');
-            $locationBangla = EmpLocationBangla::where('empno', $empno)->first();
-
-            $banglaData = [
-                'empno' => $empno,
-                'father_name' => $request->input('father_name'),
-                'mother_name' => $request->input('mother_name'),
-                'present_village' => $request->input('present_village'),
-                'present_psot' => $request->input('present_psot'),
-                'present_thana' => $request->input('present_thana'),
-                'present_dist' => $request->input('present_dist'),
-                'permanent_village' => $request->input('permanent_village'),
-                'parmaent_post' => $request->input('parmaent_post'),
-                'permanent_thana' => $request->input('permanent_thana'),
-                'permanent_dist' => $request->input('permanent_dist'),
-                'sopuse_name' => $request->input('sopuse_name'),
-                'worker_class' => $request->input('worker_class'),
-                'working_type' => $request->input('working_type'),
-                'new_empno' => $empno,
-            ];
-
-            if ($locationBangla) {
-                $locationBangla->update($banglaData);
-                $message = 'Bangla location information updated successfully';
-                $statusCode = 200;
-            } else {
-                $locationBangla = EmpLocationBangla::create($banglaData);
-                $message = 'Bangla location information saved successfully';
-                $statusCode = 201;
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'data' => $locationBangla
-            ], $statusCode);
-
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error processing Bangla location information',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
         }
+
+        // ── 2. Check employee exists in master table ──────────────────────
+        $empno = $request->input('empno');
+
+        $employeeExists = EmpPersonal::where('empno', $empno)->exists();
+
+        if (!$employeeExists) {
+            return response()->json([
+                'success' => false,
+                'message' => "Employee '{$empno}' not found in the system.",
+            ], 404);
+        }
+
+        // ── 3. Prepare data ───────────────────────────────────────────────
+        $banglaData = [
+            'father_name'       => $request->input('father_name'),
+            'mother_name'       => $request->input('mother_name'),
+            'present_village'   => $request->input('present_village'),
+            'present_psot'      => $request->input('present_psot'),
+            'present_thana'     => $request->input('present_thana'),
+            'present_dist'      => $request->input('present_dist'),
+            'permanent_village' => $request->input('permanent_village'),
+            'parmaent_post'     => $request->input('parmaent_post'),
+            'permanent_thana'   => $request->input('permanent_thana'),
+            'permanent_dist'    => $request->input('permanent_dist'),
+            'sopuse_name'       => $request->input('sopuse_name'),
+            'worker_class'      => $request->input('worker_class'),
+            'working_type'      => $request->input('working_type'),
+            'new_empno'         => $empno, // mirrors empno as per original logic
+        ];
+
+        // ── 4. Check if record already exists (for response message) ──────
+        $exists = EmpLocationBangla::where('empno', $empno)->exists();
+
+        // ── 5. Upsert ─────────────────────────────────────────────────────
+        $locationBangla = EmpLocationBangla::updateOrCreate(
+            ['empno' => $empno],   // search key
+            $banglaData            // data to insert or update
+        );
+
+        // ── 6. Respond ────────────────────────────────────────────────────
+        return response()->json([
+            'success' => true,
+            'message' => $exists
+                ? 'Bangla location information updated successfully.'
+                : 'Bangla location information saved successfully.',
+            'data'    => $locationBangla,
+        ], $exists ? 200 : 201);
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        // Database-level errors (constraint violations, connection issues, etc.)
+        return response()->json([
+            'success' => false,
+            'message' => 'Database error while saving Bangla location information.',
+            'error'   => $e->getMessage(),
+        ], 500);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unexpected error while processing Bangla location information.',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
 
     /**
      * Get Bangla Location by empno
