@@ -1026,59 +1026,95 @@ public function saveEmpLocation(Request $request)
      * Save Family Member (CREATE)
      * POST: /api/saveEmpFamily
      */
-    public function saveEmpFamily(Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'empno' => 'required|string',
-                'depd_no' => 'nullable|string|max:50',
-                'depd_name' => 'required|string|max:100',
-                'relationship' => 'nullable|string|max:50',
-                'd_dob' => 'nullable|date',
-                'd_age' => 'nullable|integer',
-                'd_sex' => 'nullable|string|max:10',
-                'd_as_on' => 'nullable|date',
-                'percentage' => 'nullable|numeric',
-                'address' => 'nullable|string|max:500',
-            ]);
+ public function saveEmpFamily(Request $request)
+{
+    try {
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+        $validator = Validator::make($request->all(), [
 
-            $family = Emp_familyModel::create([
-                'empno' => $request->input('empno'),
-                'depd_no' => $request->input('depd_no'),
-                'depd_name' => $request->input('depd_name'),
-                'depent_name_bangla' => $request->input('depent_name_bangla'),
-                'relationship' => $request->input('relationship'),
-                'relation_bn' => $request->input('relation_bn'),
-                'd_dob' => $this->parseDate($request->input('d_dob')),
-                'd_age' => $request->input('d_age'),
-                'd_sex' => $request->input('d_sex'),
-                'd_as_on' => $this->parseDate($request->input('d_as_on')),
-                'percentage' => $request->input('percentage'),
-                'address' => $request->input('address'),
-            ]);
+            'empno' => 'required|string|max:20',
+            'depd_name' => 'required|string|max:50',
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Family member saved successfully',
-                'data' => $family
-            ], 201);
+        ]);
 
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error saving family member',
-                'error' => $e->getMessage()
-            ], 500);
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO GENERATE DEPD_NO
+        |--------------------------------------------------------------------------
+        */
+
+        $maxDepdNo = Emp_familyModel::where('empno', $request->empno)
+            ->max('depd_no');
+
+        $newDepdNo = $maxDepdNo ? $maxDepdNo + 1 : 1;
+
+        /*
+        |--------------------------------------------------------------------------
+        | SAVE
+        |--------------------------------------------------------------------------
+        */
+
+        $family = Emp_familyModel::create([
+
+            'empno' => $request->empno,
+            'depd_no' => $newDepdNo,
+
+            'depd_name' => $request->depd_name,
+            'relationship' => $request->relationship,
+
+            'd_dob' => $this->parseDate($request->d_dob),
+
+            'd_age' => $request->d_age,
+            'd_sex' => $request->d_sex,
+
+            'd_as_on' => $this->parseDate($request->d_as_on),
+
+            'percentage' => $request->percentage,
+
+            'address' => $request->address,
+
+            'depent_name_bangla' => $request->depent_name_bangla,
+
+            'relation_bn' => $request->relation_bn,
+
+            'address_bn' => $request->address_bn,
+
+            'village_bn' => $request->village_bn,
+
+            'po_bn' => $request->po_bn,
+
+            'ps_bn' => $request->ps_bn,
+
+            'district_bn' => $request->district_bn,
+
+        ]);
+
+        return response()->json([
+
+            'success' => true,
+            'message' => 'Family member saved successfully',
+            'data' => $family
+
+        ], 201);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+
+            'success' => false,
+            'message' => $e->getMessage()
+
+        ], 500);
     }
+}
 
     public function getEmpFamily($empno)
     {
@@ -1101,84 +1137,110 @@ public function saveEmpLocation(Request $request)
      * Update Family Member (UPDATE)
      * PUT: /api/updateEmpFamily/{id}
      */
-    public function updateEmpFamily($id, Request $request)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'depd_name' => 'required|string|max:100',
-                'depd_no' => 'nullable|string|max:50',
-                'relationship' => 'nullable|string|max:50',
-                'd_dob' => 'nullable|date',
-                'd_age' => 'nullable|integer',
-                'd_sex' => 'nullable|string|max:10',
-                'd_as_on' => 'nullable|date',
-                'percentage' => 'nullable|numeric',
-                'address' => 'nullable|string|max:500',
-            ]);
+    public function updateEmpFamily(Request $request)
+{
+    try {
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+        $family = Emp_familyModel::where('empno', $request->empno)
+            ->where('depd_no', $request->depd_no)
+            ->first();
 
-            $family = Emp_familyModel::findOrFail($id);
-            $family->update([
-               'empno' => $request->input('empno'),
-                'depd_no' => $request->input('depd_no'),
-                'depd_name' => $request->input('depd_name'),
-                'depent_name_bangla' => $request->input('depent_name_bangla'),
-                'relationship' => $request->input('relationship'),
-                'relation_bn' => $request->input('relation_bn'),
-                'd_dob' => $this->parseDate($request->input('d_dob')),
-                'd_age' => $request->input('d_age'),
-                'd_sex' => $request->input('d_sex'),
-                'd_as_on' => $this->parseDate($request->input('d_as_on')),
-                'percentage' => $request->input('percentage'),
-                'address' => $request->input('address'),
-            ]);
+        if (!$family) {
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Family member updated successfully',
-                'data' => $family
-            ], 200);
-
-        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error updating family member',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Family record not found'
+            ], 404);
         }
-    }
 
+        $family->update([
+
+            'depd_name' => $request->depd_name,
+            'relationship' => $request->relationship,
+
+            'd_dob' => $this->parseDate($request->d_dob),
+
+            'd_age' => $request->d_age,
+
+            'd_sex' => $request->d_sex,
+
+            'd_as_on' => $this->parseDate($request->d_as_on),
+
+            'percentage' => $request->percentage,
+
+            'address' => $request->address,
+
+            'depent_name_bangla' => $request->depent_name_bangla,
+
+            'relation_bn' => $request->relation_bn,
+
+            'address_bn' => $request->address_bn,
+
+            'village_bn' => $request->village_bn,
+
+            'po_bn' => $request->po_bn,
+
+            'ps_bn' => $request->ps_bn,
+
+            'district_bn' => $request->district_bn,
+
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Updated Successfully',
+            'data' => $family
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+
+    }
+}
     /**
      * Delete Family Member (DELETE)
      * DELETE: /api/deleteEmpFamily/{id}
      */
-    public function deleteEmpFamily($id)
-    {
-        try {
-            $family = Emp_familyModel::findOrFail($id);
-            $family->delete();
+  public function deleteEmpFamily(Request $request)
+{
+    try {
+
+        $deleted = Emp_familyModel::where('empno', $request->empno)
+            ->where('depd_no', $request->depd_no)
+            ->delete();
+
+        if ($deleted == 0) {
 
             return response()->json([
-                'success' => true,
-                'message' => 'Family member deleted successfully'
-            ], 200);
 
-        } catch (\Exception $e) {
-            return response()->json([
                 'success' => false,
-                'message' => 'Error deleting family member',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+                'message' => 'Family member not found'
 
+            ], 404);
+        }
+
+        return response()->json([
+
+            'success' => true,
+            'message' => 'Family member deleted successfully'
+
+        ], 200);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+
+            'success' => false,
+            'message' => 'Error deleting family member',
+            'error' => $e->getMessage()
+
+        ], 500);
+    }
+}
     /**
      * Save Job History (CREATE)
      * POST: /api/saveEmpHistory

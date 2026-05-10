@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Section;
 
 class EmpOfficial extends Model
 {
@@ -71,4 +72,12 @@ class EmpOfficial extends Model
        'is_lefty'
 
     ];
+    public function section()
+    {
+        return $this->belongsTo(
+            Section::class,
+            'section_no',
+            'section_no'
+        );
+    }
 }

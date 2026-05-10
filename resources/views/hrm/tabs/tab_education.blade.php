@@ -174,7 +174,8 @@
                     '<button type="button" class="btn btn-sm btn-secondary btn-edit-edu me-1" data-item="' +
                     encodeURIComponent(JSON.stringify(item)) +
                     '" title="Edit"><i class="bi bi-pencil-fill"></i></button>' +
-                    '<button type="button" class="btn btn-sm btn-danger btn-delete-edu" data-id="' + (
+                    '<button type="button" class="btn btn-sm btn-danger btn-delete-edu"id="btnDelete" data-id="' +
+                    (
                         item.id || item.slno || item.SLNO || '') +
                     '" title="Delete"><i class="bi bi-trash-fill"></i></button>' +
                     '</td>' +
@@ -211,7 +212,7 @@
         fillEduForm(item);
     });
 
-    $(document).on('click', '.btn-delete-edu', function() {
+    $(document).on('click', '#btnDelete', function() {
         const id = $(this).data('id');
         if (!id) return;
 

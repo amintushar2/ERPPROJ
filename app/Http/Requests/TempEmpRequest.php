@@ -16,7 +16,7 @@ class TempEmpRequest extends FormRequest
         return [
             /* ── EMP_PERSONAL ── */
             'first_name'             => 'required|string|max:100',
-            'last_name'              => 'required|string|max:100',
+            'last_name'              => 'nullable|string|max:100',
             'middle_name'            => 'nullable|string|max:100',
             'company_name'           => 'required|string|max:100',
             'card_no'                => 'nullable|string|max:50',

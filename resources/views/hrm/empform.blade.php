@@ -25,6 +25,10 @@
                 font-display: swap;
             }
 
+            .bn-font {
+                font-family: SutonnyMJ, sans-serif;
+            }
+
             #b_name {
                 font-family: SutonnyMJ, sans-serif !important;
             }

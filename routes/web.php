@@ -44,6 +44,7 @@ use App\Http\Controllers\Setup\ShiftController;
 use App\Http\Controllers\Setup\ReligionController;
 use App\Http\Controllers\Setup\EmpTypeController;
 use App\Http\Controllers\Setup\EntrySystemController;
+use App\Http\Controllers\Reports\IdCardController;
 
 
 
@@ -95,8 +96,8 @@ Route::prefix('api')->middleware(['auth'])->group(function () {
     
     // ──── FAMILY INFORMATION ────
     Route::post('/saveEmpFamily', [EmpControllers::class, 'saveEmpFamily']);
-    Route::put('/updateEmpFamily/{id}', [EmpControllers::class, 'updateEmpFamily'])->name('updateEmpFamily');
-    Route::delete('/deleteEmpFamily/{id}', [EmpControllers::class, 'deleteEmpFamily'])->name('deleteEmpFamily');
+    Route::put('/updateEmpFamily', [EmpControllers::class, 'updateEmpFamily'])->name('updateEmpFamily');
+    Route::delete('/deleteEmpFamily/', [EmpControllers::class, 'deleteEmpFamily'])->name('deleteEmpFamily');
     Route::get('/getEmpFamily/{empno}', [EmpControllers::class, 'getEmpFamily'])->name('getEmpFamily');
     
     // ──── JOB HISTORY ────
@@ -673,7 +674,7 @@ Route::prefix('user-menu')->middleware(['auth'])->group(function () {
    LOV ENDPOINTS (used by Select2 AJAX in the Blade view)
    Source: LovController.php (provided)
 ───────────────────────────────────────────────────────────── */
-Route::prefix('lov')->name('lov.')->group(function () {
+Route::prefix('lov')->name('lov.')->middleware(['auth'])->group(function () {
 
     /*
      | GET /lov/company?q=
@@ -763,5 +764,29 @@ Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
     // DELETE /temp-emp/{empno} → Delete (cascades to emp_official)
     Route::delete('/{empno}',         [TempEmpController::class, 'destroy'])->name('destroy');
 });
+
+
+Route::prefix('id-card')->name('id-card.')->middleware(['auth'])->group(function () {
+
+    // Main report form
+    Route::get('/',                  [IdCardController::class, 'index'])           ->name('index');
+
+    // CRUD
+    Route::get('/create',            [IdCardController::class, 'create'])          ->name('create');
+    Route::post('/',                 [IdCardController::class, 'store'])           ->name('store');
+    Route::get('/{employee}/edit',   [IdCardController::class, 'edit'])            ->name('edit');
+    Route::put('/{employee}',        [IdCardController::class, 'update'])          ->name('update');
+    Route::delete('/{employee}',     [IdCardController::class, 'destroy'])         ->name('destroy');
+
+    // AJAX APIs
+    Route::get('/api/employees',     [IdCardController::class, 'searchEmployees']) ->name('api.employees');
+    Route::get('/api/employeesKeyUp', [IdCardController::class, 'searchEmployeesKeyUp']) ->name('api.employeesKeyUp');
+    Route::get('/api/sections',      [IdCardController::class, 'getSections'])     ->name('api.sections');
+
+    // Run / print report  (multi-employee)
+    Route::get('/print',           [IdCardController::class, 'printCard'])       ->name('print');
+});
+
+
 
 require base_path('routes/setup.php');

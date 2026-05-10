@@ -72,6 +72,13 @@
 
 
     <script src="{{ URL::asset('mainjs/jquery.min.js') }}"></script>
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+    </script>
 
     <!-- 2. Select2 CSS -->
 
