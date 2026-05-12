@@ -1,15 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\Reports;
-use App\Http\Controllers\Controller;
 
-use App\Models\EmpPersonal;
+use App\Http\Controllers\Controller;
 use App\Models\Section;
 use App\Models\IdCardPrintLog;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class IdCardController extends Controller
 {
@@ -23,74 +23,103 @@ class IdCardController extends Controller
     }
 
     // ─────────────────────────────────────────────────────────
-    //  LOV – AJAX employee search
-    //  GET /id-card/api/employees?q=...&section_no=...
+    //  LOV – AJAX employee search  (server-side paginated)
+    //  GET /id-card/api/employees?q=&section_no=&page=1&per_page=50
     // ─────────────────────────────────────────────────────────
-    public function searchEmployees(Request $request)
-    {
-        $q     = $request->get('q', '');
-        $secNo = $request->get('section_no', '');
+ public function searchEmployees(Request $request): JsonResponse
+{
+    $q       = trim($request->get('q', ''));
+    $secNo   = trim($request->get('section_no', ''));
+    $perPage = min((int) $request->get('per_page', 50), 200);
+    $page    = max((int) $request->get('page', 1), 1);
+    $offset  = ($page - 1) * $perPage;
+    $end     = $offset + $perPage;
 
-        $query = EmpPersonal::query()
-            ->select(
-                'HRM.EMP_PERSONAL.empno',
-                'HRM.EMP_PERSONAL.first_name',
-                'HRM.EMP_PERSONAL.last_name',
-                'HRM.EMP_PERSONAL.b_name',
-                'HRM.EMP_PERSONAL.blood_group',
-                'HRM.EMP_PERSONAL.status'
-            )
-            ->with(['getempofficial' => fn($q) => $q->select('empno','designation','section_id','card_type','join_date')])
-            ->join('HRM.EMP_OFFICIAL', 'HRM.EMP_PERSONAL.empno', '=', 'HRM.EMP_OFFICIAL.empno')
-            ->orderByDesc('HRM.EMP_OFFICIAL.join_date');  // most recent join first
+    // ── WHERE conditions ──────────────────────────────────
+    $where    = [];
+    $bindings = [];
 
-        if ($q) {
-            $query->where(function ($qb) use ($q) {
-                $qb->where('HRM.EMP_PERSONAL.empno',       'like', "%{$q}%")
-                   ->orWhere('HRM.EMP_PERSONAL.first_name', 'like', "%{$q}%")
-                   ->orWhere('HRM.EMP_PERSONAL.b_name',     'like', "%{$q}%");
-            });
-        }
-
-        if ($secNo) {
-            $query->whereHas('getempofficial', function ($qb) use ($secNo) {
-                $qb->whereHas('section', fn($s) => $s->where('section_no', $secNo));
-            });
-        }
-
-        $rows = $query->limit(100)->get()->map(fn($e) => [
-            'emp_no'      => $e->empno,
-            'emp_name'    => trim($e->first_name . ' ' . $e->last_name),
-            'emp_name_bn' => $e->b_name,
-            'designation' => $e->getempofficial?->designation,
-            'section'     => $e->getempofficial?->section?->section_name,
-            'section_no'  => $e->getempofficial?->section?->section_no,
-            'blood_group' => $e->blood_group,
-            'card_type'   => $e->getempofficial?->card_type,
-            'status'      => $e->status,
-            'join_date'   => $e->getempofficial?->join_date
-                                ? \Carbon\Carbon::parse($e->getempofficial->join_date)->format('d-M-Y')
-                                : '',
-        ]);
-
-        return response()->json($rows);
+    if ($q !== '') {
+        $where[]        = "(UPPER(EP.EMPNO) LIKE UPPER(:q1)
+                         OR UPPER(EP.FIRST_NAME) LIKE UPPER(:q2)
+                         OR UPPER(EP.LAST_NAME)  LIKE UPPER(:q3)
+                         OR UPPER(EP.B_NAME)     LIKE UPPER(:q4))";
+        $bindings[':q1'] = "%{$q}%";
+        $bindings[':q2'] = "%{$q}%";
+        $bindings[':q3'] = "%{$q}%";
+        $bindings[':q4'] = "%{$q}%";
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  SECTIONS LOV
-    // ─────────────────────────────────────────────────────────
-    public function getSections()
-    {
-        return response()->json(
-            Section::select('id', 'section_no', 'section_name')->orderBy('section_no')->get()
-        );
+    if ($secNo !== '') {
+        $where[]           = "UPPER(EO.SECTION_NO) = UPPER(:sec)";
+        $bindings[':sec']  = $secNo;
     }
+
+    $whereSQL = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    // ── Total count ───────────────────────────────────────
+    $total = DB::selectOne("
+        SELECT COUNT(*) AS cnt
+        FROM HRM.EMP_PERSONAL EP
+        LEFT JOIN HRM.EMP_OFFICIAL EO ON EP.EMPNO = EO.EMPNO
+        {$whereSQL}
+    ", $bindings)->cnt;
+
+    // ── Paginated query ───────────────────────────────────
+    $paginationBindings = array_merge($bindings, [
+        ':rn_end'    => $end,
+        ':rn_offset' => $offset,
+    ]);
+
+    $rows = DB::select("
+        SELECT * FROM (
+            SELECT inner_.*, ROWNUM AS rn FROM (
+                SELECT
+                    EP.EMPNO                                               AS emp_no,
+                    EP.FIRST_NAME                                          AS first_name,
+                    EP.LAST_NAME                                           AS last_name,
+                    EP.B_NAME                                              AS emp_name_bn,
+                    EP.BLOOD_GROUP                                         AS blood_group,
+                    EP.STATUS                                              AS status,
+                    EO.DES_NAME                                            AS designation,
+                    EO.SECTION_NO                                          AS section_no,
+                    EO.SECTION_NAME                                        AS section,
+                    TO_CHAR(CAST(EO.JOINING_DATE AS DATE), 'DD-MON-YYYY') AS join_date
+                FROM HRM.EMP_PERSONAL EP
+                LEFT JOIN HRM.EMP_OFFICIAL EO ON EP.EMPNO = EO.EMPNO
+                {$whereSQL}
+                ORDER BY EO.INSERT_DATE DESC NULLS LAST
+            ) inner_
+            WHERE ROWNUM <= :rn_end
+        )
+        WHERE rn > :rn_offset
+    ", $paginationBindings);
+
+    // ── Map results ───────────────────────────────────────
+    $mapped = collect($rows)->map(fn($e) => [
+        'emp_no'      => $e->emp_no,
+        'emp_name'    => trim(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')),
+        'emp_name_bn' => $e->emp_name_bn ?? '',
+        'designation' => $e->designation ?? '',
+        'section'     => $e->section     ?? '',
+        'section_no'  => $e->section_no  ?? '',
+        'blood_group' => $e->blood_group ?? '',
+        'card_type'   => '',
+        'status'      => $e->status      ?? '',
+        'join_date'   => $e->join_date   ?? '',
+    ]);
+
+    return response()->json([
+        'data'         => $mapped,
+        'total'        => $total,
+        'per_page'     => $perPage,
+        'current_page' => $page,
+        'last_page'    => (int) ceil($total / $perPage),
+    ]);
+}
 
     // ─────────────────────────────────────────────────────────
     //  RUN REPORT  –  GET /id-card/print
-    //
-    //  GET so the browser can open the PDF directly in a new tab.
-    //  JS builds a query string and does: window.open(url, '_blank')
     //
     //  Params:
     //    emp_nos    comma-separated string  e.g. "1001,1002,1003"
@@ -102,14 +131,13 @@ class IdCardController extends Controller
     public function printCard(Request $request): \Illuminate\Http\Response|JsonResponse
     {
         $request->validate([
-            'emp_nos'    => 'required|string|min:1',
-            'card_type'  => 'required|string|in:bangla_knit,bangla_front,bangla_single,bangla_back,process_label,emp_label,card_label,temp_card,process_rony,bangla_level',
-            'section_no' => 'nullable|string',
-            'from_date'  => 'nullable|string',
-            'end_date'   => 'nullable|string',
+            'emp_nos'   => 'required|string|min:1',
+            'card_type' => 'required|string|in:bangla_knit,bangla_front,bangla_single,bangla_back,process_label,emp_label,card_label,temp_card,process_rony,bangla_level',
+            'section_no'=> 'nullable|string',
+            'from_date' => 'nullable|string',
+            'end_date'  => 'nullable|string',
         ]);
 
-        // Extra guard: emp_nos must not be blank after trim
         if (trim($request->emp_nos) === '') {
             abort(422, 'emp_nos is empty.');
         }
@@ -186,17 +214,6 @@ class IdCardController extends Controller
 
     // ─────────────────────────────────────────────────────────
     //  BUILD ORACLE PARAMS
-    //
-    //  Original .fmb trigger pattern (extracted from binary):
-    //    add_parameter(pl_id,'P_emp',  text_parameter,:REPORT_BK.EMP_NO);
-    //    add_parameter(pl_id,'P_emp1', text_parameter,:REPORT_BK.EMP_NO1);
-    //    add_parameter(pl_id,'P_emp2', text_parameter,:REPORT_BK.EMP_NO2);
-    //    ...up to P_emp12
-    //
-    //  Each employee gets its OWN numbered parameter.
-    //  NOT a comma-separated list — that is why only 1st emp showed.
-    //
-    //  Supports up to 12 employees per run (matches original form limit).
     // ─────────────────────────────────────────────────────────
     private function buildOracleParams(
         string  $cardType,
@@ -208,45 +225,21 @@ class IdCardController extends Controller
         $params = [];
         $empStr = implode(',', $empNos);
 
-        // ─────────────────────────────────────────────────────
-        //  Per-report emp parameter name mapping
-        //  (extracted directly from .fmb button triggers)
-        //
-        //  RUN_REPORTS      → ID_CARD_bangla_level_knit  → P_emp
-        //  PB_BANGLA_FRONT  → ID_CARD_bangla_back        → P_emp
-        //  PB_BANGLA_SINGLE → ID_CARD_bangla_level       → P_emp
-        //  BACK_PART        → ID_CARD_bangla_level        → P_emp
-        //  ITEM140          → ID_CARD_bangla_front        → P_emp
-        //                  → ID_CARD_bangla               → P_emp
-        //                  → ID_CARD_Process_Rony_I       → P_emp
-        //  PUSH_BUTTON136   → emp_lebel                   → P_empno
-        //                  → ID_CARD_Process_lebel        → P_empno
-        //                  → ID_CARD_Process_Temp         → P_empno
-        //                  → ID_CARD_Process_back         → P_empno
-        //  CAED_LEBEL       → ID_CARD_bangla_level        → P_emp
-        //  EMP_LEBEL        → ID_CARD_bangla_level        → P_emp
-        // ─────────────────────────────────────────────────────
-
         switch ($cardType) {
-
-            // ── Uses P_emp ───────────────────────────────────
-            case 'bangla_knit':    // ID_CARD_bangla_level_knit  ← RUN_REPORTS
-            case 'bangla_front':   // ID_CARD_bangla_front       ← ITEM140
-            case 'bangla_single':  // ID_CARD_bangla             ← ITEM140
-            case 'bangla_back':    // ID_CARD_bangla_back        ← PB_BANGLA_FRONT
-            case 'bangla_level':   // ID_CARD_bangla_level       ← PB_BANGLA_SINGLE / BACK_PART
-                 case 'card_label':     // ID_CARD_Process_lebel      ← PUSH_BUTTON136 / CAED_LEBEL
-            case 'process_label':  // ID_CARD_Process_lebel      ← PUSH_BUTTON136
-            case 'process_rony':   // ID_CARD_Process_Rony_I     ← ITEM140
-                case 'temp_card':      // ID_CARD_Process_Temp       ← PUSH_BUTTON136
+            case 'bangla_knit':
+            case 'bangla_front':
+            case 'bangla_single':
+            case 'bangla_back':
+            case 'bangla_level':
+            case 'card_label':
+            case 'process_label':
+            case 'process_rony':
+            case 'temp_card':
                 $params['P_emp'] = $empStr;
                 if ($sectionNo) $params['P_SACTION'] = $sectionNo;
                 break;
 
-            // ── Uses P_empno ─────────────────────────────────
-            case 'emp_label':      // emp_lebel                  ← PUSH_BUTTON136
-           
-            
+            case 'emp_label':
                 $params['P_empno'] = $empStr;
                 if ($sectionNo) $params['P_SACTION']   = $sectionNo;
                 if ($fromDate)  $params['P_FROM_DATE'] = $this->toOracleDate($fromDate);
@@ -263,7 +256,6 @@ class IdCardController extends Controller
 
     // ─────────────────────────────────────────────────────────
     //  PROXY TO ORACLE REPORTS SERVER
-    //  Identical to your ReportCentreController pattern
     // ─────────────────────────────────────────────────────────
     protected function proxyOracleReport(string $reportFileName, array $params): \Illuminate\Http\Response
     {
@@ -284,7 +276,6 @@ class IdCardController extends Controller
              . 'report=' . $filePath . strtolower($reportFileName)
              . '&' . http_build_query($queryParams);
 
-        // Log URL for debugging — comment out in production
         Log::info('ID Card Report URL: ' . $url);
 
         $response = Http::timeout(config('hrm.timeout', 120))
@@ -297,7 +288,6 @@ class IdCardController extends Controller
             );
         }
 
-        // Check if Oracle returned an error HTML page instead of PDF
         $contentType = $response->header('Content-Type');
         if (str_contains($contentType, 'text/html')) {
             $body = substr($response->body(), 0, 500);
@@ -321,15 +311,13 @@ class IdCardController extends Controller
             '09'=>'SEP','10'=>'OCT','11'=>'NOV','12'=>'DEC',
         ];
 
-        // YYYY-MM-DD  →  DD-MON-YYYY
         if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $m)) {
             return $m[3] . '-' . ($months[$m[2]] ?? $m[2]) . '-' . $m[1];
         }
-        // DD-MM-YYYY  →  DD-MON-YYYY
         if (preg_match('/^(\d{2})-(\d{2})-(\d{4})$/', $date, $m)) {
             return $m[1] . '-' . ($months[$m[2]] ?? $m[2]) . '-' . $m[3];
         }
 
-        return strtoupper($date); // already DD-MON-YYYY
+        return strtoupper($date);
     }
 }

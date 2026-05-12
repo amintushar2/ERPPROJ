@@ -249,16 +249,43 @@ class UserMenuPermissionController extends Controller
                     ]);
             } elseif (!$userHasGroupDetails) {
                 // No rows at all for this user → fresh INSERT
-                DB::table('F_STORE.ALL_USER_GROUP_DETAILS_WEB')->insert([
-                    'MENU_ITEM_ID'  => $menuId,
-                    'USER_GROUP_ID' => $groupId,
-                    'USER_ID'       => $userId,
-                    'ENABLED'       => $enabled,
-                    'INSERT_DATE'   => now(),
-                    'INSERT_BY'     => auth()->id() ?? 'USER',
-                    'UPDATE_BY'     => auth()->id() ?? 'USER',
-                    'UPDATE_DATE'   => now(),
-                ]);
+\DB::enableQueryLog();
+
+$route = DB::table('F_STORE.ALL_ROUTE_DETAILS')
+    ->where('ROUTE_ID', $routeId)
+    ->first();
+
+DB::table('F_STORE.ALL_USER_SUB_DETAILS')->insert([
+
+    'USER_GROUP_ID' => $groupId,
+
+    'SUB_MENU_ID'   => $routeId,
+
+    'SUB_MENU_1'    => data_get($route, 'SUB_MENU_1'),
+
+    'SUB_MENU_2'    => data_get($route, 'SUB_MENU_2'),
+
+    'USER_ID'       => $userId,
+
+    'MENU_ITEM_ID'  => $menuId,
+
+    'SUB_MENU_NAME' => data_get($route, 'COMPONENT'),
+
+    'ROUTE'         => data_get($route, 'ROUTE_PATH'),
+
+    'ENABLED'       => 'Y',
+
+    'INSERT_DATE'   => now(),
+
+    'INSERT_BY'     => auth()->id() ?? 'USER',
+]);
+
+\Log::info(DB::getQueryLog());
+
+\Log::info($route);
+
+
+
             }
             // else: user has other rows but NOT this menu → skip (do not insert)
 
@@ -345,18 +372,18 @@ class UserMenuPermissionController extends Controller
 } else {
     // INSERT (no need for !$userHasSubDetails)
     $route = DB::table('F_STORE.ALL_ROUTE_DETAILS')
-        ->whereRaw('TRIM(ROUTE_ID) = ?', [$routeId])
-        ->select(
-            DB::raw('TRIM(ROUTE_PATH) AS route_path'),
-            DB::raw('TRIM(COMPONENT)  AS component')
-        )
-        ->first();
-
+    ->where('ROUTE_ID', $routeId)
+    ->first();
+   // dd($route);
     DB::table('F_STORE.ALL_USER_SUB_DETAILS')->insert([
         'USER_GROUP_ID' => $groupId,
         'SUB_MENU_ID'   => $routeId,
         'USER_ID'       => $userId,
         'MENU_ITEM_ID'  => $menuId,
+        
+    'SUB_MENU_1'    => $route?->sub_menu_1 ??'',
+
+    'SUB_MENU_2'    => $route?->sub_menu_1 ??'',
         'SUB_MENU_NAME' => $route?->component ?? $routeId,
         'ROUTE'         => $route?->route_path ?? '',
         'ENABLED'       => 'Y',

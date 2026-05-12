@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class MenuHierarchy extends Model
 {
     protected $table      = 'F_STORE.ALL_MENU_HIERARCHY';
-    protected $primaryKey = 'CHILD_ID';
+    protected $primaryKey = 'MENU_CHILD_ID';
     public    $keyType    = 'string';
     public    $incrementing = false;
     public    $timestamps   = false;

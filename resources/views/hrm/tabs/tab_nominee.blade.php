@@ -33,15 +33,15 @@
             {{-- ROW 1 --}}
             <div class="row">
 
-                <div class="col-md-4">
+                <div class="col-md-6">
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
+                        <label class="col-sm-3 col-form-label">
                             Name (EN):
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
                             <input type="text" class="form-control" name="depd_name"
                                 placeholder="Full Name in English">
@@ -52,36 +52,18 @@
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
+                        <label class="col-sm-3 col-form-label">
                             Name (BN):
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
                             <input type="text" class="form-control bn-font" name="depent_name_bangla"
                                 placeholder="বাংলায় নাম">
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <div class="row p-1">
-
-                        <label class="col-sm-4 col-form-label">
-                            Relation (EN):
-                        </label>
-
-                        <div class="col-sm-8">
-
-                            <input type="text" class="form-control" name="relationship" placeholder="e.g. Wife, Son">
 
                         </div>
 
@@ -94,15 +76,33 @@
             {{-- ROW 2 --}}
             <div class="row">
 
-                <div class="col-md-4">
+                <div class="col-md-6">
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
+                        <label class="col-sm-3 col-form-label">
+                            Relation (EN):
+                        </label>
+
+                        <div class="col-sm-9">
+
+                            <input type="text" class="form-control" name="relationship" placeholder="e.g. Wife, Son">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="row p-1">
+
+                        <label class="col-sm-3 col-form-label">
                             Relation (BN):
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
                             <input type="text" class="form-control bn-font" name="relation_bn" placeholder="সম্পর্ক">
 
@@ -112,12 +112,17 @@
 
                 </div>
 
+            </div>
+
+            {{-- ROW 3 --}}
+            <div class="row">
+
                 <div class="col-md-4">
 
                     <div class="row p-1">
 
                         <label class="col-sm-4 col-form-label">
-                            Date of Birth:
+                            DOB:
                         </label>
 
                         <div class="col-sm-8">
@@ -140,18 +145,13 @@
 
                         <div class="col-sm-8">
 
-                            <input type="number" class="form-control" name="d_age" placeholder="Age">
+                            <input type="number" class="form-control" name="d_age">
 
                         </div>
 
                     </div>
 
                 </div>
-
-            </div>
-
-            {{-- ROW 3 --}}
-            <div class="row">
 
                 <div class="col-md-4">
 
@@ -191,43 +191,6 @@
 
                 </div>
 
-                <div class="col-md-4">
-
-                    <div class="row p-1">
-
-                        <label class="col-sm-4 col-form-label">
-                            As On:
-                        </label>
-
-                        <div class="col-sm-8">
-
-                            <input type="text" class="form-control date-pick" name="d_as_on">
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <div class="row p-1">
-
-                        <label class="col-sm-4 col-form-label">
-                            Percentage:
-                        </label>
-
-                        <div class="col-sm-8">
-
-                            <input type="number" class="form-control" name="percentage" placeholder="%"
-                                max="100">
-
-                        </div>
-
-                    </div>
-
-                </div>
-
             </div>
 
             {{-- ROW 4 --}}
@@ -237,13 +200,13 @@
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
-                            Address (EN):
+                        <label class="col-sm-3 col-form-label">
+                            As On:
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
-                            <textarea class="form-control" name="address" placeholder="Address in English"></textarea>
+                            <input type="text" class="form-control date-pick" name="d_as_on">
 
                         </div>
 
@@ -255,13 +218,14 @@
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
-                            Address (BN):
+                        <label class="col-sm-3 col-form-label">
+                            Percentage:
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
-                            <textarea class="form-control bn-font" name="address_bn" placeholder="বাংলায় ঠিকানা"></textarea>
+                            <input type="number" class="form-control" name="percentage" placeholder="%"
+                                max="100">
 
                         </div>
 
@@ -278,13 +242,13 @@
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
-                            Village (BN):
+                        <label class="col-sm-3 col-form-label">
+                            Address (EN):
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
-                            <input type="text" class="form-control bn-font" name="village_bn">
+                            <textarea class="form-control" name="address" rows="2" placeholder="Address in English"></textarea>
 
                         </div>
 
@@ -296,13 +260,13 @@
 
                     <div class="row p-1">
 
-                        <label class="col-sm-4 col-form-label">
-                            PO (BN):
+                        <label class="col-sm-3 col-form-label">
+                            Address (BN):
                         </label>
 
-                        <div class="col-sm-8">
+                        <div class="col-sm-9">
 
-                            <input type="text" class="form-control bn-font" name="po_bn">
+                            <textarea class="form-control bn-font" name="address_bn" rows="2" placeholder="বাংলায় ঠিকানা"></textarea>
 
                         </div>
 
@@ -315,17 +279,18 @@
             {{-- ROW 6 --}}
             <div class="row">
 
-                <div class="col-md-6">
+                <div class="col-md-3">
 
                     <div class="row p-1">
 
                         <label class="col-sm-4 col-form-label">
-                            PS (BN):
+                            Village (Bangla):
                         </label>
 
                         <div class="col-sm-8">
 
-                            <input type="text" class="form-control bn-font" name="ps_bn">
+                            <input type="text" class="form-control bn-font" name="village_bn"
+                                placeholder="গ্রাম">
 
                         </div>
 
@@ -333,12 +298,50 @@
 
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-3">
 
                     <div class="row p-1">
 
                         <label class="col-sm-4 col-form-label">
-                            District (BN):
+                            PO (Bangla):
+                        </label>
+
+                        <div class="col-sm-8">
+
+                            <input type="text" class="form-control bn-font" name="po_bn"
+                                placeholder="পোষ্ট অফিস">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="row p-1">
+
+                        <label class="col-sm-4 col-form-label">
+                            PS:
+                        </label>
+
+                        <div class="col-sm-8">
+
+                            <input type="text" class="form-control bn-font" name="ps_bn"
+                                placeholder="পুলিশ স্টেশন">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="row p-1">
+
+                        <label class="col-sm-4 col-form-label">
+                            District:
                         </label>
 
                         <div class="col-sm-8">
@@ -659,7 +662,7 @@
         });
     });
 
-    /* ── Smart dd-mm-yyyy date picker for all .date-pick inputs ── */
+    /* Smart dd-mm-yyyy date picker */
 
     (function() {
 
@@ -680,13 +683,7 @@
 
                         allowInput: true,
 
-                        disableMobile: true,
-
-                        onReady: function(_, __, fp) {
-
-                            fp.calendarContainer &&
-                                fp.calendarContainer.classList.add('fp-sm');
-                        }
+                        disableMobile: true
                     });
                 }
 
@@ -734,16 +731,6 @@
 
                 return;
             }
-
-            var d = parseInt(day, 10),
-                m = parseInt(mon, 10),
-                y = parseInt(yr, 10);
-
-            if (
-                d < 1 || d > 31 ||
-                m < 1 || m > 12 ||
-                y < 1900 || y > 2099
-            ) return;
 
             var formatted = day + '-' + mon + '-' + yr;
 

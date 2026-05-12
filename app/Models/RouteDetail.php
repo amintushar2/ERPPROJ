@@ -12,10 +12,24 @@ class RouteDetail extends Model
     public    $incrementing = false;
     public    $timestamps   = false;
 
-    protected $fillable = [
-        'ROUTE_ID','ROUTE_PATH','MENU_CHILD_ID','COMPONENT',
-        'IS_ACTIVE','DESCRIPTION','INSERT_BY','INSERT_DATE',
-    ];
+   protected $fillable = [ 'ROUTE_ID', 'ROUTE_PATH', 
+   // MAIN MENU 
+   'MENU_CHILD_ID', 
+   // SUB MENU 
+   'SUB_MENU_ID', 
+   // CHILD MENU 
+   'SUB_MENU_1', 
+   // LEVEL 3 
+   'SUB_MENU_2', 
+   'COMPONENT', 
+   'SUB_MENU_NAME', 
+   'DESCRIPTION', 
+   'IS_ACTIVE', 
+   'INSERT_DATE', 
+   'INSERT_BY', 
+   'UPDATE_DATE', 
+   'UPDATE_BY', 
+ ];
 
     public function menu()
     {

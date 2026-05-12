@@ -766,7 +766,7 @@ Route::prefix('hrm/temp-emp')->name('temp-emp.')->group(function () {
 });
 
 
-Route::prefix('id-card')->name('id-card.')->middleware(['auth'])->group(function () {
+Route::prefix('hrm/id-card')->name('id-card.')->middleware(['auth'])->group(function () {
 
     // Main report form
     Route::get('/',                  [IdCardController::class, 'index'])           ->name('index');
