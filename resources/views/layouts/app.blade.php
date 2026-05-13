@@ -11,6 +11,10 @@
     <link href="{{ asset('bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('erpcss/select2.min.css') }}" rel="stylesheet">
     <link href="{{ URL::asset('erpcss/sweetalert2.min.css') }}" rel="stylesheet">
+    <link href="{{ URL::asset('erpcss/select2-bootstrap-5-theme.min.css') }}" rel="stylesheet">
+
+    <link href="{{ asset('flatpickr/dist/flatpickr.min.css') }}" rel="stylesheet">
+
 
     {{-- Icons loaded async so they never block paint --}}
 
@@ -99,6 +103,7 @@
     <script src="{{ URL::asset('mainjs/dataTables.buttons.min.js') }}"></script>
     <script src="{{ URL::asset('mainjs/buttons.bootstrap5.min.js') }}"></script>
     <script src="{{ URL::asset('mainjs/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ asset('flatpickr/dist/flatpickr.min.js') }}"></script>
 
 
     <script>

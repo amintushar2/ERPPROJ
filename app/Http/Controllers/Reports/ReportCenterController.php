@@ -1,6 +1,7 @@
 <?php
+namespace App\Http\Controllers\Reports;
 
-namespace App\Http\Controllers;
+use App\Http\Controllers\BaseController;
 
 use App\Models\HrmReport;
 use Illuminate\Http\Request;
@@ -29,24 +30,25 @@ class ReportCenterController extends BaseController
     private const LOV_SOURCES = [
         'COMPANY_NAME'   => ['table' => 'COMPANY_PROFILE',   'value' => 'COMPANY_ID',    'label' => 'COMPANY_NAME',   'order' => 'COMPANY_NAME'],
         'SETION_TXT'     => ['table' => 'HRM.SECTION',       'value' => 'SECTION_NO',    'label' => 'SECTION_NAME',   'order' => 'SECTION_NAME'],
-        'DEPT_NAME'      => ['table' => 'HRM.DEPARTMENT',    'value' => 'DEPT_NO',       'label' => 'DEPT_NAME',      'order' => 'DEPT_NAME'],
+        'DEPT_NAME'      => ['table' => 'HRM.dept',    'value' => 'DEPT_NO',       'label' => 'DEPT_NAME',      'order' => 'DEPT_NAME'],
         'EMP_TYPE'       => ['table' => 'HRM.EMP_TYPE',      'value' => 'EMP_TYPE',      'label' => 'EMP_TYPE',       'order' => 'PRIORITY'],
         'EMP_GRADE'      => ['table' => 'HRM.GRADE',         'value' => 'GRADE_ID',      'label' => 'GRADE_NAME',     'order' => 'GRADE_NAME'],
         'RELEGION'       => ['table' => 'RELIGION',          'value' => 'RELIGION_ID',   'label' => 'RELIGION_NAME',  'order' => 'RELIGION_NAME'],
         'BLOOD_GROUP'    => ['raw'   => [['v'=>'A+','l'=>'A+'],['v'=>'A-','l'=>'A-'],['v'=>'B+','l'=>'B+'],['v'=>'B-','l'=>'B-'],['v'=>'AB+','l'=>'AB+'],['v'=>'AB-','l'=>'AB-'],['v'=>'O+','l'=>'O+'],['v'=>'O-','l'=>'O-']]],
         'SEX'            => ['raw'   => [['v'=>'Male','l'=>'Male'],['v'=>'Female','l'=>'Female']]],
         'DES_NAME'       => ['table' => 'HRM.DESIGNATION',   'value' => 'DES_NO',        'label' => 'DES_NAME',       'order' => 'DES_NAME'],
-        'WORK_ENT'       => ['table' => 'COMPANY_PROFILE',   'value' => 'COMPANY_ID',    'label' => 'COMPANY_NAME',   'order' => 'COMPANY_NAME'],
-        'STATUS'         => ['raw'   => [['v'=>'Active','l'=>'Active'],['v'=>'Inactive','l'=>'Inactive'],['v'=>'Terminated','l'=>'Terminated']]],
+        'WORK_ENT'       => ['raw'   => [['v'=>'Officer','l'=>'Officer'],['v'=>'Staff','l'=>'Staff'],['v'=>'Worker','l'=>'Worker']]],
+        'STATUS'         => ['raw'   => [['v'=>'Active','l'=>'Active'],['v'=>'Inactive','l'=>'Inactive']]],
         'P_MONTH'        => ['raw'   => [
             ['v'=>'01','l'=>'January'],['v'=>'02','l'=>'February'],['v'=>'03','l'=>'March'],
             ['v'=>'04','l'=>'April'],  ['v'=>'05','l'=>'May'],      ['v'=>'06','l'=>'June'],
             ['v'=>'07','l'=>'July'],   ['v'=>'08','l'=>'August'],   ['v'=>'09','l'=>'September'],
             ['v'=>'10','l'=>'October'],['v'=>'11','l'=>'November'], ['v'=>'12','l'=>'December'],
         ]],
-        'FLOOR_NAME'     => ['table' => 'HRM.FLOOR',         'value' => 'FLOOR_ID',      'label' => 'FLOOR_NAME',     'order' => 'FLOOR_NAME'],
+        'FLOOR_NAME'     => ['table' => 'HRM.FLOOR',         'value' => 'FLOOR_ID',      'label' => 'FLOOR_DESC',     'order' => 'FLOOR_DESC'],
         'INCREMENT_TYPE' => ['raw'   => [['v'=>'Increment','l'=>'Increment'],['v'=>'Promotion','l'=>'Promotion'],['v'=>'Demotion','l'=>'Demotion']]],
-        'LINE_NAME'      => ['table' => 'HRM.LINE',          'value' => 'LINE_ID',       'label' => 'LINE_NAME',      'order' => 'LINE_NAME'],
+        'LINE_NAME'      => ['table' => 'HRM.LINE_INFO',          'value' => 'LINE_NO',       'label' => 'LINE',      'order' => 'LINE'],
+        'P_BILL'      => ['raw'   => [['v'=>'0','l'=>'ALL EMP '],['v'=>'1','l'=>'Only Bill']]],
     ];
 
     // ─────────────────────────────────────────────────────────────────
@@ -310,7 +312,7 @@ class ReportCenterController extends BaseController
             'P_DAYES'        => 'Days',
             'FLOOR_NAME'     => 'Floor',
             'INCREMENT_TYPE' => 'Increment Type',
-            'P_BILL'         => 'Bill No',
+            'P_BILL'         => 'Bill Type',
             'LINE_NAME'      => 'Line',
             'P_LETTER_NO'    => 'Letter No',
         ];

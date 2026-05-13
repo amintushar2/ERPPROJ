@@ -6,25 +6,15 @@
       [2] Date format → DD-MM-YYYY display via flatpickr, sent as DD-MON-YYYY to Oracle
 --}}
 
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>HRM Report Center</title>
+@section('title', 'HRM Report Center')
 
+@push('styles')
     {{-- Bootstrap 5 --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {{-- Bootstrap Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    {{-- Select2 --}}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
-        rel="stylesheet">
+
+
     {{-- Flatpickr (DD-MM-YYYY date picker) --}}
-    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -306,104 +296,96 @@
             display: block;
         }
     </style>
-</head>
+@endpush
 
-<body class="sidebar-mini layout-fixed sidebar-collapse">
-    <div class="wrapper">
+@section('content')
+    {{-- ── Navbar ── --}}
+    <nav class="navbar navbar-hrm">
+        <span class="navbar-brand">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>Four Design (Pvt.) Ltd.
+        </span>
+        <span class="nav-badge"><i class="bi bi-person-badge me-1"></i>HRM Module</span>
+    </nav>
 
-        {{-- Sidebar included normally — AdminLTE handles it --}}
-        @include('topbar.sidebar')
-
-        <div class="content-wrapper">
-            {{-- ── Navbar ── --}}
-            <nav class="navbar navbar-hrm">
-                <span class="navbar-brand">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Four Design (Pvt.) Ltd.
-                </span>
-                <span class="nav-badge"><i class="bi bi-person-badge me-1"></i>HRM Module</span>
+    {{-- ── Page Header ── --}}
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5><i class="bi bi-file-earmark-bar-graph me-2" style="color:var(--hrm-accent)"></i>Report Center
+            </h5>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#" style="color:var(--hrm-secondary)">HRM</a>
+                    </li>
+                    <li class="breadcrumb-item active">Report Center</li>
+                </ol>
             </nav>
+        </div>
+    </div>
 
-            {{-- ── Page Header ── --}}
-            <div class="page-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-file-earmark-bar-graph me-2" style="color:var(--hrm-accent)"></i>Report Center
-                    </h5>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#" style="color:var(--hrm-secondary)">HRM</a>
-                            </li>
-                            <li class="breadcrumb-item active">Report Center</li>
-                        </ol>
-                    </nav>
-                </div>
+    {{-- ── Main Content ── --}}
+    <div class="container-fluid px-4 py-3" style="max-width:960px; padding-bottom:3rem;">
+
+        @if (session('error'))
+            <div class="alert-hrm-error mb-3">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ session('error') }}
             </div>
+        @endif
 
-            {{-- ── Main Content ── --}}
-            <div class="container-fluid px-4 py-3" style="max-width:960px; padding-bottom:3rem;">
+        <div class="card">
+            <div class="card-header-hrm">
+                <i class="bi bi-sliders"></i>Report Selection &amp; Parameters
+            </div>
+            <div class="card-body p-3">
 
-                @if (session('error'))
-                    <div class="alert-hrm-error mb-3">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ session('error') }}
+                {{-- ── Report Dropdown ── --}}
+                <div class="row g-2 align-items-end mb-2">
+                    <div class="col-md-9">
+                        <label class="form-label" for="report_no">
+                            <i class="bi bi-list-ul me-1" style="color:var(--hrm-secondary)"></i>Select Report
+                        </label>
+                        <select class="form-select" id="report_no" name="report_no">
+                            <option value="">-- Select a Report --</option>
+                            @foreach ($reports as $report)
+                                <option value="{{ $report->report_id }}">{{ $report->report_title }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                @endif
-
-                <div class="card">
-                    <div class="card-header-hrm">
-                        <i class="bi bi-sliders"></i>Report Selection &amp; Parameters
-                    </div>
-                    <div class="card-body p-3">
-
-                        {{-- ── Report Dropdown ── --}}
-                        <div class="row g-2 align-items-end mb-2">
-                            <div class="col-md-9">
-                                <label class="form-label" for="report_no">
-                                    <i class="bi bi-list-ul me-1" style="color:var(--hrm-secondary)"></i>Select Report
-                                </label>
-                                <select class="form-select" id="report_no" name="report_no">
-                                    <option value="">-- Select a Report --</option>
-                                    @foreach ($reports as $report)
-                                        <option value="{{ $report->report_id }}">{{ $report->report_title }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button class="btn btn-outline-secondary btn-reset w-100" id="btn-reset" type="button">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                                </button>
-                            </div>
-                        </div>
-
-                        {{-- ── Report Info Bar ── --}}
-                        <div class="report-info-bar d-none mt-2" id="report-info-bar">
-                            <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
-                            <span id="report-file-label"></span>
-                            <span class="ms-auto text-muted" id="param-count-label"></span>
-                        </div>
-
-                        {{-- ── Dynamic Parameter Fields ── --}}
-                        <div id="param-section" class="d-none">
-                            <div class="param-section-title mt-3">
-                                <i class="bi bi-funnel me-1"></i>Report Parameters
-                            </div>
-                            <div id="loading-skeleton" class="d-none">
-                                <div class="skeleton"></div>
-                                <div class="skeleton" style="width:70%"></div>
-                                <div class="skeleton" style="width:85%"></div>
-                            </div>
-                            <div id="dynamic-params" class="row g-3"></div>
-                        </div>
-
-                        {{-- ── Action Buttons ── --}}
-                        <div class="d-flex gap-2 align-items-center mt-3 pt-3 border-top" id="action-bar"
-                            style="display:none!important">
-                            <button class="btn btn-run" id="btn-run" type="button">
-                                <i class="bi bi-play-fill me-1"></i>Run Report
-                            </button>
-                            <div id="status-msg" class="ms-2"></div>
-                        </div>
-
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-secondary btn-reset w-100" id="btn-reset" type="button">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                        </button>
                     </div>
                 </div>
+
+                {{-- ── Report Info Bar ── --}}
+                <div class="report-info-bar d-none mt-2" id="report-info-bar">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+                    <span id="report-file-label"></span>
+                    <span class="ms-auto text-muted" id="param-count-label"></span>
+                </div>
+
+                {{-- ── Dynamic Parameter Fields ── --}}
+                <div id="param-section" class="d-none">
+                    <div class="param-section-title mt-3">
+                        <i class="bi bi-funnel me-1"></i>Report Parameters
+                    </div>
+                    <div id="loading-skeleton" class="d-none">
+                        <div class="skeleton"></div>
+                        <div class="skeleton" style="width:70%"></div>
+                        <div class="skeleton" style="width:85%"></div>
+                    </div>
+                    <div id="dynamic-params" class="row g-3"></div>
+                </div>
+
+                {{-- ── Action Buttons ── --}}
+                <div class="d-flex gap-2 align-items-center mt-3 pt-3 border-top" id="action-bar"
+                    style="display:none!important">
+                    <button class="btn btn-run" id="btn-run" type="button">
+                        <i class="bi bi-play-fill me-1"></i>Run Report
+                    </button>
+                    <div id="status-msg" class="ms-2"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -413,22 +395,9 @@
     </div>
 
     {{-- ── Scripts ── --}}
-    <script src="{{ URL::asset('mainjs/jquery.min.js') }}"></script>
+@endsection
 
-    <script src="{{ URL::asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-    <script src="{{ URL::asset('mainjs/select2.min.js') }}"></script>
-
-    {{-- Flatpickr for DD-MM-YYYY date input --}}
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="{{ URL::asset('dist/js/adminlte.min.js') }}"></script>
-    <script src="{{ URL::asset('mainjs/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ URL::asset('mainjs/dataTables.bootstrap5.min.js') }}"></script>
-    <script src="{{ URL::asset('mainjs/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ URL::asset('mainjs/buttons.bootstrap5.min.js') }}"></script>
-    <script src="{{ URL::asset('mainjs/sweetalert2.all.min.js') }}"></script>
-
-
+@push('scripts')
     <script>
         const csrf = document.querySelector('meta[name="csrf-token"]').content;
         const reportSel = document.getElementById('report_no');
@@ -442,6 +411,7 @@
         const fileLabel = document.getElementById('report-file-label');
         const cntLabel = document.getElementById('param-count-label');
         const skeleton = document.getElementById('loading-skeleton');
+        const runReportUrl = @json(route('reports.run'));
 
         // Track flatpickr instances to destroy on reset
         let flatpickrInstances = [];
@@ -466,7 +436,7 @@
             paramSec.classList.remove('d-none');
 
             try {
-                const res = await fetch(`/reports/${reportId}/parameters`);
+                const res = await fetch(`/hrm/reports/${reportId}/parameters`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
 
@@ -487,6 +457,7 @@
 
                 actionBar.style.removeProperty('display');
                 clearStatus();
+                focusFirstParameter();
 
             } catch (e) {
                 skeleton.classList.add('d-none');
@@ -505,6 +476,8 @@
             const parameters = {};
 
             dynDiv.querySelectorAll('[data-param-key]').forEach(el => {
+                if (el.classList.contains('hrm-date')) autoFormatDate(el);
+
                 if (el.tagName === 'INPUT' && el.dataset.oracleValue) {
                     // Date input — use the pre-converted DD-MM-YYYY value
                     if (el.dataset.oracleValue !== '') parameters[el.dataset.paramKey] = el.dataset
@@ -519,7 +492,7 @@
             clearStatus();
 
             try {
-                const res = await fetch('/reports/run', {
+                const res = await fetch(runReportUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -581,7 +554,7 @@
                 <select class="form-select lov-select2"
                         id="${id}"
                         data-param-key="${key}">
-                    <option value="">-- Select --</option>
+                    <option value="" selected>-- Select --</option>
                     ${options}
                 </select>
             </div>`;
@@ -642,8 +615,6 @@
             // ── LOV dropdowns → Select2 ─────────────────────────────────────
             $('.lov-select2').select2({
                 theme: 'bootstrap-5',
-                placeholder: '-- Select --',
-                allowClear: true,
                 width: '100%',
                 dropdownParent: $('#dynamic-params'),
             });
@@ -664,8 +635,17 @@
                             const dd = dateStr.substring(0, 2);
                             const mm = dateStr.substring(2, 4);
                             const yy = dateStr.substring(4, 6);
+                            const yyyy = (parseInt(yy, 10) <= 30 ? '20' : '19') + yy;
 
-                            return new Date(2000 + parseInt(yy), mm - 1, dd);
+                            return new Date(yyyy, mm - 1, dd);
+                        }
+
+                        if (/^\d{8}$/.test(dateStr)) {
+                            const dd = dateStr.substring(0, 2);
+                            const mm = dateStr.substring(2, 4);
+                            const yyyy = dateStr.substring(4, 8);
+
+                            return new Date(yyyy, mm - 1, dd);
                         }
 
                         // fallback for normal format
@@ -690,10 +670,117 @@
                 });
 
                 flatpickrInstances.push(fp);
+
+                el.addEventListener('blur', function() {
+                    autoFormatDate(el);
+                });
             });
+
+            bindEnterNavigation();
         }
 
         // ── Utility ─────────────────────────────────────────────────────────
+        function getFocusableFields() {
+            return Array.from(dynDiv.querySelectorAll('[data-param-key]'))
+                .filter(el => !el.disabled && (el.offsetParent !== null || $(el).hasClass('select2-hidden-accessible')));
+        }
+
+        function focusControl(el) {
+            if (!el) return;
+
+            if ($(el).hasClass('select2-hidden-accessible')) {
+                $(el).next('.select2-container').find('.select2-selection').trigger('focus');
+                return;
+            }
+
+            el.focus();
+            if (typeof el.select === 'function') el.select();
+        }
+
+        function focusFirstParameter() {
+            const fields = getFocusableFields();
+
+            setTimeout(() => {
+                if (fields.length) {
+                    focusControl(fields[0]);
+                } else {
+                    btnRun.focus();
+                }
+            }, 50);
+        }
+
+        function bindEnterNavigation() {
+            getFocusableFields().forEach(el => {
+                el.addEventListener('keydown', function(event) {
+                    if (event.key !== 'Enter') return;
+
+                    event.preventDefault();
+                    if (el.classList.contains('hrm-date')) autoFormatDate(el);
+
+                    const fields = getFocusableFields();
+                    const nextField = fields[fields.indexOf(el) + 1];
+
+                    if (nextField) {
+                        focusControl(nextField);
+                    } else {
+                        btnRun.focus();
+                    }
+                });
+            });
+
+            $('.lov-select2').on('select2:select', function() {
+                const fields = getFocusableFields();
+                const nextField = fields[fields.indexOf(this) + 1];
+
+                setTimeout(() => {
+                    if (nextField) {
+                        focusControl(nextField);
+                    } else {
+                        btnRun.focus();
+                    }
+                }, 0);
+            });
+        }
+
+        function autoFormatDate(el) {
+            var raw = el.value.replace(/\D/g, '');
+            if (!raw) return;
+
+            var day, mon, yr;
+
+            if (raw.length === 6) {
+                day = raw.substr(0, 2);
+                mon = raw.substr(2, 2);
+                yr = raw.substr(4, 2);
+                yr = (parseInt(yr, 10) <= 30 ? '20' : '19') + yr;
+            } else if (raw.length === 8) {
+                day = raw.substr(0, 2);
+                mon = raw.substr(2, 2);
+                yr = raw.substr(4, 4);
+            } else {
+                return;
+            }
+
+            var d = parseInt(day, 10),
+                m = parseInt(mon, 10),
+                y = parseInt(yr, 10);
+
+            if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900 || y > 2099) return;
+
+            var formatted = day + '-' + mon + '-' + yr;
+            el.value = formatted;
+            el.dataset.oracleValue = formatted;
+
+            if (el._flatpickr) el._flatpickr.setDate(formatted, false, 'd-m-Y');
+        }
+
+        btnRun.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                btnRun.click();
+            }
+        });
+
         function escHtml(str) {
             if (!str) return '';
             return String(str)
@@ -723,6 +810,4 @@
             statusMsg.innerHTML = `<div class="alert-hrm-success">${msg}</div>`;
         }
     </script>
-</body>
-
-</html>
+@endpush

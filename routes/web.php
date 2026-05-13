@@ -9,13 +9,12 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EmpEntListController;
 use App\Http\Controllers\LoanController;
 use App\Http\controllers\HrmSetupController;
-use App\Http\controllers\ReportCenterController;
+use App\Http\controllers\Reports\ReportCenterController;
 use App\Http\controllers\HrmDashboardController;
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SalProcessController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LovController;
 use App\Http\Controllers\TempEmpController;
@@ -579,7 +578,7 @@ Route::get('/ajax/list', [VoucherController::class, 'ajaxList'])
 
 // HRM REPORT
 
- Route::prefix('reports')->middleware(['web', 'auth'])->name('reports.')->group(function () {
+ Route::prefix('hrm/reports')->middleware(['web', 'auth'])->name('reports.')->group(function () {
  
     // WHEN-NEW-FORM-INSTANCE → loads report list dropdown
     Route::get('/', [ReportCenterController::class, 'index'])->name('center');
