@@ -11,7 +11,6 @@ use App\Http\Controllers\LoanController;
 use App\Http\controllers\HrmSetupController;
 use App\Http\controllers\Reports\ReportCenterController;
 use App\Http\controllers\HrmDashboardController;
-
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\SalProcessController;
@@ -44,6 +43,7 @@ use App\Http\Controllers\Setup\ReligionController;
 use App\Http\Controllers\Setup\EmpTypeController;
 use App\Http\Controllers\Setup\EntrySystemController;
 use App\Http\Controllers\Reports\IdCardController;
+use App\Http\Controllers\HrmModule\LeaveEntryController;
 
 
 
@@ -63,6 +63,22 @@ use App\Http\Controllers\Reports\IdCardController;
 // });
 
 //Route::get('/',[LoginController::class,'demo'])->name('login');
+
+Route::get('/images/no-photo.png', function () {
+    $svg = <<<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg" width="130" height="150" viewBox="0 0 130 150" role="img" aria-label="No photo">
+  <rect width="130" height="150" fill="#f4f6f9"/>
+  <circle cx="65" cy="52" r="24" fill="#c8d0da"/>
+  <path d="M24 128c5-28 24-44 41-44s36 16 41 44" fill="#c8d0da"/>
+  <rect x="1" y="1" width="128" height="148" fill="none" stroke="#dee2e6" stroke-width="2"/>
+</svg>
+SVG;
+
+    return response($svg, 200, [
+        'Content-Type' => 'image/svg+xml; charset=UTF-8',
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+});
 
 
 Route::get('/check-login', function () {
@@ -182,12 +198,7 @@ Route::middleware(['auth'])->name('hrm.')->group(function () {
  
 
 
-//login Page
-// Route::get('/',[LoginController::class,'login'])->name('login');
-// Route::get('/login',[LoginController::class,'login'])->name('login');
 
-// Route::post('auth/check',[LoginController::class,'check'])->name('auth.check');
-//Route::get('dashboard',[LoginController::class, 'dashboard'])->name('dashboard');
 Route::get('/auth/logout',[LoginController::class, 'logout'])->name('auth.logout');
 
 
@@ -336,40 +347,12 @@ Route::get('/common/gatepass',[GpController::class, 'gatepass'])->name('common.g
 // Route::get('/getEmpData', [EmpControllers::class,'empData'])->name('emp.data')->middleware(['auth']);
 // Route::get('/tableData/{empId}', [EmpControllers::class,'tableData'])->name('t.data')->middleware(['auth']);
 
-//Designation
-Route::get('/des',[HrmSetupController::class,'designation'])->name('des')->middleware(['auth']);
-Route::post('/desiinsert',[HrmSetupController::class,'insertDesignation'])->name('insertdata4')->middleware(['auth']);
-Route::post('/desUpdate', [HrmSetupController::class, 'editdes'])->name('editdes')->middleware(['auth']);
-Route::get('/destroydes/{des_id}',[HrmSetupController::class,'destroydesig'])->name('deletedesig')->middleware(['auth']);
-
-// Department 
-Route::get('/dept',[HrmSetupController::class,'department'])->name('dept')->middleware(['auth']);
-Route::post('/deptUpdate', [HrmSetupController::class, 'editdept'])->name('editdept')->middleware(['auth']);
-Route::post('/deptentry',[HrmSetupController::class,'savedata'])->name('save')->middleware(['auth']);
-Route::get('/destroyDept/{grade_id}',[HrmSetupController::class,'destroyDept'])->name('destroy')->middleware(['auth']);
-
 //Company Profile
 Route::get('/companypf',[HrmSetupController::class,'companypf'])->middleware(['auth']);
 Route::get('/comapnydt',[HrmSetupController::class,'companyDetails'])->middleware(['auth']);
 Route::post('/cominsert',[HrmSetupController::class,'companyInsert'])->middleware(['auth']);
 Route::post('/comUpdate',[HrmSetupController::class,'companyUpdate'])->middleware(['auth']);
 Route::get('/destroyCom/{company_id}',[HrmSetupController::class,'destroyprof'])->name('destroyprofile')->middleware(['auth']);
-
-
-// Address 
-Route::get('/address',[HrmSetupController::class,'address'])->name('address')->middleware(['auth']);
-Route::get('/deletecity/{city}',[HrmSetupController::class,'destroyCity'])->name('deletecity')->middleware(['auth']);
-Route::get('/deletedistrict/{district}',[HrmSetupController::class,'destroyDistrict'])->name('deletedistrict')->middleware(['auth']);
-Route::post('/cityInsert',[HrmSetupController::class,'insertcity'])->name('insertcity')->middleware(['auth']);
-Route::post('/districtInsert',[HrmSetupController::class,'insertdistrict'])->name('insertdistrict')->middleware(['auth']);
-Route::post('/cityUpdate', [HrmSetupController::class, 'editcity'])->name('editcity')->middleware(['auth']);
-Route::post('/districtUpdate', [HrmSetupController::class, 'editdistrict'])->name('editdistrict')->middleware(['auth']);
-
-// line 
-Route::get('/line',[HrmSetupController::class,'Line'])->name('line')->middleware(['auth']);
-Route::post('/lineinsert',[HrmSetupController::class,'insertLine'])->name('insertdataline')->middleware(['auth']);
-Route::post('/lineUpdate',[HrmSetupController::class,'editLine'])->name('updatedataline')->middleware(['auth']);
-Route::get('/destroyline/{line_id}',[HrmSetupController::class,'destroyline'])->name('destroydata')->middleware(['auth']);
 
 
 //Attendence
@@ -789,3 +772,4 @@ Route::prefix('hrm/id-card')->name('id-card.')->middleware(['auth'])->group(func
 
 
 require base_path('routes/setup.php');
+require base_path('routes/hrm/leave.php');

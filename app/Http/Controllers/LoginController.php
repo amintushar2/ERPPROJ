@@ -249,25 +249,57 @@ public function liveData(Request $request)
             'cid' => $companyId
         ])[0];
         // ── Dept Headcount ───────────────────────────────────────────────────
-        $deptCount = DB::table('emp_official as eo')
-            ->join('emp_personal as ep', 'ep.empno', '=', 'eo.empno')
-            ->select('eo.dept_name', DB::raw('COUNT(eo.empno) as cnt'))
-            ->where('ep.status', 'Active')
-            ->whereNotNull('eo.dept_name')
-            ->groupBy('eo.dept_name')
-            ->orderByDesc('cnt')
-            ->limit(8)
-            ->get();
+          $deptCount = DB::select("
+            SELECT *
+            FROM (
+                SELECT eo.DEPT_NAME, COUNT(*) AS cnt
+                FROM HRM.EMP_OFFICIAL eo
+                JOIN HRM.EMP_PERSONAL ep ON ep.EMPNO = eo.EMPNO
+                WHERE eo.COMPANY_ID = :cid
+                  AND eo.TERMINATION_DATE IS NULL
+                  AND eo.RESIGNED_DATE IS NULL
+                  AND ep.STATUS = 'Active'
+                GROUP BY eo.DEPT_NAME
+                ORDER BY cnt DESC
+            )
+        ", ['cid' => $companyId]);
  
+ $sectionAttToday = DB::select("
+            SELECT
+                NVL(e.SECTION_NAME, 'No Section')                        AS section_name,
+                SUM(CASE WHEN a.STATUS2 = 'P' THEN 1 ELSE 0 END)         AS present,
+                COUNT(e.EMPNO)                                            AS total,
+                ROUND(
+                    SUM(CASE WHEN a.STATUS2 = 'P' THEN 1 ELSE 0 END)
+                    / NULLIF(COUNT(e.EMPNO), 0) * 100
+                , 1) AS pct
+            FROM HRM.EMP_OFFICIAL e
+            JOIN HRM.EMP_PERSONAL pp ON pp.EMPNO = e.EMPNO
+            LEFT JOIN HRM.ATTENDANCE_DETAILS a
+                ON  a.EMPNO = e.EMPNO
+                AND TRUNC(a.ATT_DATE) = :dt
+            WHERE pp.STATUS = 'Active'
+              AND e.COMPANY_ID = :cid
+            GROUP BY NVL(e.SECTION_NAME, 'No Section')
+            ORDER BY pct DESC NULLS LAST
+        ", [
+            'dt'  => $effectiveDate,
+            'cid' => $companyId,
+        ]);
+
+
+
         // ── Gender Split ─────────────────────────────────────────────────────
-        $genderSplit = DB::table('emp_personal as ep')
-        ->join('emp_official as eo', 'ep.empno', '=', 'eo.empno')
-            ->select('sex', DB::raw('COUNT(*) as cnt'))
-            ->where('status', 'Active')
-            ->whereNotNull('sex')
-            ->where('ep.company_id','100')
-            ->groupBy('sex')
-            ->get();
+         $genderSplit = DB::select("
+            SELECT ep.SEX, COUNT(*) AS cnt
+            FROM HRM.EMP_PERSONAL ep
+            JOIN HRM.EMP_OFFICIAL eo ON eo.EMPNO = ep.EMPNO
+            WHERE eo.COMPANY_ID = :cid
+              AND eo.TERMINATION_DATE IS NULL
+              AND eo.RESIGNED_DATE IS NULL
+              AND ep.STATUS = 'Active'
+            GROUP BY ep.SEX
+        ", ['cid' => $companyId]);
  
         // ── Avg Monthly OT (last 6 months) ───────────────────────────────────
           $avgOT = DB::select("
@@ -368,6 +400,7 @@ ORDER BY eo.INCREMENT_DATE
             'attendance_rate'    => $attendanceRate,
             // Charts
             'deptCount'         => $deptCount,
+            'sectionAttToday'    => $sectionAttToday,   // ← ADD THIS LINE
             'genderSplit'       => $genderSplit,
             'avg_ot'             => $avgOT,
             // Alert badge counts

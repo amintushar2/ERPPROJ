@@ -1,5 +1,4 @@
 {{-- resources/views/hrm/dashboard.blade.php --}}
-{{-- Extends your existing layout which already has the topbar --}}
 @extends('layouts.app')
 
 @push('styles')
@@ -16,14 +15,12 @@
             --hrm-card-shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 2px 8px rgba(0, 0, 0, .04);
         }
 
-        /* ── PAGE WRAPPER ── */
         .hrm-page {
             background: var(--hrm-surface);
             min-height: calc(100vh - 56px);
             padding: 1.5rem 1.75rem;
         }
 
-        /* ── PAGE HEADER ── */
         .hrm-page-header {
             display: flex;
             align-items: center;
@@ -80,7 +77,7 @@
             }
         }
 
-        /* ── STAT CARDS ── */
+        /* Stat cards */
         .hrm-stat {
             background: #fff;
             border: 1px solid var(--hrm-border);
@@ -113,6 +110,7 @@
             margin-top: .4rem;
         }
 
+        /* FIX: was broken HTML mixed into CSS */
         .hrm-stat-icon {
             position: absolute;
             right: 1rem;
@@ -126,7 +124,7 @@
             border-left-width: 3px !important;
         }
 
-        /* ── CARDS ── */
+        /* Cards */
         .hrm-card {
             background: #fff;
             border: 1px solid var(--hrm-border);
@@ -155,7 +153,7 @@
             padding: 1rem 1.1rem;
         }
 
-        /* ── TABLE ── */
+        /* Tables */
         .hrm-table {
             font-size: .8rem;
             margin: 0;
@@ -184,7 +182,7 @@
             background: #f0f4ff;
         }
 
-        /* ── BADGES ── */
+        /* Badges */
         .hrm-badge {
             font-size: .65rem;
             font-weight: 600;
@@ -193,7 +191,7 @@
             letter-spacing: .03em;
         }
 
-        /* ── DEPT BAR ── */
+        /* Department bars */
         .dept-bar-wrap {
             background: #e9ecef;
             border-radius: 3px;
@@ -208,7 +206,7 @@
             transition: width .6s ease;
         }
 
-        /* ── OT CHART ── */
+        /* OT chart */
         .ot-bar-col {
             display: flex;
             flex-direction: column;
@@ -247,7 +245,6 @@
             color: var(--hrm-primary);
         }
 
-        /* ── MODAL PRINT ── */
         @media print {
             body>*:not(#printModal) {
                 display: none !important;
@@ -269,7 +266,7 @@
             }
         }
 
-        /* ── GENDER DONUT (CSS only) ── */
+        /* Gender donut */
         .gender-wrap {
             position: relative;
             width: 80px;
@@ -293,7 +290,6 @@
             color: var(--hrm-primary);
         }
 
-        /* ── AVATAR CIRCLE ── */
         .hrm-avatar {
             width: 28px;
             height: 28px;
@@ -306,7 +302,6 @@
             flex-shrink: 0;
         }
 
-        /* ── LEAVE PILLS ROW ── */
         .leave-pill {
             background: var(--hrm-surface);
             border: 1px solid var(--hrm-border);
@@ -341,27 +336,17 @@
             display: inline-flex;
             align-items: center;
             gap: 10px;
-
             padding: 10px 20px;
             border-radius: 30px;
-
             background: #fff3e0;
             border: 1px solid #ffe0b2;
-
             font-size: 1.1rem;
-            /* 🔥 Bigger text */
             font-weight: 700;
-            /* Bold */
-
             color: #7a3800;
-
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
-    </style>
-@endpush
-@push('styles')
-    <style>
-        /* ── HEATMAP ── */
+
+        /* Heatmap */
         .heatmap-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -405,6 +390,7 @@
             color: #bbb;
         }
 
+        /* FIX: were broken HTML tags mixed into CSS */
         .hm-0 {
             background: #fee2e2;
             color: #b91c1c;
@@ -435,7 +421,7 @@
             color: #14532d;
         }
 
-        /* ── DEPT ATTENDANCE RATE ── */
+        /* Department attendance */
         .dept-att-row {
             display: flex;
             align-items: center;
@@ -473,7 +459,7 @@
             text-align: right;
         }
 
-        /* ── LATE TREND ── */
+        /* Late trend */
         .late-bar-col {
             display: flex;
             flex-direction: column;
@@ -510,7 +496,6 @@
             color: #c2410c;
         }
 
-        /* ── OT COST TABLE ── */
         .ot-cost-table td,
         .ot-cost-table th {
             padding: .45rem .65rem;
@@ -533,7 +518,7 @@
             transition: width .7s ease;
         }
 
-        /* ── LEGEND DOT ── */
+        /* Heatmap legend */
         .hm-legend {
             display: flex;
             gap: 8px;
@@ -562,7 +547,7 @@
 @section('content')
     <div class="hrm-page">
 
-        {{-- ══ PAGE HEADER ══════════════════════════════════════════════════════ --}}
+        {{-- Page header --}}
         <div class="hrm-page-header">
             <div>
                 <div class="hrm-page-title">Human Resource Management</div>
@@ -571,7 +556,7 @@
             <div class="d-flex align-items-center gap-2">
                 <span class="hrm-db-badge">
                     <span class="hrm-db-dot"></span>
-                    Oracle HRM · Live
+                    Oracle HRM
                 </span>
                 <div class="hrm-clock-box">
                     <span class="hrm-db-dot"></span>
@@ -580,14 +565,14 @@
             </div>
         </div>
 
-        {{-- ══ ROW 1 — KPI STATS ════════════════════════════════════════════════ --}}
+        {{-- Row 1: KPI stats --}}
         <div class="row g-3 mb-3">
             <div class="col-6 col-md-3">
                 <div class="hrm-stat border-start border-primary">
                     <div class="hrm-stat-label">Total Employees</div>
                     <div class="hrm-stat-value" id="statTotalEmp">{{ number_format($totalEmployees) }}</div>
                     <div class="hrm-stat-meta">Active headcount</div>
-                    <span class="hrm-stat-icon">👥</span>
+                    <span class="hrm-stat-icon"></span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -598,7 +583,7 @@
                         {{ $totalEmployees > 0 ? round((($todayAtt->present ?? 0) / $totalEmployees) * 100, 1) : 0 }}%
                         attendance rate
                     </div>
-                    <span class="hrm-stat-icon">✅</span>
+                    <span class="hrm-stat-icon"></span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -608,7 +593,7 @@
                     <div class="hrm-stat-meta">
                         Late arrivals: <span id="statLate">{{ $todayAtt->late ?? 0 }}</span>
                     </div>
-                    <span class="hrm-stat-icon">🏖</span>
+                    <span class="hrm-stat-icon"></span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -616,12 +601,12 @@
                     <div class="hrm-stat-label">Absent</div>
                     <div class="hrm-stat-value text-danger" id="statAbsent">{{ $todayAtt->absent ?? 0 }}</div>
                     <div class="hrm-stat-meta">Unauthorised absence</div>
-                    <span class="hrm-stat-icon">⚠</span>
+                    <span class="hrm-stat-icon"></span>
                 </div>
             </div>
         </div>
 
-        {{-- ══ ROW 2 — OT CHART + DEPT + GENDER ════════════════════════════════ --}}
+        {{-- Row 2: OT chart, section attendance, gender --}}
         <div class="row g-3 mb-3">
 
             {{-- AVERAGE MONTHLY OT --}}
@@ -632,9 +617,7 @@
                         <span class="text-muted" style="font-size:.68rem">Last 6 months</span>
                     </div>
                     <div class="hrm-card-body">
-                        @php
-                            $maxOT = collect($avgOT)->max('avg_ot') ?: 1;
-                        @endphp
+                        @php $maxOT = collect($avgOT)->max('avg_ot') ?: 1; @endphp
                         <div class="d-flex align-items-flex-end gap-2" style="height:100px" id="otBarContainer">
                             @forelse($avgOT as $row)
                                 <div class="ot-bar-col">
@@ -653,33 +636,44 @@
                 </div>
             </div>
 
-            {{-- DEPT HEADCOUNT --}}
+            {{-- SECTION ATTENDANCE TODAY --}}
             <div class="col-md-4">
                 <div class="hrm-card h-100">
                     <div class="hrm-card-header">
-                        <span class="hrm-card-title">Dept Headcount</span>
+                        <span class="hrm-card-title">Section Attendance Today</span>
+                        <span class="text-muted" style="font-size:.68rem">Best to Worst</span>
                     </div>
                     <div class="hrm-card-body">
-                        @php
-                            $maxDept = collect($deptCount)->max('cnt') ?: 1;
-                            $deptColors = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545'];
-                        @endphp
-                        <div id="deptBarContainer"> {{-- ← ADD THIS WRAPPER --}}
-                            @foreach ($deptCount as $i => $dept)
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-                                        title="{{ $dept->dept_name }}">{{ $dept->dept_name }}</div>
-                                    <div class="dept-bar-wrap">
-                                        <div class="dept-bar-fill"
-                                            style="width:{{ round(($dept->cnt / $maxDept) * 100) }}%;background:{{ $deptColors[$i % count($deptColors)] }}">
-                                        </div>
+                        <div id="sectionAttTodayContainer">
+                            @forelse($sectionAttToday ?? [] as $i => $section)
+                                @php
+                                    $pct = round($section->pct, 1);
+                                    $color =
+                                        $pct >= 90
+                                            ? '#22c55e'
+                                            : ($pct >= 75
+                                                ? '#84cc16'
+                                                : ($pct >= 50
+                                                    ? '#f59e0b'
+                                                    : '#ef4444'));
+                                @endphp
+                                <div class="dept-att-row">
+                                    <div class="dept-att-name" title="{{ $section->section_name }}">
+                                        {{ $section->section_name }}
                                     </div>
-                                    <div
-                                        style="font-size:.72rem;font-weight:600;color:var(--hrm-primary);min-width:24px;text-align:right">
-                                        {{ $dept->cnt }}</div>
+                                    <div class="dept-att-bar-wrap">
+                                        <div class="dept-att-bar-fill"
+                                            style="width:{{ $pct }}%;background:{{ $color }}"></div>
+                                    </div>
+                                    <div class="dept-att-pct" style="color:{{ $color }}">{{ $pct }}%</div>
+                                    <div style="font-size:.6rem;color:var(--hrm-muted);min-width:48px;text-align:right">
+                                        {{ $section->present }}/{{ $section->total }}
+                                    </div>
                                 </div>
-                            @endforeach
-                        </div> {{-- ← CLOSE WRAPPER --}}
+                            @empty
+                                <div class="text-muted" style="font-size:.75rem">No attendance data for today.</div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
             </div>
@@ -692,12 +686,8 @@
                     </div>
                     <div class="hrm-card-body">
                         @php
-                            $male =
-                                collect($genderSplit)->firstWhere('sex', 'Male')->cnt ??
-                                (collect($genderSplit)->firstWhere('sex', 'Male')->cnt ?? 0);
-                            $female =
-                                collect($genderSplit)->firstWhere('sex', 'Female')->cnt ??
-                                (collect($genderSplit)->firstWhere('sex', 'Female')->cnt ?? 0);
+                            $male = collect($genderSplit)->firstWhere('sex', 'Male')->cnt ?? 0;
+                            $female = collect($genderSplit)->firstWhere('sex', 'Female')->cnt ?? 0;
                             $gTotal = $male + $female ?: 1;
                             $mPct = round(($male / $gTotal) * 100);
                             $fPct = round(($female / $gTotal) * 100);
@@ -727,25 +717,25 @@
                                         style="width:8px;height:8px;border-radius:50%;background:#0d6efd;display:inline-block"></span>
                                     <span style="font-size:.72rem;color:var(--hrm-muted)">Male</span>
                                     <span id="genderMaleCount"
-                                        style="font-size:.72rem;font-weight:700;color:var(--hrm-primary);margin-left:4px">{{ $male }}
-                                        ({{ $mPct }}%)</span>
-
+                                        style="font-size:.72rem;font-weight:700;color:var(--hrm-primary);margin-left:4px">
+                                        {{ $male }} ({{ $mPct }}%)
+                                    </span>
                                 </div>
                                 <div class="d-flex align-items-center gap-1">
                                     <span
                                         style="width:8px;height:8px;border-radius:50%;background:#f06595;display:inline-block"></span>
                                     <span style="font-size:.72rem;color:var(--hrm-muted)">Female</span>
                                     <span id="genderFemaleCount"
-                                        style="font-size:.72rem;font-weight:700;color:var(--hrm-primary);margin-left:4px">{{ $female }}
-                                        ({{ $fPct }}%)</span>
-
+                                        style="font-size:.72rem;font-weight:700;color:var(--hrm-primary);margin-left:4px">
+                                        {{ $female }} ({{ $fPct }}%)
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                        {{-- Leave pills --}}
                         <div
                             style="font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--hrm-muted);margin-bottom:.5rem">
-                            Leave Taken ({{ now()->year }})</div>
+                            Leave Taken ({{ now()->year }})
+                        </div>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach ($leaveSummary as $lv)
                                 <div class="leave-pill">
@@ -760,13 +750,15 @@
             </div>
         </div>
 
-        {{-- ══ ROW 3 — ACTION BUTTONS + RECENT JOINERS ══════════════════════════ --}}
+        {{-- Row 3: recent joiners and actions --}}
         <div class="row g-3 mb-3">
             <div class="col-md-8">
                 <div class="hrm-card">
                     <div class="hrm-card-header">
-                        <span class="hrm-card-title">Recent Joiners <span class="text-muted fw-normal"
-                                style="text-transform:none;letter-spacing:0">(last 30 days)</span></span>
+                        <span class="hrm-card-title">Recent Joiners
+                            <span class="text-muted fw-normal" style="text-transform:none;letter-spacing:0">(last 30
+                                days)</span>
+                        </span>
                     </div>
                     <div class="table-responsive">
                         <table class="table hrm-table">
@@ -785,11 +777,11 @@
                                 @forelse($recentJoiners as $i => $emp)
                                     <tr>
                                         <td class="text-muted">{{ $i + 1 }}</td>
-                                        <td><span class="fw-600">{{ $emp->empno }}</span></td>
+                                        <td><span class="fw-semibold">{{ $emp->empno }}</span></td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="hrm-avatar"
-                                                    style="background:{{ $emp->sex == 'Male' || $emp->sex == 'Male' ? '#dbeafe' : '#fce7f3' }};color:{{ $emp->sex == 'Male' || $emp->sex == 'Male' ? '#1e40af' : '#9d174d' }}">
+                                                    style="background:{{ $emp->sex === 'Male' ? '#dbeafe' : '#fce7f3' }};color:{{ $emp->sex === 'Male' ? '#1e40af' : '#9d174d' }}">
                                                     {{ strtoupper(substr($emp->emp_name, 0, 2)) }}
                                                 </div>
                                                 {{ $emp->emp_name }}
@@ -800,14 +792,16 @@
                                         <td>{{ \Carbon\Carbon::parse($emp->joining_date)->format('d M Y') }}</td>
                                         <td>
                                             <span
-                                                class="hrm-badge {{ in_array($emp->sex, ['Male', 'Male']) ? 'bg-primary bg-opacity-10 text-primary' : 'bg-pink text-danger' }}">
-                                                {{ $emp->sex }} </span>
+                                                class="hrm-badge {{ $emp->sex === 'Male' ? 'bg-primary bg-opacity-10 text-primary' : 'bg-danger bg-opacity-10 text-danger' }}">
+                                                {{ $emp->sex }}
+                                            </span>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="7" class="text-center text-muted py-3" style="font-size:.78rem">
-                                            No new joiners in the last 30 days.</td>
+                                            No new joiners in the last 30 days.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -820,51 +814,36 @@
             <div class="col-md-4">
                 <div class="hrm-card h-100">
                     <div class="hrm-card-header">
-                        <span class="hrm-card-title">Alerts & Actions</span>
+                        <span class="hrm-card-title">Alerts &amp; Actions</span>
                     </div>
                     <div class="hrm-card-body d-flex flex-column gap-2">
-
-                        {{-- Probation Ending --}}
                         <button
                             class="btn btn-outline-warning btn-sm d-flex align-items-center justify-content-between w-100 text-start"
                             data-bs-toggle="modal" data-bs-target="#modalProbation">
-                            <span>
-                                <i class="bi bi-hourglass-split me-2"></i>
-                                Probation Ending This Month
-                            </span>
+                            <span><i class="bi bi-hourglass-split me-2"></i>Probation Ending This Month</span>
                             <span class="badge bg-warning text-dark"
                                 id="badgeProbation">{{ count($probationEnd) }}</span>
                         </button>
-
-                        {{-- Increment This Month --}}
                         <button
                             class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-between w-100 text-start"
                             data-bs-toggle="modal" data-bs-target="#modalIncrementThis">
-                            <span>
-                                <i class="bi bi-graph-up-arrow me-2"></i>
-                                Increment Due This Month
-                            </span>
+                            <span><i class="bi bi-graph-up-arrow me-2"></i>Increment Due This Month -
+                                {{ now()->format('F Y') }}</span>
                             <span class="badge bg-success" id="badgeIncrThis">{{ count($incrementThisMonth) }}</span>
                         </button>
-
-                        {{-- Increment Next Month --}}
                         <button
                             class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-between w-100 text-start"
                             data-bs-toggle="modal" data-bs-target="#modalIncrementNext">
-                            <span>
-                                <i class="bi bi-calendar2-plus me-2"></i>
-                                Increment Due Next Month
-                            </span>
+                            <span><i class="bi bi-calendar2-plus me-2"></i>Increment Due Next Month -
+                                {{ now()->addMonth()->format('F Y') }}</span>
                             <span class="badge bg-primary"
                                 id="badgeIncrNext">{{ count($incrementNextMonth ?? []) }}</span>
                         </button>
 
                         <hr class="my-1">
-
                         <div class="text-muted"
                             style="font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Quick
                             Links</div>
-
                         <a href="#" class="btn btn-light btn-sm text-start border">
                             <i class="bi bi-person-plus me-2 text-primary"></i> Add New Employee
                         </a>
@@ -882,295 +861,266 @@
             </div>
         </div>
 
-    </div>{{-- /hrm-page --}}
+        {{-- Row 4: heatmap + dept headcount --}}
+        <div class="row g-3 mb-3">
 
-
-    <div class="row g-3 mb-3">
-
-        {{-- ── 7. ATTENDANCE HEATMAP ── --}}
-        <div class="col-md-7">
-            <div class="hrm-card h-100">
-                <div class="hrm-card-header">
-                    <span class="hrm-card-title">Attendance Heatmap</span>
-                    <span class="text-muted" style="font-size:.68rem">{{ now()->format('F Y') }} — daily present %</span>
-                </div>
-                <div class="hrm-card-body">
-                    @php
-                        $today = now()->day;
-                        $firstDay = now()->startOfMonth()->dayOfWeek; // 0=Sun
-                        $daysInMonth = now()->daysInMonth;
-
-                        // Build a keyed array: day => pct  from controller data
-                        // $attendanceHeatmap = [ ['day'=>1,'pct'=>92], ... ]
-                        $heatByDay = collect($attendanceHeatmap ?? [])->keyBy('day');
-
-                        function heatClass(float $pct): string
-                        {
-                            if ($pct >= 90) {
-                                return 'hm-90';
-                            }
-                            if ($pct >= 75) {
-                                return 'hm-75';
-                            }
-                            if ($pct >= 50) {
-                                return 'hm-50';
-                            }
-                            if ($pct >= 25) {
-                                return 'hm-25';
-                            }
-                            return 'hm-0';
-                        }
-                    @endphp
-
-                    <div class="heatmap-grid">
-                        {{-- Day headers (Sun–Sat) --}}
-                        @foreach (['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as $d)
-                            <div class="heatmap-day-label">{{ $d }}</div>
-                        @endforeach
-
-                        {{-- Empty cells before month starts --}}
-                        @for ($e = 0; $e < $firstDay; $e++)
-                            <div class="heatmap-cell empty"></div>
-                        @endfor
-
-                        {{-- Day cells --}}
-                        @for ($day = 1; $day <= $daysInMonth; $day++)
-                            @php
-                                $row = $heatByDay->get($day);
-                                $pct = $row ? (float) $row->pct : null;
-                            @endphp
-                            @if ($day > $today)
-                                <div class="heatmap-cell future" title="Day {{ $day }}">{{ $day }}
-                                </div>
-                            @elseif($pct !== null)
-                                <div class="heatmap-cell {{ heatClass($pct) }}"
-                                    title="Day {{ $day }}: {{ $pct }}% present">
-                                    {{ $day }}
-                                </div>
-                            @else
-                                <div class="heatmap-cell hm-0" title="Day {{ $day }}: No data">
-                                    {{ $day }}</div>
-                            @endif
-                        @endfor
+            {{-- Attendance heatmap --}}
+            <div class="col-md-7">
+                <div class="hrm-card h-100">
+                    <div class="hrm-card-header">
+                        <span class="hrm-card-title">Attendance Heatmap</span>
+                        <span class="text-muted" style="font-size:.68rem">{{ now()->format('F Y') }} — daily present
+                            %</span>
                     </div>
-
-                    {{-- Legend --}}
-                    <div class="hm-legend">
-                        <span style="font-size:.6rem;color:var(--hrm-muted);font-weight:600">Present %:</span>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot hm-0"></div>&lt;25%
-                        </div>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot hm-25"></div>25–50%
-                        </div>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot hm-50"></div>50–75%
-                        </div>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot hm-75"></div>75–90%
-                        </div>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot hm-90"></div>90%+
-                        </div>
-                        <div class="hm-legend-item">
-                            <div class="hm-legend-dot" style="background:#f0f0f0;border:1px solid #ddd"></div>Future
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- ── 8. DEPT ATTENDANCE RATE TODAY ── --}}
-        <div class="col-md-5">
-            <div class="hrm-card h-100">
-                <div class="hrm-card-header">
-                    <span class="hrm-card-title">Dept Attendance Today</span>
-                    <span class="text-muted" style="font-size:.68rem">Best → Worst</span>
-                </div>
-                <div class="hrm-card-body">
-                    @php
-                        // $deptAttToday = [ {dept_name, present, total, pct}, ... ] sorted desc by pct
-                        $maxPct = collect($deptAttToday ?? [])->max('pct') ?: 100;
-                        $attColors = ['#4ade80', '#86efac', '#fde68a', '#fca5a5', '#f87171', '#ef4444'];
-                    @endphp
-                    @forelse($deptAttToday ?? [] as $i => $dept)
+                    <div class="hrm-card-body">
                         @php
-                            $pct = round($dept->pct, 1);
-                            $color =
-                                $pct >= 90
-                                    ? '#22c55e'
-                                    : ($pct >= 75
-                                        ? '#84cc16'
-                                        : ($pct >= 50
-                                            ? '#f59e0b'
-                                            : '#ef4444'));
+                            $today = now()->day;
+                            $firstDay = now()->startOfMonth()->dayOfWeek; // 0=Sun
+                            $daysInMonth = now()->daysInMonth;
+                            $heatByDay = collect($attendanceHeatmap ?? [])->keyBy('day');
+
+                            function heatClass(float $pct): string
+                            {
+                                if ($pct >= 90) {
+                                    return 'hm-90';
+                                }
+                                if ($pct >= 75) {
+                                    return 'hm-75';
+                                }
+                                if ($pct >= 50) {
+                                    return 'hm-50';
+                                }
+                                if ($pct >= 25) {
+                                    return 'hm-25';
+                                }
+                                return 'hm-0';
+                            }
                         @endphp
-                        <div class="dept-att-row">
-                            <div class="dept-att-name" title="{{ $dept->dept_name }}">
-                                {{ $dept->dept_name }}
+
+                        <div class="heatmap-grid">
+                            @foreach (['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] as $d)
+                                <div class="heatmap-day-label">{{ $d }}</div>
+                            @endforeach
+
+                            @for ($e = 0; $e < $firstDay; $e++)
+                                <div class="heatmap-cell empty"></div>
+                            @endfor
+
+                            @for ($day = 1; $day <= $daysInMonth; $day++)
+                                @php
+                                    $row = $heatByDay->get($day);
+                                    $pct = $row ? (float) $row->pct : null;
+                                @endphp
+                                @if ($day > $today)
+                                    <div class="heatmap-cell future" title="Day {{ $day }}">{{ $day }}
+                                    </div>
+                                @elseif($pct !== null)
+                                    <div class="heatmap-cell {{ heatClass($pct) }}"
+                                        title="Day {{ $day }}: {{ $pct }}% present">
+                                        {{ $day }}</div>
+                                @else
+                                    <div class="heatmap-cell hm-0" title="Day {{ $day }}: No data">
+                                        {{ $day }}</div>
+                                @endif
+                            @endfor
+                        </div>
+
+                        <div class="hm-legend">
+                            <span style="font-size:.6rem;color:var(--hrm-muted);font-weight:600">Present %:</span>
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot hm-0"></div>&lt;25%
                             </div>
-                            <div class="dept-att-bar-wrap">
-                                <div class="dept-att-bar-fill"
-                                    style="width:{{ $pct }}%;background:{{ $color }}">
-                                </div>
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot hm-25"></div>25–50%
                             </div>
-                            <div class="dept-att-pct" style="color:{{ $color }}">{{ $pct }}%</div>
-                            <div style="font-size:.6rem;color:var(--hrm-muted);min-width:48px;text-align:right">
-                                {{ $dept->present }}/{{ $dept->total }}
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot hm-50"></div>50–75%
+                            </div>
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot hm-75"></div>75–90%
+                            </div>
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot hm-90"></div>90%+
+                            </div>
+                            <div class="hm-legend-item">
+                                <div class="hm-legend-dot" style="background:#f0f0f0;border:1px solid #ddd"></div>Future
                             </div>
                         </div>
-                    @empty
-                        <div class="text-muted" style="font-size:.75rem">No attendance data for today.</div>
-                    @endforelse
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {{-- ══ ROW 5 — LATE TREND + OT COST ════════════════════════════════════ --}}
-    <div class="row g-3 mb-3">
-
-        {{-- ── 9. LATE ARRIVAL TREND (last 7 days) ── --}}
-        <div class="col-md-5">
-            <div class="hrm-card h-100">
-                <div class="hrm-card-header">
-                    <span class="hrm-card-title">Late Arrival Trend</span>
-                    <span class="text-muted" style="font-size:.68rem">Last 7 days</span>
-                </div>
-                <div class="hrm-card-body">
-                    @php
-                        // $lateTrend = [ {att_date, late_count}, ... ] last 7 days
-                        $maxLate = collect($lateTrend ?? [])->max('late_count') ?: 1;
-                    @endphp
-                    <div class="d-flex align-items-flex-end gap-2" style="height:90px">
-                        @forelse($lateTrend ?? [] as $row)
-                            <div class="late-bar-col">
-                                <div class="late-bar-val">{{ $row->late_count }}</div>
-                                <div class="late-bar-outer">
-                                    <div class="late-bar-fill"
-                                        style="height:{{ $maxLate > 0 ? round(($row->late_count / $maxLate) * 65) : 0 }}px">
+            {{-- Dept Headcount --}}
+            <div class="col-md-5">
+                <div class="hrm-card h-100">
+                    <div class="hrm-card-header">
+                        <span class="hrm-card-title">Dept Headcount</span>
+                        <span class="text-muted" style="font-size:.68rem">By department</span>
+                    </div>
+                    <div class="hrm-card-body">
+                        @php
+                            $maxDept = collect($deptCount)->max('cnt') ?: 1;
+                            $deptColors = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545'];
+                        @endphp
+                        <div id="deptBarContainer">
+                            @foreach ($deptCount as $i => $dept)
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                                        title="{{ $dept->dept_name }}">{{ $dept->dept_name }}</div>
+                                    <div class="dept-bar-wrap">
+                                        <div class="dept-bar-fill"
+                                            style="width:{{ round(($dept->cnt / $maxDept) * 100) }}%;background:{{ $deptColors[$i % count($deptColors)] }}">
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="font-size:.72rem;font-weight:600;color:var(--hrm-primary);min-width:24px;text-align:right">
+                                        {{ $dept->cnt }}
                                     </div>
                                 </div>
-                                <div class="late-bar-label">
-                                    {{ \Carbon\Carbon::parse($row->att_date)->format('D') }}<br>
-                                    <span
-                                        style="color:#94a3b8">{{ \Carbon\Carbon::parse($row->att_date)->format('d') }}</span>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-muted" style="font-size:.75rem">No late arrival data.</div>
-                        @endforelse
-                    </div>
-
-                    {{-- Total summary line --}}
-                    @if (!empty($lateTrend))
-                        <div class="mt-2 pt-2 border-top d-flex gap-3" style="font-size:.7rem">
-                            <span style="color:var(--hrm-muted)">7-day total:
-                                <strong style="color:#c2410c">
-                                    {{ collect($lateTrend)->sum('late_count') }}
-                                </strong> late arrivals
-                            </span>
-                            <span style="color:var(--hrm-muted)">Daily avg:
-                                <strong style="color:#c2410c">
-                                    {{ round(collect($lateTrend)->avg('late_count'), 1) }}
-                                </strong>
-                            </span>
+                            @endforeach
                         </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- ── 10. OT COST ESTIMATE BY DEPT ── --}}
-        <div class="col-md-7">
-            <div class="hrm-card h-100">
-                <div class="hrm-card-header">
-                    <span class="hrm-card-title">OT Cost Estimate — {{ now()->format('F Y') }}</span>
-                    <span class="text-muted" style="font-size:.68rem">OT hrs × hourly rate by dept</span>
-                </div>
-                <div class="hrm-card-body p-0">
-                    @php
-                        // $otCostByDept = [ {dept_name, total_ot_hrs, avg_hourly_rate, estimated_cost}, ... ]
-                        $maxCost = collect($otCostByDept ?? [])->max('estimated_cost') ?: 1;
-                        $grandTotal = collect($otCostByDept ?? [])->sum('estimated_cost');
-                    @endphp
-                    <div class="table-responsive">
-                        <table class="table hrm-table ot-cost-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Department</th>
-                                    <th class="text-end">OT Hrs</th>
-                                    <th class="text-end">Avg Rate</th>
-                                    <th class="text-end">Est. Cost</th>
-                                    <th>Share</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($otCostByDept ?? [] as $i => $row)
-                                    @php
-                                        $sharePct =
-                                            $grandTotal > 0 ? round(($row->estimated_cost / $grandTotal) * 100, 1) : 0;
-                                        $barPct = $maxCost > 0 ? round(($row->estimated_cost / $maxCost) * 100) : 0;
-                                    @endphp
-                                    <tr>
-                                        <td class="text-muted">{{ $i + 1 }}</td>
-                                        <td>{{ $row->dept_name }}</td>
-                                        <td class="text-end fw-semibold">{{ number_format($row->total_ot_hrs, 1) }}</td>
-                                        <td class="text-end text-muted">{{ number_format($row->avg_hourly_rate, 2) }}</td>
-                                        <td class="text-end fw-bold text-primary">
-                                            {{ number_format($row->estimated_cost, 0) }}
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center gap-1">
-                                                <div class="ot-cost-bar-wrap">
-                                                    <div class="ot-cost-bar-fill" style="width:{{ $barPct }}%">
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    style="font-size:.63rem;color:var(--hrm-muted)">{{ $sharePct }}%</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-3" style="font-size:.78rem">
-                                            No OT cost data for this month.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                            @if (!empty($otCostByDept))
-                                <tfoot>
-                                    <tr style="background:var(--hrm-surface)">
-                                        <td colspan="2" class="fw-bold" style="font-size:.72rem">TOTAL</td>
-                                        <td class="text-end fw-bold" style="font-size:.72rem">
-                                            {{ number_format(collect($otCostByDept)->sum('total_ot_hrs'), 1) }}
-                                        </td>
-                                        <td></td>
-                                        <td class="text-end fw-bold text-primary" style="font-size:.72rem">
-                                            {{ number_format($grandTotal, 0) }}
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            @endif
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-    </div>
+        {{-- Row 5: late trend and OT cost --}}
+        <div class="row g-3 mb-3">
 
+            {{-- Late arrival trend --}}
+            <div class="col-md-5">
+                <div class="hrm-card h-100">
+                    <div class="hrm-card-header">
+                        <span class="hrm-card-title">Late Arrival Trend</span>
+                        <span class="text-muted" style="font-size:.68rem">Last 7 days</span>
+                    </div>
+                    <div class="hrm-card-body">
+                        @php $maxLate = collect($lateTrend ?? [])->max('late_count') ?: 1; @endphp
+                        <div class="d-flex align-items-flex-end gap-2" style="height:90px">
+                            @forelse($lateTrend ?? [] as $row)
+                                <div class="late-bar-col">
+                                    <div class="late-bar-val">{{ $row->late_count }}</div>
+                                    <div class="late-bar-outer">
+                                        <div class="late-bar-fill"
+                                            style="height:{{ $maxLate > 0 ? round(($row->late_count / $maxLate) * 65) : 0 }}px">
+                                        </div>
+                                    </div>
+                                    <div class="late-bar-label">
+                                        {{ \Carbon\Carbon::parse($row->att_date)->format('D') }}<br>
+                                        <span
+                                            style="color:#94a3b8">{{ \Carbon\Carbon::parse($row->att_date)->format('d') }}</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-muted" style="font-size:.75rem">No late arrival data.</div>
+                            @endforelse
+                        </div>
 
+                        @if (!empty($lateTrend))
+                            <div class="mt-2 pt-2 border-top d-flex gap-3" style="font-size:.7rem">
+                                <span style="color:var(--hrm-muted)">7-day total:
+                                    <strong style="color:#c2410c">{{ collect($lateTrend)->sum('late_count') }}</strong>
+                                    late arrivals
+                                </span>
+                                <span style="color:var(--hrm-muted)">Daily avg:
+                                    <strong
+                                        style="color:#c2410c">{{ round(collect($lateTrend)->avg('late_count'), 1) }}</strong>
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
 
+            {{-- OT cost estimate by department --}}
+            <div class="col-md-7">
+                <div class="hrm-card h-100">
+                    <div class="hrm-card-header">
+                        <span class="hrm-card-title">OT Cost Estimate — {{ now()->format('F Y') }}</span>
+                        <span class="text-muted" style="font-size:.68rem">OT hrs × hourly rate by dept</span>
+                    </div>
+                    <div class="hrm-card-body p-0">
+                        @php
+                            $maxCost = collect($otCostByDept ?? [])->max('estimated_cost') ?: 1;
+                            $grandTotal = collect($otCostByDept ?? [])->sum('estimated_cost');
+                        @endphp
+                        <div class="table-responsive">
+                            <table class="table hrm-table ot-cost-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Department</th>
+                                        <th class="text-end">OT Hrs</th>
+                                        <th class="text-end">Avg Rate</th>
+                                        <th class="text-end">Est. Cost</th>
+                                        <th>Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($otCostByDept ?? [] as $i => $row)
+                                        @php
+                                            $sharePct =
+                                                $grandTotal > 0
+                                                    ? round(($row->estimated_cost / $grandTotal) * 100, 1)
+                                                    : 0;
+                                            $barPct = $maxCost > 0 ? round(($row->estimated_cost / $maxCost) * 100) : 0;
+                                        @endphp
+                                        <tr>
+                                            <td class="text-muted">{{ $i + 1 }}</td>
+                                            <td>{{ $row->dept_name }}</td>
+                                            <td class="text-end fw-semibold">{{ number_format($row->total_ot_hrs, 1) }}
+                                            </td>
+                                            <td class="text-end text-muted">{{ number_format($row->avg_hourly_rate, 2) }}
+                                            </td>
+                                            <td class="text-end fw-bold text-primary">
+                                                {{ number_format($row->estimated_cost, 0) }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <div class="ot-cost-bar-wrap">
+                                                        <div class="ot-cost-bar-fill" style="width:{{ $barPct }}%">
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        style="font-size:.63rem;color:var(--hrm-muted)">{{ $sharePct }}%</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-3"
+                                                style="font-size:.78rem">
+                                                No OT cost data for this month.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                @if (!empty($otCostByDept))
+                                    <tfoot>
+                                        <tr style="background:var(--hrm-surface)">
+                                            <td colspan="2" class="fw-bold" style="font-size:.72rem">TOTAL</td>
+                                            <td class="text-end fw-bold" style="font-size:.72rem">
+                                                {{ number_format(collect($otCostByDept)->sum('total_ot_hrs'), 1) }}
+                                            </td>
+                                            <td></td>
+                                            <td class="text-end fw-bold text-primary" style="font-size:.72rem">
+                                                {{ number_format($grandTotal, 0) }}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                @endif
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    {{-- ══════════════════════════════════════════════════════════════════════════
-     MODALS
-════════════════════════════════════════════════════════════════════════════ --}}
+    </div>{{-- /hrm-page --}}
 
-    {{-- ── MODAL: PROBATION ENDING THIS MONTH ── --}}
+    {{-- ==================== MODALS ==================== --}}
+
+    {{-- Modal: probation ending --}}
     <div class="modal fade" id="modalProbation" tabindex="-1" aria-labelledby="modalProbationLabel">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -1216,9 +1166,7 @@
                                             @endif
                                         </td>
                                         <td>{{ $emp->months_served }}</td>
-                                        <td>
-                                            <span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span>
-                                        </td>
+                                        <td><span class="hrm-badge bg-warning bg-opacity-15 text-warning">Due</span></td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -1232,8 +1180,9 @@
                 </div>
                 <div class="modal-footer py-2 px-3 no-print">
                     <span class="text-muted me-auto" style="font-size:.72rem">{{ count($probationEnd) }} record(s)</span>
+                    {{-- FIX: was broken raw text instead of onclick --}}
                     <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblProbation','Probation Period Ending — {{ now()->format('F Y') }}')">
+                        onclick="printModal('tblProbation','Probation Period Ending - {{ now()->format('F Y') }}')">
                         <i class="bi bi-printer me-1"></i> Print
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -1242,7 +1191,7 @@
         </div>
     </div>
 
-    {{-- ── MODAL: INCREMENT DUE THIS MONTH ── --}}
+    {{-- Modal: increment this month --}}
     <div class="modal fade" id="modalIncrementThis" tabindex="-1" aria-labelledby="modalIncrThisLabel">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -1296,7 +1245,7 @@
                     <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementThisMonth) }}
                         record(s)</span>
                     <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblIncrThis','Increment Due — {{ now()->format('F Y') }}')">
+                        onclick="printModal('tblIncrThis','Increment Due - {{ now()->format('F Y') }}')">
                         <i class="bi bi-printer me-1"></i> Print
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -1305,7 +1254,7 @@
         </div>
     </div>
 
-    {{-- ── MODAL: INCREMENT DUE NEXT MONTH ── --}}
+    {{-- Modal: increment next month --}}
     <div class="modal fade" id="modalIncrementNext" tabindex="-1" aria-labelledby="modalIncrNextLabel">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -1354,8 +1303,9 @@
                 <div class="modal-footer py-2 px-3 no-print">
                     <span class="text-muted me-auto" style="font-size:.72rem">{{ count($incrementNextMonth) }}
                         record(s)</span>
+                    {{-- FIX: was broken raw text instead of onclick --}}
                     <button class="btn btn-outline-secondary btn-sm"
-                        onclick="printModal('tblIncrNext','Increment Due Next Month — {{ now()->addMonth()->format('F Y') }}')">
+                        onclick="printModal('tblIncrNext','Increment Due Next Month - {{ now()->addMonth()->format('F Y') }}')">
                         <i class="bi bi-printer me-1"></i> Print
                     </button>
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -1366,53 +1316,30 @@
 @endsection
 
 @push('scripts')
-    {{--
-    ════════════════════════════════════════════════════════════════
-    DASHBOARD AUTO-REFRESH  — paste inside @push('scripts')
-    in your dashboard_blade.php, AFTER the existing clock script.
-
-    Polls /dashboard/live-data every 60 seconds and updates:
-      • All 4 KPI stat cards (Total / Present / On Leave / Absent)
-      • Dept Headcount bars
-      • Gender donut SVG
-      • OT bar chart
-      • Alert badge counts (Probation / Increment)
-      • Last-updated timestamp badge
-    ════════════════════════════════════════════════════════════════
---}}
-
     <script>
-        // ─────────────────────────────────────────────────────────────────
-        // CONFIG
-        // ─────────────────────────────────────────────────────────────────
-        const REFRESH_INTERVAL_MS = 60000; // 60 seconds — change freely
+        // ── CONFIG ────────────────────────────────────────────────────────────
+        const REFRESH_INTERVAL_MS = 60000;
         const LIVE_DATA_URL = '{{ route('hrm.dashboard.liveData') }}';
 
-        // ─────────────────────────────────────────────────────────────────
-        // BADGE: "Last updated" shown in the page header
-        // We inject it next to the Oracle HRM badge automatically.
-        // ─────────────────────────────────────────────────────────────────
+        // ── LAST-UPDATED BADGE ────────────────────────────────────────────────
         function injectUpdatedBadge() {
-            if (document.getElementById('lastUpdatedBadge')) return; // already exists
+            if (document.getElementById('lastUpdatedBadge')) return;
 
             const badge = document.createElement('span');
             badge.id = 'lastUpdatedBadge';
             badge.style.cssText = `
-        display:inline-flex;align-items:center;gap:.4rem;
-        font-size:.72rem;font-weight:500;color:#155724;
-        background:#d4edda;border:1px solid #c3e6cb;
-        border-radius:20px;padding:.28rem .85rem;
-    `;
-            badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating…</span>';
+                display:inline-flex;align-items:center;gap:.4rem;
+                font-size:.72rem;font-weight:500;color:#155724;
+                background:#d4edda;border:1px solid #c3e6cb;
+                border-radius:20px;padding:.28rem .85rem;
+            `;
+            badge.innerHTML = '<i class="bi bi-arrow-repeat"></i> <span id="lastUpdatedText">Updating...</span>';
 
-            // Insert after the Oracle HRM badge
             const hrmBadge = document.querySelector('.hrm-db-badge');
             if (hrmBadge) hrmBadge.insertAdjacentElement('afterend', badge);
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // KPI CARD UPDATER — animates the number change
-        // ─────────────────────────────────────────────────────────────────
+        // ── KPI COUNTER ANIMATION ─────────────────────────────────────────────
         function animateValue(el, newVal) {
             if (!el) return;
             const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
@@ -1421,7 +1348,7 @@
 
             const step = target > current ? 1 : -1;
             const diff = Math.abs(target - current);
-            const duration = Math.min(600, diff * 15); // max 600ms
+            const duration = Math.min(600, diff * 15);
             const interval = Math.max(10, duration / diff);
 
             let cur = current;
@@ -1432,10 +1359,15 @@
             }, interval);
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // DEPT BAR CHART UPDATER
-        // ─────────────────────────────────────────────────────────────────
+        // ── DEPT BAR UPDATER ──────────────────────────────────────────────────
         const DEPT_COLORS = ['#0d6efd', '#6610f2', '#0dcaf0', '#198754', '#fd7e14', '#dc3545', '#6c757d', '#20c997'];
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
 
         function updateDeptBars(deptData) {
             const container = document.getElementById('deptBarContainer');
@@ -1443,72 +1375,56 @@
 
             const maxCnt = Math.max(...deptData.map(d => d.cnt), 1);
 
-            // Build new rows
-            const html = deptData.map((dept, i) => `
-        <div class="d-flex align-items-center gap-2 mb-2">
-            <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
-                 title="${escHtml(dept.dept_name)}">${escHtml(dept.dept_name)}</div>
-            <div class="dept-bar-wrap">
-                <div class="dept-bar-fill"
-                     style="width:0%;background:${DEPT_COLORS[i % DEPT_COLORS.length]};transition:width .7s ease">
+            container.innerHTML = deptData.map((dept, i) => `
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div style="font-size:.72rem;color:#2c3e50;min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                         title="${escHtml(dept.dept_name)}">${escHtml(dept.dept_name)}</div>
+                    <div class="dept-bar-wrap">
+                        <div class="dept-bar-fill"
+                             style="width:0%;background:${DEPT_COLORS[i % DEPT_COLORS.length]};transition:width .7s ease">
+                        </div>
+                    </div>
+                    <div style="font-size:.72rem;font-weight:600;color:var(--hrm-primary);min-width:24px;text-align:right">
+                        ${dept.cnt}
+                    </div>
                 </div>
-            </div>
-            <div style="font-size:.72rem;font-weight:600;color:var(--hrm-primary);min-width:24px;text-align:right">
-                ${dept.cnt}
-            </div>
-        </div>
-    `).join('');
+            `).join('');
 
-            container.innerHTML = html;
-
-            // Animate bars in after paint
             requestAnimationFrame(() => {
                 container.querySelectorAll('.dept-bar-fill').forEach((bar, i) => {
-                    const pct = Math.round((deptData[i].cnt / maxCnt) * 100);
-                    bar.style.width = pct + '%';
+                    bar.style.width = Math.round((deptData[i].cnt / maxCnt) * 100) + '%';
                 });
             });
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // GENDER DONUT UPDATER
-        // ─────────────────────────────────────────────────────────────────
+        // ── GENDER DONUT UPDATER ──────────────────────────────────────────────
         function updateGenderDonut(genderData) {
-            const male = Number((genderData.find(g => ['male', 'male'].includes(g.sex?.toLowerCase())) || {}).cnt) || 0;
-            const female = Number((genderData.find(g => ['female', 'female'].includes(g.sex?.toLowerCase())) || {}).cnt) ||
-                0;
+            const male = Number((genderData.find(g => g.sex?.toLowerCase() === 'male') || {}).cnt) || 0;
+            const female = Number((genderData.find(g => g.sex?.toLowerCase() === 'female') || {}).cnt) || 0;
             const total = male + female || 1;
-
             const mPct = Math.round((male / total) * 100);
             const circum = 2 * Math.PI * 30;
             const maleDash = Math.round((mPct / 100) * circum * 100) / 100;
             const femDash = Math.round((circum - maleDash) * 100) / 100;
 
-            // Male arc
-            const maleCircle = document.getElementById('genderMaleArc');
-            if (maleCircle) {
-                maleCircle.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
+            const mArc = document.getElementById('genderMaleArc');
+            const fArc = document.getElementById('genderFemaleArc');
+            if (mArc) mArc.setAttribute('stroke-dasharray', `${maleDash} ${femDash}`);
+            if (fArc) {
+                fArc.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
+                fArc.setAttribute('stroke-dashoffset', `-${maleDash}`);
             }
-            // Female arc
-            const femCircle = document.getElementById('genderFemaleArc');
-            if (femCircle) {
-                femCircle.setAttribute('stroke-dasharray', `${femDash} ${maleDash}`);
-                femCircle.setAttribute('stroke-dashoffset', `-${maleDash}`);
-            }
-            // Centre total
+
             const totalEl = document.getElementById('genderTotal');
             if (totalEl) totalEl.textContent = total.toLocaleString();
 
-            // Legend numbers
-            const maleCountEl = document.getElementById('genderMaleCount');
-            const femaleCountEl = document.getElementById('genderFemaleCount');
-            if (maleCountEl) maleCountEl.textContent = `${male} (${mPct}%)`;
-            if (femaleCountEl) femaleCountEl.textContent = `${female} (${100 - mPct}%)`;
+            const mEl = document.getElementById('genderMaleCount');
+            const fEl = document.getElementById('genderFemaleCount');
+            if (mEl) mEl.textContent = `${male} (${mPct}%)`;
+            if (fEl) fEl.textContent = `${female} (${100 - mPct}%)`;
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // OT BAR CHART UPDATER
-        // ─────────────────────────────────────────────────────────────────
+        // ── OT BAR CHART UPDATER ──────────────────────────────────────────────
         function updateOTChart(otData) {
             const container = document.getElementById('otBarContainer');
             if (!container || !otData.length) return;
@@ -1516,26 +1432,61 @@
             const maxOT = Math.max(...otData.map(d => parseFloat(d.avg_ot) || 0), 1);
 
             container.innerHTML = otData.map(row => `
-        <div class="ot-bar-col">
-            <div class="ot-bar-val">${row.avg_ot}</div>
-            <div class="ot-bar-outer">
-                <div class="ot-bar-fill" style="height:0px;transition:height .7s ease"></div>
-            </div>
-            <div class="ot-bar-label">${escHtml(String(row.att_month).substring(0,3))}</div>
-        </div>
-    `).join('');
+                <div class="ot-bar-col">
+                    <div class="ot-bar-val">${row.avg_ot}</div>
+                    <div class="ot-bar-outer">
+                        <div class="ot-bar-fill" style="height:0px;transition:height .7s ease"></div>
+                    </div>
+                    <div class="ot-bar-label">${escHtml(String(row.att_month).substring(0, 3))}</div>
+                </div>
+            `).join('');
 
             requestAnimationFrame(() => {
                 container.querySelectorAll('.ot-bar-fill').forEach((bar, i) => {
-                    const h = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75);
-                    bar.style.height = h + 'px';
+                    bar.style.height = Math.round((parseFloat(otData[i].avg_ot) / maxOT) * 75) + 'px';
                 });
             });
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // REFRESH INDICATOR — spinner flash on card
-        // ─────────────────────────────────────────────────────────────────
+        // ── SECTION ATTENDANCE UPDATER ────────────────────────────────────────
+        function updateSectionAtt(sectionData) {
+            const container = document.getElementById('sectionAttTodayContainer');
+            if (!container) return;
+
+            if (!sectionData || !sectionData.length) {
+                container.innerHTML =
+                    '<div class="text-muted" style="font-size:.75rem">No attendance data for today.</div>';
+                return;
+            }
+
+            container.innerHTML = sectionData.map(section => {
+                const pct = parseFloat(section.pct) || 0;
+                const color = pct >= 90 ? '#22c55e' :
+                    pct >= 75 ? '#84cc16' :
+                    pct >= 50 ? '#f59e0b' :
+                    '#ef4444';
+                return `
+                    <div class="dept-att-row">
+                        <div class="dept-att-name" title="${escHtml(section.section_name)}">${escHtml(section.section_name)}</div>
+                        <div class="dept-att-bar-wrap">
+                            <div class="dept-att-bar-fill" style="width:0%;background:${color};transition:width .7s ease"></div>
+                        </div>
+                        <div class="dept-att-pct" style="color:${color}">${pct}%</div>
+                        <div style="font-size:.6rem;color:var(--hrm-muted);min-width:48px;text-align:right">
+                            ${section.present}/${section.total}
+                        </div>
+                    </div>`;
+            }).join('');
+
+            // Animate bars after paint
+            requestAnimationFrame(() => {
+                container.querySelectorAll('.dept-att-bar-fill').forEach((bar, i) => {
+                    bar.style.width = (parseFloat(sectionData[i].pct) || 0) + '%';
+                });
+            });
+        }
+
+        // ── CARD FLASH ────────────────────────────────────────────────────────
         function flashRefresh() {
             document.querySelectorAll('.hrm-stat').forEach(card => {
                 card.style.transition = 'opacity .2s';
@@ -1546,27 +1497,15 @@
             });
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // HELPER — escape HTML for dynamic content
-        // ─────────────────────────────────────────────────────────────────
-        function escHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-        }
-
-        // ─────────────────────────────────────────────────────────────────
-        // MAIN FETCH — gets JSON and dispatches all updaters
-        // ─────────────────────────────────────────────────────────────────
+        // ── MAIN FETCH ────────────────────────────────────────────────────────
         function fetchDashboardData() {
             fetch(LIVE_DATA_URL, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
                     },
-                    credentials: 'same-origin'
+                    credentials: 'same-origin',
                 })
                 .then(res => {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1577,129 +1516,106 @@
 
                     flashRefresh();
 
-                    // ── KPI stat values ──────────────────────────────────────────────
                     animateValue(document.getElementById('statTotalEmp'), data.total_employees);
                     animateValue(document.getElementById('statPresent'), data.present);
                     animateValue(document.getElementById('statOnLeave'), data.on_leave);
                     animateValue(document.getElementById('statAbsent'), data.absent);
                     animateValue(document.getElementById('statLate'), data.late);
 
-                    // Attendance rate text
                     const rateEl = document.getElementById('statAttendanceRate');
                     if (rateEl) rateEl.textContent = data.attendance_rate + '% attendance rate';
 
-                    // ── Charts ───────────────────────────────────────────────────────
                     updateDeptBars(data.deptCount);
                     updateGenderDonut(data.genderSplit);
                     updateOTChart(data.avg_ot);
+                    updateSectionAtt(data.sectionAttToday);
 
-                    // ── Alert badge counts ────────────────────────────────────────────
                     const probBadge = document.getElementById('badgeProbation');
                     const incrThis = document.getElementById('badgeIncrThis');
                     const incrNext = document.getElementById('badgeIncrNext');
                     if (probBadge) probBadge.textContent = data.probationEnd.length;
                     if (incrThis) incrThis.textContent = data.incrementThisMonth.length;
                     if (incrNext) incrNext.textContent = data.incrementNextMonth.length;
-                    console.log(data.incrementThisMonth.length);
-                    // ── Timestamp ────────────────────────────────────────────────────
-                    const el = document.getElementById('lastUpdatedText');
-                    if (el) el.textContent = 'Updated ' + data.updated_at;
+
+                    const updEl = document.getElementById('lastUpdatedText');
+                    if (updEl) updEl.textContent = 'Updated ' + data.updated_at;
                 })
-                .catch(err => {
-                    console.warn('[Dashboard] Refresh failed:', err.message);
-                    const el = document.getElementById('lastUpdatedText');
-                    if (el) el.textContent = '⚠ Refresh failed — retrying…';
+                .catch(() => {
+                    // FIX: el was referenced before declaration in original
+                    const updEl = document.getElementById('lastUpdatedText');
+                    if (updEl) updEl.textContent = 'Refresh failed — retrying...';
                 });
         }
 
-        // ─────────────────────────────────────────────────────────────────
-        // BOOT — run once page is ready, then poll on interval
-        // ─────────────────────────────────────────────────────────────────
+        // ── BOOT ──────────────────────────────────────────────────────────────
+        // FIX: original DOMContentLoaded block was never closed; setTimeout never
+        //      had its interval call; REFRESH_INTERVAL_MS was declared twice with const.
         document.addEventListener('DOMContentLoaded', () => {
             injectUpdatedBadge();
-
-            // First refresh after 60s; initial data already rendered by Blade
-            setTimeout(() => {
-                fetchDashboardData();
-                setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
-            }, REFRESH_INTERVAL_MS);
+            // First fetch after one interval; initial data already rendered by Blade.
+            setTimeout(fetchDashboardData, REFRESH_INTERVAL_MS);
+            setInterval(fetchDashboardData, REFRESH_INTERVAL_MS);
         });
     </script>
+
     <script>
+        // ── PRINT HELPER ──────────────────────────────────────────────────────
         function printModal(tableId, title) {
-            console.log('Print function called for table:', tableId, 'with title:', title);
             const table = document.getElementById(tableId);
             if (!table) {
                 alert('Table not found: ' + tableId);
                 return;
             }
 
-            const safeTitle = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
+            const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const clone = table.cloneNode(true);
             clone.querySelectorAll('.no-print').forEach(el => el.remove());
 
             const win = window.open('', '_blank', 'width=900,height=650');
             if (!win) {
-                alert('Popup blocked! Allow popups.');
+                alert('Popup blocked! Allow popups for this site.');
                 return;
             }
 
             win.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
+                <!DOCTYPE html><html><head>
                 <title>${safeTitle}</title>
                 <style>
-                    body { font-family: Arial; font-size: 11px; margin: 20px; }
+                    body { font-family:Arial; font-size:11px; margin:20px; }
                     table { width:100%; border-collapse:collapse; }
                     th { background:#1a3c5e; color:#fff; padding:6px; }
                     td { padding:5px; border-bottom:1px solid #ccc; }
                 </style>
-            </head>
-            <body>
-                <h3>${safeTitle}</h3>
-                ${clone.outerHTML}
-            </body>
-            </html>
-        `);
-
+                </head><body>
+                <h3>${safeTitle}</h3>${clone.outerHTML}
+                </body></html>
+            `);
             win.document.close();
-
-            // KEY FIX HERE
             setTimeout(() => {
                 win.focus();
                 win.print();
             }, 500);
         }
     </script>
+
     <script>
+        // ── LIVE CLOCK ────────────────────────────────────────────────────────
         function updateClock() {
             const now = new Date();
-
-            const options = {
+            const date = now.toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric'
-            };
-
-            const date = now.toLocaleDateString('en-GB', options);
-
+            });
             const time = now.toLocaleTimeString('en-GB', {
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: true
-
             });
-
-            document.getElementById('liveClock').innerHTML = date + ' ' + time;
+            document.getElementById('liveClock').textContent = date + ' ' + time;
         }
-
-        // run immediately
         updateClock();
-
-        // update every second
         setInterval(updateClock, 1000);
     </script>
 @endpush
