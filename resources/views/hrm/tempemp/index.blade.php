@@ -908,8 +908,8 @@
                             </div>
                             <div class="f">
                                 <label class="lbl">Gross</label>
-                                <input type="number" id="gross" name="official[gross]" placeholder="0.00"
-                                    step="0.01" min="0">
+                                <input type="text" id="gross" name="official[gross]" placeholder="0"
+                                    inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                             </div>
                         </div>
                     </div>

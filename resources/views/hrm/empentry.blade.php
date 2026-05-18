@@ -38,6 +38,12 @@
             font-family: 'SutonnyMJ' !important;
         }
 
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         .select2.select2-container {
             width: 100% !important;
         }
