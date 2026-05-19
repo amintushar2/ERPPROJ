@@ -131,6 +131,8 @@
                     </span>
                     <a href="{{ route('user-menu.index') }}" class="btn btn-sm btn-primary"><i
                             class="bi bi-toggles me-1"></i>Manage Menu Permissions</a>
+                    <a href="{{ route('user-company.index') }}" class="btn btn-sm btn-primary"><i
+                            class="bi bi-toggles me-1"></i>Company Permissions</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-hover datatable" style="width:100%">

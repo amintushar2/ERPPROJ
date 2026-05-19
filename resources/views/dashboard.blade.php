@@ -572,7 +572,7 @@
                     <div class="hrm-stat-label">Total Employees</div>
                     <div class="hrm-stat-value" id="statTotalEmp">{{ number_format($totalEmployees) }}</div>
                     <div class="hrm-stat-meta">Active headcount</div>
-                    <span class="hrm-stat-icon"></span>
+                    <span class="hrm-stat-icon">👥</span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -583,7 +583,7 @@
                         {{ $totalEmployees > 0 ? round((($todayAtt->present ?? 0) / $totalEmployees) * 100, 1) : 0 }}%
                         attendance rate
                     </div>
-                    <span class="hrm-stat-icon"></span>
+                    <span class="hrm-stat-icon">✅</span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -593,7 +593,7 @@
                     <div class="hrm-stat-meta">
                         Late arrivals: <span id="statLate">{{ $todayAtt->late ?? 0 }}</span>
                     </div>
-                    <span class="hrm-stat-icon"></span>
+                    <span class="hrm-stat-icon">🏖</span>
                 </div>
             </div>
             <div class="col-6 col-md-3">
@@ -601,7 +601,7 @@
                     <div class="hrm-stat-label">Absent</div>
                     <div class="hrm-stat-value text-danger" id="statAbsent">{{ $todayAtt->absent ?? 0 }}</div>
                     <div class="hrm-stat-meta">Unauthorised absence</div>
-                    <span class="hrm-stat-icon"></span>
+                    <span class="hrm-stat-icon">⚠</span>
                 </div>
             </div>
         </div>

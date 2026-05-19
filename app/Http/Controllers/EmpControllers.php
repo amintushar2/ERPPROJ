@@ -16,6 +16,7 @@ use App\Models\Emp_work_expModel;
 use App\Models\Emp_leaveModel;
 use App\Models\CompanyProfile;
 use App\Models\EmpLocationBangla;
+use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Validator;
 use DB;
@@ -41,7 +42,13 @@ class EmpControllers extends BaseController
     // ── Tab 1 data only (2 queries) ───────────────────────
     private function tab1Data(): array {
         return [
-            'companyList' => DB::table('COMPANY_PROFILE')->get(),
+            // 'companyList' => DB::table('COMPANY_PROFILE')->get(),
+            'companyList' => DB::table('company_profile as cp')
+            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
+            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
+            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
+            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
+            ->select('cp.company_id', 'cp.company_name')->distinct()->get(),
             'religion'    => DB::table('RELIGION')->get(),
                'lastedu'    => DB::table('PASSED_EXAM')->get(),
         ];
@@ -53,10 +60,12 @@ class EmpControllers extends BaseController
     // ─────────────────────────────────────────────────────
     public function empList() {
         if (!session('LoggedUser')) return redirect('login');
-        $companyList = DB::table('COMPANY_PROFILE')
-            ->select('COMPANY_ID', 'COMPANY_NAME')
-            ->orderBy('COMPANY_NAME', 'ASC')
-            ->get();
+        $companyList = DB::table('company_profile as cp')
+            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
+            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
+            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
+            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
+            ->select('cp.company_id', 'cp.company_name')->distinct()->get();
         return view('hrm.emplist', compact('companyList'));
     }
 
@@ -145,7 +154,7 @@ public function empEditEntry($empno) {
             'emp'         => $emp,
             'empno'       => $empno,
             // Only these two are server-rendered in official tab
-            'companyList' => DB::table('COMPANY_PROFILE')->select('COMPANY_ID','COMPANY_NAME')->orderBy('COMPANY_ID','desc')->get(),
+            'companyList' => $this->tab1Data()['companyList'],
             'empType'     => DB::table('HRM.EMP_TYPE')->select('EMP_TYPE','TYPE_SET','PRIORITY')->get(),
         ]);
     }

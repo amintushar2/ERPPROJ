@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * LovController
@@ -17,26 +18,22 @@ class LovController extends Controller
     }
   public function company(Request $request) {
         $this->auth();
-        $rows = DB::table('COMPANY_PROFILE as cp')
-            ->join('COMPANY_PERMISSION as perm', 'cp.COMPANY_ID', '=', 'perm.COMPANY_ID')
-            ->select('cp.COMPANY_ID as id', DB::raw("cp.COMPANY_NAME as text"))
-            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(cp.COMPANY_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
-            ->orderBy('cp.COMPANY_NAME')
-            ->limit(50)
-            ->distinct()
-            ->get();
+        $rows =DB::table('company_profile as cp')
+            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
+            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
+            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
+            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
+            ->select('cp.company_id as id', 'cp.company_name as text')->distinct()->get();
         return response()->json(['results' => $rows]);
     }
      public function companyHrm(Request $request) {
         $this->auth();
-        $rows = DB::table('COMPANY as cp')
-            ->join('COMPANY_PERMISSION as perm', 'cp.COMPANY_ID', '=', 'perm.COMPANY_ID')
-            ->select('cp.COMPANY_ID as id', DB::raw("cp.COMPANY_NAME as text"))
-            ->when($request->q, fn($q) => $q->where(DB::raw('UPPER(cp.COMPANY_NAME)'), 'like', '%'.strtoupper($request->q).'%'))
-            ->orderBy('cp.COMPANY_NAME')
-            ->limit(50)
-            ->distinct()
-            ->get();
+        $rows = DB::table('company as cp')
+            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
+            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
+            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
+            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
+            ->select('cp.company_id as id', 'cp.company_name as text')->distinct()->get();
         return response()->json(['results' => $rows]);
     }
     // Department  GET /lov/dept
