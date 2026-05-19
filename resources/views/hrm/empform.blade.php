@@ -955,6 +955,15 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <div class="row p-1">
+                                            <label class="col-sm-5 col-form-label">Age </label>
+                                            <div class="col-sm-7"><input type="text" class="form-control"
+                                                    name="age2" id="age2"
+                                                    value="{{ isset($emp) && $emp->age2 ? $emp->age2 : '' }}">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1464,12 +1473,67 @@
                     disableMobile: true,
                 });
 
+                // ── Set as_on to today if empty ──
+                const asOnInput = document.querySelector('input[name="as_on"]');
+                if (asOnInput && !asOnInput.value.trim()) {
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yyyy = today.getFullYear();
+                    asOnInput.value = dd + '-' + mm + '-' + yyyy;
+                    if (asOnInput._flatpickr) asOnInput._flatpickr.setDate(asOnInput.value, false, 'd-m-Y');
+                }
                 // ── Clear button ──
                 $('#clearPersonal').on('click', () => {
                     if (!IS_EDIT) $('#frmPersonal')[0].reset();
                     resetPreview('photo');
                     resetPreview('sign');
                 });
+                // ── Age Calculator ──
+                function calcAge() {
+                    const dobVal = $('#dob').val().trim();
+                    const asOnVal = $('input[name="as_on"]').val().trim();
+                    if (!dobVal) return;
+
+                    function parseDate(str) {
+                        // expects dd-mm-yyyy
+                        const parts = str.split('-');
+                        if (parts.length !== 3) return null;
+                        return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                    }
+
+                    const dob = parseDate(dobVal);
+                    const asOn = asOnVal ? parseDate(asOnVal) : new Date();
+                    if (!dob || !asOn || isNaN(dob) || isNaN(asOn)) return;
+
+                    let years = asOn.getFullYear() - dob.getFullYear();
+                    let months = asOn.getMonth() - dob.getMonth();
+                    let days = asOn.getDate() - dob.getDate();
+
+                    if (days < 0) {
+                        months--;
+                        // days in previous month relative to asOn
+                        const prevMonth = new Date(asOn.getFullYear(), asOn.getMonth(), 0);
+                        days += prevMonth.getDate();
+                    }
+                    if (months < 0) {
+                        years--;
+                        months += 12;
+                    }
+
+                    const yy = String(years).padStart(2, '0');
+                    const mm = String(months).padStart(2, '0');
+                    const dd = String(days).padStart(2, '0');
+
+                    $('#age2').val(`${yy} Year    ${mm} Months    ${dd} Days`);
+                }
+
+                // ── Trigger age calc on DOB or As-On change ──
+                $(document).on('change', '#dob, input[name="as_on"]', calcAge);
+
+                // ── On page load: calc if DOB already filled (edit mode) ──
+                if ($('#dob').val().trim()) calcAge();
+
 
                 // ── IMAGE PREVIEW SETUP ──────────────────────────────
                 function setupPreview(inputId, previewId, placeholderId, removeBtnId, filenameId) {

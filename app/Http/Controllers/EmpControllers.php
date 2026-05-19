@@ -44,11 +44,15 @@ class EmpControllers extends BaseController
         return [
             // 'companyList' => DB::table('COMPANY_PROFILE')->get(),
             'companyList' => DB::table('company_profile as cp')
-            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
-            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
-            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
-            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
-            ->select('cp.company_id', 'cp.company_name')->distinct()->get(),
+    ->join('company_permission_user as cpu', 'cpu.company_id', '=', 'cp.company_id')
+    ->join('F_STORE.ALL_USER_INFO as aui', 'aui.user_id', '=', 'cpu.user_id')
+    ->where('aui.user_id', Auth::id()) // or 'AMIN'
+    ->where('cp.is_active', 'Y')
+                ->select('cp.company_id', 'cp.company_name')
+    ->orderBy('cp.company_name')
+    ->limit(50)
+    ->distinct()
+    ->get(),
             'religion'    => DB::table('RELIGION')->get(),
                'lastedu'    => DB::table('PASSED_EXAM')->get(),
         ];
@@ -236,7 +240,7 @@ public function saveEmpPersonal(Request $request)
             'religion_id', 'blood_group', 'national_id_no', 'id_mark', 'company_id', 'company_name',
             'passport_no', 'place_of_issue', 'birthday_id',
             'emp_mobile_no', 'sms_mobile_no', 'office_food', 'status', 'hbs_test',
-            'nationality_desc', 'last_education',
+            'nationality_desc', 'last_education','age2'
         ]), [
              'empno'     => $empno,
                 'card_no'   => $empno,
@@ -1720,6 +1724,7 @@ public function saveEmpLocation(Request $request)
                    'getEmpShortModel','getEmpFamily','getEmpHistory',
                    'getEmpTraining','getEmpWorkExp')
             ->get();
+
     }
 
     public function empSearchExist(Request $request) {

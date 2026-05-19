@@ -427,11 +427,17 @@ class LeaveEntryController extends Controller
     private function getPermittedCompanies()
     {
         return DB::table('company_profile as cp')
-            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
-            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
-            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
-            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
-            ->select('cp.company_id', 'cp.company_name')->distinct()->get();
+    ->join('company_permission_user as cpu', 'cpu.company_id', '=', 'cp.company_id')
+    ->join('F_STORE.ALL_USER_INFO as aui', 'aui.user_id', '=', 'cpu.user_id')
+    ->where('aui.user_id', Auth::id()) // or 'AMIN'
+    ->where('cp.is_active', 'Y')
+                ->select('cp.company_id', 'cp.company_name')
+    ->orderBy('cp.company_name')
+    ->limit(50)
+    ->distinct()
+    ->get();
+        
+        
     }
 
     private function getMasterWithEmployee($empno, $year, $companyId)

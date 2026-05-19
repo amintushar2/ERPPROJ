@@ -18,22 +18,50 @@ class LovController extends Controller
     }
   public function company(Request $request) {
         $this->auth();
-        $rows =DB::table('company_profile as cp')
-            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
-            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
-            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
-            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
-            ->select('cp.company_id as id', 'cp.company_name as text')->distinct()->get();
+        $rows =DB::table('company as cp')
+    ->join('company_permission_user as cpu', 'cpu.company_id', '=', 'cp.company_id')
+    ->join('F_STORE.ALL_USER_INFO as aui', 'aui.user_id', '=', 'cpu.user_id')
+    ->where('aui.user_id', Auth::id()) // or 'AMIN'
+    ->where('cp.is_active', 'Y')
+    ->when($request->q, fn($q) =>
+        $q->where(
+            DB::raw('UPPER(cp.company_name)'),
+            'like',
+            '%' . strtoupper($request->q) . '%'
+        )
+    )
+    ->select(
+        'cp.company_id as id',
+        DB::raw('cp.company_name as text')
+    )
+    ->orderBy('cp.company_name')
+    ->limit(50)
+    ->distinct()
+    ->get();
         return response()->json(['results' => $rows]);
     }
      public function companyHrm(Request $request) {
         $this->auth();
         $rows = DB::table('company as cp')
-            ->join('company_permission as cperm', 'cperm.company_id', '=', 'cp.company_id')
-            ->join('user_permission as up', 'up.user_group_id', '=', 'cperm.user_group_id')
-            ->join('auth_group as ag', 'ag.user_group_id', '=', 'up.user_group_id')
-            ->where('up.user_id', Auth::id())->where('ag.group_tyep', 'U')->where('cp.is_active', 'Y')
-            ->select('cp.company_id as id', 'cp.company_name as text')->distinct()->get();
+    ->join('company_permission_user as cpu', 'cpu.company_id', '=', 'cp.company_id')
+    ->join('F_STORE.ALL_USER_INFO as aui', 'aui.user_id', '=', 'cpu.user_id')
+    ->where('aui.user_id', Auth::id()) // or 'AMIN'
+    ->where('cp.is_active', 'Y')
+    ->when($request->q, fn($q) =>
+        $q->where(
+            DB::raw('UPPER(cp.company_name)'),
+            'like',
+            '%' . strtoupper($request->q) . '%'
+        )
+    )
+    ->select(
+        'cp.company_id as id',
+        DB::raw('cp.company_name as text')
+    )
+    ->orderBy('cp.company_name')
+    ->limit(50)
+    ->distinct()
+    ->get();
         return response()->json(['results' => $rows]);
     }
     // Department  GET /lov/dept

@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\GroupMenuController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserMenuPermissionController;
+use App\Http\Controllers\Admin\UserCompanyPermissionController;
 use App\Http\Controllers\TempEmpPersonalController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Setup\DepartmentController;
@@ -650,7 +651,24 @@ Route::prefix('user-menu')->middleware(['auth'])->group(function () {
     Route::post('/{userId}/reset',                 [UserMenuPermissionController::class, 'reset'])->name('user-menu.reset');
 });
 
+Route::prefix('user-company')->name('user-company.')->group(function () {
 
+    // Page
+    Route::get('/',                              [UserCompanyPermissionController::class, 'index'])
+         ->name('index');
+
+    // AJAX: fetch companies + enabled state for a user
+    Route::get('/{userId}/companies',            [UserCompanyPermissionController::class, 'getCompanies'])
+         ->name('companies');
+
+    // AJAX: save permission changes
+    Route::post('/{userId}/save',                [UserCompanyPermissionController::class, 'save'])
+         ->name('save');
+
+    // AJAX: delete user-level overrides
+    Route::post('/{userId}/reset',               [UserCompanyPermissionController::class, 'reset'])
+         ->name('reset');
+});
 
 /* ─────────────────────────────────────────────────────────────
    LOV ENDPOINTS (used by Select2 AJAX in the Blade view)
